@@ -1,0 +1,10 @@
+{
+  "name": "diwaniya",
+  "version": "1.0.0",
+  "description": "ديوانية — منصة ألعاب جماعية مباشرة (27 لعبة)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node test/perft.js && node test/fuzz.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}
