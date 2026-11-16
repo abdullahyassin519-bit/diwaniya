@@ -45,7 +45,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const ip = ipOf(req);
     if (p === '/healthz') return json(res, 200, { ok: 1, up: Math.round(process.uptime()) });
-    if (p === '/api/ping') return json(res, 200, { ok: 1, rooms: rooms.size, id: pidOf(q) });
+    if (p === '/api/ping') return json(res, 200, { ok: 1, rooms: rooms.size, id: pidOf(q), q: u.search.length });
     if (p === '/api/create' && req.method === 'POST') {
       const pid = pidOf(q); if (!pid) return json(res, 400, { err: 'bad id' });
       if (over(ip, 'c', 12, 60000)) return json(res, 429, { err: 'slow down' });
