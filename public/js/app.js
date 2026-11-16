@@ -13,6 +13,7 @@
   /* ---------- الملف الشخصي ---------- */
   const P = Object.assign({ id: 'u' + rid(10), n: '', av: U.pick(AV0), fr: 0, xp: 0, coins: 50, own: [], ach: {}, played: 0, won: 0, streak: 0, hosted: 0, games: {}, hist: [], day: {}, week: {}, snd: 1, theme: '' }, LS.get('dw_p', {}));
   if (!P.n) P.n = 'ضيف ' + (100 + U.rnd(900));
+  if (!P.tok) P.tok = rid(28);
   const save = () => LS.set('dw_p', P); save();
   const ACH = [['first', '☕ أول فنجان', 'العب أول مباراة', () => P.played >= 1], ['win1', '🏅 أول فوز', 'افز بمباراة', () => P.won >= 1], ['win5', '🏆 خمسة انتصارات', 'افز بخمس مباريات', () => P.won >= 5], ['play10', '🎮 مدمن ديوانية', 'العب 10 مباريات', () => P.played >= 10],
   ['var5', '🧭 ذوّاق', 'جرّب 5 ألعاب مختلفة', () => Object.keys(P.games).length >= 5], ['orig', '✨ مستكشف الحصريات', 'العب لعبة من حصريات ديوانية', () => G.list.some(g => g.cat === 'orig' && P.games[g.id])], ['host', '🛋️ راعي المجلس', 'افتح غرفة', () => P.hosted >= 1],
@@ -30,12 +31,13 @@
   /* ---------- الشبكة (SSE + POST إلى خادم ديوانية) ---------- */
   const Net = {
     ok: false, es: null, code: null,
-    async ping() { try { const c = new AbortController(); setTimeout(() => c.abort(), 3500); const r = await fetch('api/ping', { signal: c.signal }); Net.ok = !!(await r.json()).ok; } catch (e) { Net.ok = false; } },
-    url: (p, x = '') => `api/${p}?c=${Net.code}&p=${P.id}${x}`,
+    async ping() { try { const c = new AbortController(); setTimeout(() => c.abort(), 3500); const r = await fetch('api/ping?t=' + P.tok, { signal: c.signal }), j = await r.json(); if (j.id) { P.id = j.id; save(); } Net.ok = !!j.ok; } catch (e) { Net.ok = false; } },
+    url: (p, x = '') => `api/${p}?c=${Net.code}&t=${P.tok}${x}`,
+    info: code => fetch(`api/room?c=${code}&t=${P.tok}`).then(r => r.status === 404 ? { err: 'none' } : r.status === 429 ? { err: 'slow' } : r.json(), () => ({ err: 'net' })),
     open(code, h) {
       Net.close(); Net.code = code; let opened = false; const es = Net.es = new EventSource(Net.url('ev'));
       es.addEventListener('state', e => h.state(JSON.parse(e.data))); es.addEventListener('act', e => { const d = JSON.parse(e.data); h.act(d.p, d.a); });
-      es.addEventListener('pres', e => h.pres(JSON.parse(e.data))); es.addEventListener('hk', e => h.hk(JSON.parse(e.data).hk));
+      es.addEventListener('pres', e => h.pres(JSON.parse(e.data))); es.addEventListener('hk', e => h.hk(JSON.parse(e.data).hk)); es.addEventListener('closed', e => h.closed(JSON.parse(e.data)));
       es.onopen = () => { opened = true; h.conn(true); }; es.onerror = () => { if (!opened && es.readyState === 2) h.missing(); else h.conn(false); };
     },
     close() { if (Net.es) Net.es.close(); Net.es = null; },
@@ -57,7 +59,7 @@
   function handle(p, a) {            /* يعمل عند قائد الغرفة فقط */
     const R = Room.R; if (!R || !a) return; const pl = R.ps.find(x => x.id === p);
     switch (a.t) {
-      case 'join': if (!pl && R.ps.length < 12) { R.ps.push({ id: p, n: txt(a.n, 16) || 'لاعب', av: okAv(a.av), fr: a.fr | 0, rdy: 0, team: 1 + R.ps.length % 2 }); sys(`انضم ${txt(a.n, 16)} إلى الغرفة`); } break;
+      case 'join': if (!pl && R.ps.length < (R.max || 12) && !R.lock && !(R.ban || []).includes(p)) { R.ps.push({ id: p, n: txt(a.n, 16) || 'لاعب', av: okAv(a.av), fr: a.fr | 0, rdy: 0, team: 1 + R.ps.length % 2 }); sys(`انضم ${txt(a.n, 16)} إلى الغرفة`); } break;
       case 'prof': if (pl) { pl.n = txt(a.n, 16) || pl.n; pl.av = okAv(a.av); pl.fr = a.fr | 0; } break;
       case 'rdy': if (pl) pl.rdy = pl.rdy ? 0 : 1; break;
       case 'team': if (pl) pl.team = pl.team === 1 ? 2 : 1; break;
@@ -90,18 +92,25 @@
     pres(d) { Room.on = d.on; const R = Room.R; if (R && d.host !== R.host) { R.host = d.host; if (d.host !== P.id) Room.host = false; } render(); },
     hk(hk) { Room.hk = hk; LS.set('dw_hk_' + Net.code, hk); if (Room.R) { Room.host = true; Room.R.host = P.id; sys('انتقلت قيادة الغرفة إلى ' + P.n); push(); } },
     conn(ok) { if (Room.conn && !ok) toast('انقطع الاتصال… نحاول إعادة الاتصال'); else if (!Room.conn && ok) toast('عاد الاتصال ✅'); Room.conn = ok; },
-    missing() { toast('لا توجد غرفة بهذا الرمز'); leave(true); },
+    missing() { toast('تعذر دخول الغرفة: قد تكون مغلقة أو مقفلة'); leave(true); },
+    closed(d) { toast(d && d.kick ? 'أزالك قائد الغرفة' : 'أغلق القائد الغرفة'); leave(true); },
   };
   function resetRoom() { Object.assign(Room, { R: null, host: false, hk: null, on: [], ui: {}, keep: {}, off: 0, offline: false, busy: false, dirty: false, hideRes: 0, conn: true, sess: rid(5) }); }
   async function createRoom(gid, offline) {
     resetRoom(); P.hosted++; checkAch(); save();
     if (offline || !Net.ok) { Room.offline = true; Room.R = newR('LOCAL'); }
-    else { try { const r = await fetch(`api/create?p=${P.id}`, { method: 'POST' }); if (!r.ok) throw 0; const j = await r.json(); Room.hk = j.hk; LS.set('dw_hk_' + j.code, j.hk); Room.R = newR(j.code); Net.open(j.code, NH); try { location.hash = 'r-' + j.code; } catch (e) { } } catch (e) { toast('تعذر فتح غرفة مباشرة، فتحنا لك غرفة على هذا الجهاز'); Room.offline = true; Room.R = newR('LOCAL'); } }
+    else { try { const r = await fetch(`api/create?t=${P.tok}`, { method: 'POST' }); if (!r.ok) throw 0; const j = await r.json(); Room.hk = j.hk; LS.set('dw_hk_' + j.code, j.hk); Room.R = newR(j.code); Net.open(j.code, NH); try { location.hash = 'r-' + j.code; } catch (e) { } } catch (e) { toast('تعذر فتح غرفة مباشرة، فتحنا لك غرفة على هذا الجهاز'); Room.offline = true; Room.R = newR('LOCAL'); } }
     Room.host = true; view = 'room'; modal = null; handle(P.id, mine());
     if (gid) { Room.R.gid = gid; Room.R.o = defOpts(G.by[gid]); }
     push(); window.scrollTo(0, 0);
   }
-  function joinRoom(code) { code = String(code || '').trim().toUpperCase(); if (!/^[A-Z0-9]{4}$/.test(code)) return toast('رمز الغرفة أربعة أحرف أو أرقام'); if (!Net.ok) return toast('الغرف المباشرة تعمل عند تشغيل المنصة على خادمها'); resetRoom(); Room.hk = LS.get('dw_hk_' + code, null); view = 'room'; modal = null; Net.open(code, NH); try { location.hash = 'r-' + code; } catch (e) { } render(); }
+  const ERR = { none: 'لا توجد غرفة بهذا الرمز. تأكد منه أو اطلب رابطاً جديداً', slow: 'محاولات كثيرة. انتظر دقيقة ثم حاول', net: 'تعذر الاتصال بالخادم', banned: 'أزالك قائد هذه الغرفة ولا يمكنك العودة إليها', locked: 'الغرفة مقفلة. اطلب من القائد فتحها', full: 'الغرفة مكتملة العدد' };
+  async function joinRoom(code, gated) {
+    code = String(code || '').trim().toUpperCase(); if (!/^[A-Z0-9]{4}$/.test(code)) return toast('رمز الغرفة أربعة أحرف أو أرقام'); if (!Net.ok) return toast('الغرف المباشرة تعمل عند تشغيل المنصة على خادمها');
+    const j = await Net.info(code), e = j.err || j.no; if (e) { toast(ERR[e] || ERR.net); try { history.replaceState(null, '', location.pathname + location.search); } catch (er) { } modal = null; render(); return; }
+    if (!gated && !P.named) { modal = { t: 'gate', code, n: j.n, max: j.max, ph: j.ph, gid: j.gid }; render(); return; }   /* أول دخول: شاشة الاسم والصورة */
+    resetRoom(); Room.hk = LS.get('dw_hk_' + code, null); view = 'room'; modal = null; Net.open(code, NH); try { location.hash = 'r-' + code; } catch (er) { } render();
+  }
   function leave(silent) { if (Room.R && !Room.offline && !Room.host && !silent) Net.post('act', { t: 'leave' }).catch(() => { }); Net.close(); resetRoom(); view = 'home'; modal = null; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } render(); }
   function start() {
     const R = Room.R, g = G.by[R.gid], n = R.ps.length; if (!g) return toast('اختر لعبة أولاً');
@@ -111,7 +120,7 @@
     R.st = g.init(R.gps.slice(), R.o, H()); R.ps.forEach(x => x.rdy = 0); beep(700, .15); push(); window.scrollTo(0, 0);
   }
   const BOTN = ['نمر', 'صقر', 'غيمة', 'برق', 'نجمة', 'موج', 'جبل', 'ريم', 'سهم', 'ورد', 'قمر'];
-  function addSeat(kind) { const R = Room.R; if (R.ps.length >= 12) return toast('الغرفة ممتلئة'); const used = R.ps.map(x => x.n), n = kind === 'bot' ? BOTN.find(x => !used.includes(x + ' 🤖')) + ' 🤖' : 'لاعب ' + (R.ps.filter(x => x.loc).length + 2); R.ps.push({ id: kind[0] + rid(8), n, av: U.pick(AV0), fr: 0, rdy: 1, team: 1 + R.ps.length % 2, [kind]: 1 }); }
+  function addSeat(kind) { const R = Room.R; if (R.ps.length >= (R.max || 12)) return toast('الغرفة ممتلئة. ارفع الحد الأقصى أولاً'); const used = R.ps.map(x => x.n), n = kind === 'bot' ? BOTN.find(x => !used.includes(x + ' 🤖')) + ' 🤖' : 'لاعب ' + (R.ps.filter(x => x.loc).length + 2); R.ps.push({ id: kind[0] + rid(8), n, av: U.pick(AV0), fr: 0, rdy: 1, team: 1 + R.ps.length % 2, [kind]: 1 }); }
 
   setInterval(() => {               /* نبض القائد: المؤقتات واللاعبون الآليون */
     const R = Room.R; if (!R || !Room.host || R.ph !== 'game' || !R.st || R.st.over) return;
@@ -188,12 +197,12 @@
     const link = Room.offline ? '' : location.origin + location.pathname + '#r-' + R.code;
     const lg = Object.keys(R.tot).length ? `<div class="pn"><b>دوري الغرفة</b> <small class="mut">فوز = 3 · مشاركة = 1</small><table class="lg">${R.ps.filter(x => R.tot[x.id]).sort((a, b) => R.tot[b.id] - R.tot[a.id]).map((x, i) => `<tr><td>${i + 1}</td><td>${okAv(x.av)} ${esc(x.n)}</td><td>${R.tot[x.id]}</td></tr>`).join('')}</table>${R.teams ? `<p class="mut">🔴 ${R.ps.filter(x => x.team !== 2).reduce((s, x) => s + (R.tot[x.id] || 0), 0)} — ${R.ps.filter(x => x.team === 2).reduce((s, x) => s + (R.tot[x.id] || 0), 0)} 🔵</p>` : ''}${host ? '<button class="btn sm ghost" data-act="resetlg">تصفير الدوري</button>' : ''}</div>` : '';
     return `<div class="wrap room"><div class="cols"><div>
-      <div class="pn"><div class="row"><b>اللاعبون (${n}/12)</b><span class="sp"></span>${host ? `<button class="btn sm" data-act="bot">+ لاعب آلي</button><button class="btn sm" data-act="loc">+ لاعب على هذا الجهاز</button><button class="btn sm ${R.teams ? 'pri' : 'ghost'}" data-act="teams">فِرق</button>` : ''}</div><div class="pl" style="margin-top:10px">${pls}</div></div>
+      <div class="pn"><div class="row"><b>اللاعبون (${n}/${R.max || 12})</b>${R.lock ? ' <span class="chip">🔒 مقفلة</span>' : ''}<span class="sp"></span>${host ? `<button class="btn sm" data-act="bot">+ لاعب آلي</button><button class="btn sm" data-act="loc">+ لاعب على هذا الجهاز</button><button class="btn sm ${R.teams ? 'pri' : 'ghost'}" data-act="teams">فِرق</button>` : ''}</div><div class="pl" style="margin-top:10px">${pls}</div></div>
       ${g ? `<div class="pn"><div class="row"><span class="pic">${g.em}</span><div style="flex:1;min-width:200px"><h3 class="big">${g.n}</h3><span class="mut">${g.d}</span></div></div><p>${g.r}</p><div class="row">${opts}</div>${meta(g)}${n < g.min ? `<p class="warn">تحتاج ${g.min - n} لاعبين إضافيين على الأقل.</p>` : n > g.max ? `<p class="warn">هذه اللعبة لـ ${g.max} لاعبين كحد أقصى.</p>` : ''}</div>` : '<div class="pn ctr mut">لم تُختر لعبة بعد. اختر من القائمة بالأسفل.</div>'}
       <div class="row" style="margin:12px 0">${host ? `<button class="btn pri lg" data-act="start" ${g ? '' : 'disabled'}>ابدأ اللعب</button><button class="btn" data-act="rand">🎲 لعبة عشوائية</button>${Object.keys(votes).length ? '<button class="btn" data-act="voted">اعتمد الأكثر تصويتاً</button>' : ''}` : `<button class="btn ${meP.rdy ? '' : 'pri'} lg" data-act="rdy">${meP.rdy ? 'إلغاء الجاهزية' : 'أنا جاهز'}</button><span class="mut">قائد الغرفة يختار اللعبة ويبدأها. صوّت للعبة التي تريدها 👇</span>`}</div>
       <div class="pn"><b>${host ? 'اختر اللعبة' : 'صوّت للعبة القادمة'}</b><div class="pick" style="margin-top:8px">${G.list.map(x => `<button class="pk ${R.gid === x.id ? 'on' : ''} ${n < x.min || n > x.max ? 'no' : ''}" data-act="${host ? 'pick' : 'gv'}:${x.id}"><b>${x.em}</b>${x.n}<br><small class="mut">${x.min === x.max ? x.min : x.min + '–' + x.max}</small>${votes[x.id] ? `<em>${votes[x.id]}</em>` : ''}</button>`).join('')}</div></div>
       </div><div>
-      <div class="pn ctr">${Room.offline ? '<b>غرفة على هذا الجهاز</b><p class="mut">أضف لاعبين آليين، أو لاعبين يتناوبون معك على الجهاز نفسه في ألعاب الطاولة.</p>' : `<small class="mut">رمز الغرفة</small><div class="code">${R.code}</div><p class="mut" style="word-break:break-all;font-size:.8rem;direction:ltr">${esc(link)}</p><button class="btn pri" data-act="copy">انسخ رابط الدعوة</button>`}<p><button class="btn sm ghost" data-act="leave">مغادرة الغرفة</button></p></div>
+      <div class="pn ctr">${Room.offline ? '<b>غرفة على هذا الجهاز</b><p class="mut">أضف لاعبين آليين، أو لاعبين يتناوبون معك على الجهاز نفسه في ألعاب الطاولة.</p>' : `<small class="mut">رمز الغرفة</small><div class="code">${R.code}</div><p class="mut" style="word-break:break-all;font-size:.8rem;direction:ltr">${esc(link)}</p><div class="row ctr"><button class="btn pri" data-act="copy">انسخ رابط الدعوة</button>${navigator.share ? '<button class="btn" data-act="share">مشاركة</button>' : ''}<a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('تعال العب معي في ديوانية 🎮 ' + link)}">واتساب</a></div>${host ? `<div class="row ctr" style="margin-top:10px"><button class="btn sm ${R.lock ? 'pri' : ''}" data-act="lock">${R.lock ? '🔒 افتح الغرفة' : '🔓 اقفل الغرفة'}</button><span class="chip">الحد الأقصى <button class="x" data-act="max:-1" aria-label="أقل">−</button><b>${R.max || 12}</b><button class="x" data-act="max:1" aria-label="أكثر">+</button></span></div>` : ''}`}<p><button class="btn sm ghost" data-act="leave">مغادرة الغرفة</button>${host && !Room.offline ? ' <button class="btn sm dng" data-act="closeroom">إغلاق الغرفة للجميع</button>' : ''}</p></div>
       ${lg}${chatHTML()}</div></div></div>`;
   }
   function gameHTML() {
@@ -221,6 +230,13 @@
       const g = G.by[m.id];
       return `<div class="ov" data-act="close"><div class="mod" data-stop>${art(g)}<div class="in"><h2>${g.n}</h2><p class="mut">${g.d}</p>${meta(g)}<p class="row">${[...g.modes].map(k => `<span class="chip">${MODES[k]}</span>`).join('')}</p>${g.menuHTML && m.t === 'game' ? g.menuHTML() : ''}<h3 style="margin-top:10px">طريقة اللعب</h3><p>${g.r}</p>
         <div class="row" style="margin-top:14px">${m.t === 'rules' ? '' : `<button class="btn pri" data-act="play:${g.id}">${Net.ok ? 'افتح غرفة والعب مع الأصدقاء' : 'افتح غرفة على هذا الجهاز'}</button><button class="btn" data-act="solo:${g.id}">جرّبها الآن ضد لاعبين آليين</button>`}<button class="btn ghost" data-act="close">إغلاق</button></div></div></div></div>`;
+    }
+    if (m.t === 'gate') {
+      const g = m.gid && G.by[m.gid];
+      return `<div class="ov"><div class="mod" data-stop><div class="sadu"></div><div class="in"><h2>دعوة إلى غرفة ${esc(m.code)}</h2><p class="mut">${m.n} من ${m.max} لاعبين${g ? ` · اللعبة: ${g.em} ${g.n}` : ''}${m.ph === 'game' ? ' · المباراة جارية، ستنضم مع بداية اللعبة التالية' : ''}</p>
+        <h3 style="margin-top:10px">اسمك</h3><div class="row"><input class="inp" id="gate_in" maxlength="16" value="${esc(P.n)}" aria-label="اسمك"></div>
+        <h3 style="margin-top:12px">صورتك</h3><div class="avs">${AV0.concat(P.own.filter(a => a in AV1)).map(a => `<button class="avb ${P.av === a ? 'on' : ''}" data-act="gav:${a}" aria-label="صورة رمزية">${a}</button>`).join('')}</div>
+        <div class="row" style="margin-top:14px"><button class="btn pri lg" data-act="enter">ادخل الغرفة</button><button class="btn ghost" data-act="nogate">ليس الآن</button></div></div></div></div>`;
     }
     if (m.t === 'profile') {
       const rate = P.played ? Math.round(P.won / P.played * 100) : 0;
@@ -266,6 +282,11 @@
       case 'theme': { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches; P.theme = dark ? 'light' : 'dark'; document.documentElement.dataset.theme = P.theme; save(); break; }
       case 'snd': P.snd = P.snd ? 0 : 1; save(); break;
       case 'profile': modal = { t: 'profile' }; break;
+      case 'gav': P.av = x; save(); break;
+      case 'enter': { const n = txt(($('#gate_in') || {}).value, 16); if (n) P.n = n; P.named = 1; save(); joinRoom(modal.code, true); return; }
+      case 'nogate': modal = null; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } break;
+      case 'share': { const link = location.origin + location.pathname + '#r-' + R.code, text = `تعال العب معي في ديوانية 🎮 رمز الغرفة ${R.code}`; if (navigator.share) navigator.share({ title: 'ديوانية', text, url: link }).catch(() => { }); else cmd('copy'); return; }
+      case 'max': if (host && R) { R.max = Math.max(Math.max(2, R.ps.length), Math.min(12, (R.max || 12) + (+x))); push(); } return;
       case 'close': modal = null; break;
       case 'cat': filt.cat = x; break; case 'mode': filt.mode = x; break;
       case 'game': if (view === 'room') return; modal = { t: 'game', id: x }; break;
@@ -278,7 +299,7 @@
       case 'copy': { const link = location.origin + location.pathname + '#r-' + R.code; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('نُسخ رابط الدعوة ✅'), () => toast('انسخ الرابط الظاهر يدوياً')); return; }
       case 'skin': if (modal && G.by[modal.id] && G.by[modal.id].setSkin) G.by[modal.id].setSkin(+x); break;
       case 'noface': delete P.face; save(); window.dispatchEvent(new Event('dw-face')); break;
-      case 'name': { const n = txt(($('#pn_in') || {}).value, 16); if (n) { P.n = n; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); toast('تم حفظ الاسم'); } break; }
+      case 'name': { const n = txt(($('#pn_in') || {}).value, 16); if (n) { P.n = n; P.named = 1; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); toast('تم حفظ الاسم'); } break; }
       case 'av': { const own = AV0.includes(x) || P.own.includes(x); if (!own) { if (P.coins < AV1[x]) { toast('عملاتك لا تكفي. العب أكثر لتجمع العملات'); return; } P.coins -= AV1[x]; P.own.push(x); toast('تم الشراء 🎉'); } P.av = x; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); break; }
       case 'fr': { const i = +x, own = !i || P.own.includes('f' + i); if (!own) { if (P.coins < FR[i][1]) { toast('عملاتك لا تكفي'); return; } P.coins -= FR[i][1]; P.own.push('f' + i); } P.fr = i; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); break; }
       case 'chat': { const i = $('#chat_in'), m = txt(i && i.value, 120); if (m) { i.value = ''; act({ t: 'chat', m }); } return; }
@@ -295,7 +316,9 @@
         case 'rand': { const ok = G.list.filter(g => R.ps.length >= g.min && R.ps.length <= g.max && g.id !== R.gid && (g.local || !R.ps.some(p => p.loc))); if (!ok.length) { toast('لا توجد لعبة تناسب هذا العدد'); return; } const g = U.pick(ok); R.gid = g.id; R.o = defOpts(g); break; }
         case 'voted': { const v = U.tally(R.gv), top = Object.keys(v).sort((a, b) => v[b] - v[a])[0]; if (top) { R.gid = top; R.o = defOpts(G.by[top]); } break; }
         case 'bot': addSeat('bot'); break; case 'loc': addSeat('loc'); break;
-        case 'kick': R.ps = R.ps.filter(p => p.id !== x); break;
+        case 'kick': { const k = R.ps.find(p => p.id === x); R.ps = R.ps.filter(p => p.id !== x); if (k && !k.bot && !k.loc) { R.ban = (R.ban || []).concat(x).slice(-50); delete R.auto[x]; sys(`أُزيل ${k.n} من الغرفة`); } break; }
+        case 'lock': R.lock = R.lock ? 0 : 1; sys(R.lock ? 'قُفلت الغرفة: لا يدخلها لاعبون جدد' : 'فُتحت الغرفة'); break;
+        case 'closeroom': if (!Room.offline) Net.post('close', {}, '&k=' + Room.hk).catch(() => { }); toast('أُغلقت الغرفة'); leave(true); return;
         case 'teams': R.teams = R.teams ? 0 : 1; break;
         case 'resetlg': R.tot = {}; break;
         case 'auto': if (R.auto[x]) delete R.auto[x]; else R.auto[x] = 1; break;
@@ -327,6 +350,7 @@
   if (P.theme) document.documentElement.dataset.theme = P.theme;
   $('#app').innerHTML = '<header class="top" id="top"></header><main id="main"></main><div id="modal"></div>';
   render();
-  Net.ping().then(() => { render(); const m = location.hash.match(/^#r-([A-Za-z0-9]{4})$/); if (m) { if (Net.ok) joinRoom(m[1]); else toast('رابط غرفة مباشرة: يعمل عند فتحه من خادم ديوانية'); } });
+  Net.ping().then(() => { render(); const m = location.hash.match(/^#r-([A-Za-z0-9]{4})$/); if (m) { if (Net.ok) joinRoom(m[1], !!LS.get('dw_hk_' + m[1].toUpperCase(), null)); else toast('رابط غرفة مباشرة: يعمل عند فتحه من خادم ديوانية'); } });
+  window.addEventListener('hashchange', () => { const m = location.hash.match(/^#r-([A-Za-z0-9]{4})$/); if (m && Net.ok && !Room.R && view !== 'room') joinRoom(m[1]); });
   window.DW = { Room, P, Net, setFace };
 })();

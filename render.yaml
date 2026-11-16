@@ -6,3 +6,4 @@ services:
     region: frankfurt
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /healthz

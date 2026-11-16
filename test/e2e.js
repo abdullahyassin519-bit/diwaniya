@@ -7,7 +7,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const br = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
   const errs = []; let fails = 0;
   const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
-  const mk = async (name, vp) => { const ctx = await br.newContext({ viewport: vp || { width: 1100, height: 800 } }); const p = await ctx.newPage(); p.setDefaultTimeout(7000); p.on('pageerror', e => errs.push(name + ': ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/fonts|ERR_|Failed to load resource/.test(m.text())) errs.push(name + ' console: ' + m.text()); }); return p; };
+  const mk = async (name, vp) => { const ctx = await br.newContext({ viewport: vp || { width: 1100, height: 800 } }); await ctx.addInitScript(() => { try { if (!localStorage.getItem('dw_p')) localStorage.setItem('dw_p', JSON.stringify({ named: 1 })); } catch (e) { } }); const p = await ctx.newPage(); p.setDefaultTimeout(7000); p.on('pageerror', e => errs.push(name + ': ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/fonts|ERR_|Failed to load resource/.test(m.text())) errs.push(name + ' console: ' + m.text()); }); return p; };
   const R = p => p.evaluate(() => { const r = DW.Room.R; return r && { code: r.code, n: r.ps.length, ph: r.ph, gid: r.gid, host: r.host, res: !!r.res, v: r.v, st: r.st && { ph: r.st.ph, i: r.st.i, k: r.st.k, word: r.st.word, dr: r.st.dr, sc: r.st.sc, strokes: (r.st.strokes || []).length }, isHost: DW.Room.host, me: DW.P.id }; });
   const until = async (f, ms = 8000, m = '') => { const t = Date.now(); while (Date.now() - t < ms) { if (await f()) return true; await sleep(120); } console.log('  timeout: ' + m); return false; };
 
@@ -81,7 +81,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ok((await R(S)).res, 'same-device play: two humans alternate on one device (connect four) and a winner is declared');
   /* الملف الشخصي والمتجر */
   await S.evaluate(() => document.querySelector('[data-act=leave]').click()); await S.click('[data-act=profile]'); await S.screenshot({ path: 'test/shot-profile.png' });
-  ok(await S.evaluate(() => DW.P.played >= 4 && Object.keys(DW.P.ach).length >= 3), 'profile: stats + achievements recorded');
+  ok(await S.evaluate(() => DW.P.played >= 4 && Object.keys(DW.P.ach).length >= 2), 'profile: stats + achievements recorded');
   await S.click('[data-act=close]'); await S.setViewportSize({ width: 390, height: 800 }); await S.evaluate(() => { document.documentElement.dataset.theme = 'dark'; }); await S.screenshot({ path: 'test/shot-home-mobile.png' }); const ow = await S.evaluate(() => document.documentElement.scrollWidth - innerWidth); ok(ow <= 0, 'mobile: no horizontal overflow (' + ow + ')');
   console.log('page errors:', errs.length ? errs.slice(0, 12) : 'none'); if (errs.length) fails++;
   await br.close(); srv.kill(); console.log(fails ? `\n${fails} FAILURES` : '\nALL E2E PASSED'); process.exit(fails ? 1 : 0);

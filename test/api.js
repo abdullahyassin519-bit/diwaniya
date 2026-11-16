@@ -1,0 +1,37 @@
+/* اختبار واجهة الخادم: الهوية، القفل، الحد الأقصى، الطرد، الإغلاق، وحدود الطلبات */
+const { spawn } = require('child_process'); const WebSocket = require('ws');
+const B = 'http://localhost:3116/', sleep = ms => new Promise(r => setTimeout(r, ms)); let fails = 0;
+const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
+const tok = n => 'tok_' + n + '_abcdefghijklmnop';
+const get = (p, ip) => fetch(B + p, { headers: ip ? { 'x-forwarded-for': ip } : {} }).then(async r => ({ s: r.status, j: await r.json().catch(() => ({})) }));
+const post = (p, body, ip) => fetch(B + p, { method: 'POST', body: JSON.stringify(body || {}), headers: ip ? { 'x-forwarded-for': ip } : {} }).then(async r => ({ s: r.status, j: await r.json().catch(() => ({})) }));
+const sse = (p) => fetch(B + p).then(r => { const s = r.status; try { r.body.cancel(); } catch (e) { } return s; });
+const wsTry = url => new Promise(res => { const w = new WebSocket(url); w.on('open', () => { res(w); }); w.on('error', () => res(null)); });
+(async () => {
+  const srv = spawn('node', ['server.js'], { env: { ...process.env, PORT: 3116 }, stdio: 'inherit' }); await sleep(900);
+  const idA = (await get('api/ping?t=' + tok('a'))).j.id, idB = (await get('api/ping?t=' + tok('b'))).j.id, idC = (await get('api/ping?t=' + tok('c'))).j.id;
+  ok(/^u[0-9a-f]{12}$/.test(idA) && idA !== idB, 'identity: server derives a public id from the secret token');
+  ok((await post('api/create?p=' + idA)).s === 400, 'old-style request with a bare public id is refused');
+  const { code, hk } = (await post('api/create?t=' + tok('a'))).j; ok(/^[A-Z0-9]{4}$/.test(code), 'room created ' + code);
+  const st = (o) => ({ code, host: idA, ps: [{ id: idA, n: 'A' }], ph: 'lobby', v: 1, ...o });
+  ok((await post(`api/state?c=${code}&t=${tok('a')}&k=${hk}`, st({}))).s === 200, 'host can publish room state');
+  ok((await post(`api/state?c=${code}&t=${tok('b')}&k=${hk}`, st({}))).s === 403, 'another player cannot publish state even with the host key');
+  ok((await post(`api/state?c=${code}&t=${tok('a')}&k=wrong`, st({}))).s === 403, 'host without the key cannot publish state');
+  let r = await get(`api/room?c=${code}&t=${tok('b')}`); ok(r.s === 200 && r.j.n === 1 && r.j.no === '', 'invite check: room info for a newcomer');
+  await post(`api/state?c=${code}&t=${tok('a')}&k=${hk}`, st({ lock: 1 }));
+  r = await get(`api/room?c=${code}&t=${tok('b')}`); ok(r.j.no === 'locked' && (await sse(`api/ev?c=${code}&t=${tok('b')}`)) === 403, 'locked room refuses newcomers');
+  ok((await post(`api/act?c=${code}&t=${tok('b')}`, { t: 'join' })).s === 403, 'locked room refuses join actions too');
+  await post(`api/state?c=${code}&t=${tok('a')}&k=${hk}`, st({ ps: [{ id: idA }, { id: idB }], max: 2 }));
+  ok((await get(`api/room?c=${code}&t=${tok('c')}`)).j.no === 'full' && (await get(`api/room?c=${code}&t=${tok('b')}`)).j.no === '', 'full room refuses a third player but keeps its members');
+  ok((await wsTry(`ws://localhost:3116/ws?c=${code}&t=${tok('c')}`)) === null, 'realtime channel refuses a non-member');
+  const wb = await wsTry(`ws://localhost:3116/ws?c=${code}&t=${tok('b')}`); ok(!!wb, 'realtime channel accepts a member');
+  await post(`api/state?c=${code}&t=${tok('a')}&k=${hk}`, st({ ps: [{ id: idA }], ban: [idB] })); await sleep(300);
+  ok((await get(`api/room?c=${code}&t=${tok('b')}`)).j.no === 'banned' && wb.readyState !== 1, 'kicked player is banned and his realtime connection is dropped');
+  ok((await post(`api/close?c=${code}&t=${tok('b')}&k=${hk}`)).s === 403, 'non-host cannot close the room');
+  ok((await post(`api/close?c=${code}&t=${tok('a')}&k=${hk}`)).s === 200 && (await get(`api/room?c=${code}&t=${tok('a')}`)).s === 404, 'host closes the room and it is gone');
+  let last = 0; for (let i = 0; i < 34; i++) last = (await get(`api/room?c=ZZZ${i % 9}&t=${tok('x')}`, '9.9.9.9')).s; ok(last === 429, 'guessing room codes is rate-limited (429 after 30 misses)');
+  ok((await get(`api/room?c=ZZZ1&t=${tok('y')}`, '8.8.8.8')).s === 404, 'other addresses are unaffected by that limit');
+  let lastC = 0; for (let i = 0; i < 14; i++) lastC = (await post('api/create?t=' + tok('s' + i), {}, '7.7.7.7')).s; ok(lastC === 429, 'room creation is rate-limited per address');
+  ok((await get('healthz')).j.ok === 1, 'health endpoint answers');
+  srv.kill(); console.log(fails ? `\n${fails} FAILURES` : '\nALL API TESTS PASSED'); process.exit(fails ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

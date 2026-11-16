@@ -88,7 +88,7 @@
     function connect() {
       if (dead) return;
       if (!online()) { const bots = {}; for (const id of X.st.ps) if (id !== me) bots[id] = 1; sim = C.Sim({ gk: 1, ps: X.st.ps.slice(), tm: X.st.tm, bots, map: X.st.map, target: X.H.o.w || 5, diff: ['سهل', 'متوسط', 'صعب'].indexOf(X.H.o.bot || 'متوسط'), now: () => performance.now(), connected: () => true, emit: (q, to) => { if (!to || to === me) onMsg('*', q); } }); sim.join(me); simIv = setInterval(() => { try { sim.tick(); } catch (e) { console.error(e); } }, 50); return; }
-      try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + location.pathname.replace(/[^/]*$/, '') + 'ws?c=' + X.H.code + '&p=' + me); } catch (e) { return; }
+      try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + location.pathname.replace(/[^/]*$/, '') + 'ws?c=' + X.H.code + '&t=' + DW.P.tok); } catch (e) { return; }
       ws.onopen = () => { sendInit(); sendLook(); };
       ws.onmessage = e => { let d; try { d = JSON.parse(e.data); } catch (er) { return; } if (d && Array.isArray(d.m) && typeof d.f === 'string') onMsg(d.f, d.m); };
       ws.onclose = () => { ws = null; if (!dead) setTimeout(connect, 1500); };
