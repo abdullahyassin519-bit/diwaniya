@@ -2,6 +2,7 @@
    التشغيل: node server.js   (المنفذ من PORT أو 3000)
    الخادم لا يعرف قواعد الألعاب: يحفظ آخر حالة لكل غرفة ويوصل الأحداث بين اللاعبين (SSE + POST).
    قائد الغرفة يشغّل منطق اللعبة، وإذا انقطع ينقل الخادم القيادة تلقائياً للاعب متصل. */
+const { WebSocketServer } = require('ws');
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, PUB = path.join(__dirname, 'public');
 const MAX_BODY = 400 * 1024, MAX_ROOMS = 3000, IDLE_MS = 3 * 3600e3, HOST_GRACE = 12000;
@@ -75,5 +76,23 @@ const server = http.createServer(async (req, res) => {
     fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end('not found'); } res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }); res.end(d); });
   } catch (e) { if (!res.headersSent) json(res, typeof e === 'number' ? e : 400, { err: 'bad request' }); }
 });
-setInterval(() => { const t = Date.now(); for (const [c, r] of rooms) if (!r.conns.size && t - r.last > IDLE_MS) rooms.delete(c); }, 600e3).unref();
+/* قناة الوقت الحقيقي (WebSocket): مرحّل رسائل بين لاعبي الغرفة للألعاب السريعة. لا يُخزَّن شيء. */
+const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
+server.on('upgrade', (req, sock, head) => {
+  let u; try { u = new URL(req.url, 'http://x'); } catch (e) { return sock.destroy(); }
+  const room = rooms.get(String(u.searchParams.get('c') || '').toUpperCase()), pid = u.searchParams.get('p');
+  if (u.pathname !== '/ws' || !room || !validId(pid)) return sock.destroy();
+  wss.handleUpgrade(req, sock, head, ws => {
+    room.rt = room.rt || new Map(); const old = room.rt.get(pid); if (old) try { old.close(); } catch (e) { }
+    room.rt.set(pid, ws); ws.alive = true; ws.on('pong', () => { ws.alive = true; });
+    ws.on('message', (d, bin) => {
+      if (bin) return; const s = d.toString(); if (s[0] !== '[') return; try { JSON.parse(s); } catch (e) { return; }
+      room.last = Date.now(); const out = `{"f":"${pid}","m":${s}}`;
+      for (const [q, w] of room.rt) if (q !== pid && w.readyState === 1 && w.bufferedAmount < 1e6) w.send(out);
+    });
+    ws.on('close', () => { if (room.rt.get(pid) === ws) room.rt.delete(pid); }); ws.on('error', () => { });
+  });
+});
+setInterval(() => { for (const r of rooms.values()) if (r.rt) for (const w of r.rt.values()) { if (!w.alive) { try { w.terminate(); } catch (e) { } continue; } w.alive = false; try { w.ping(); } catch (e) { } } }, 25000).unref();
+setInterval(() => { const t = Date.now(); for (const [c, r] of rooms) if (!r.conns.size && !(r.rt && r.rt.size) && t - r.last > IDLE_MS) rooms.delete(c); }, 600e3).unref();
 server.listen(PORT, () => console.log('Diwaniya listening on http://localhost:' + PORT));

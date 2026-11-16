@@ -4,7 +4,7 @@
   const $ = s => document.querySelector(s), esc = U.esc;
   const LS = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } } };
   const rid = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
-  const CATS = { board: ['ألعاب الطاولة', 'كلاسيكيات واستراتيجية'], party: ['ألعاب الشلّة', 'أدوار سرية وتصويت وضحك'], brain: ['ذكاء ومعلومات', 'من الأسرع والأدق؟'], fun: ['ضحك وإبداع', 'ارسم، اكتب، اخدع'], orig: ['حصريات ديوانية', 'ألعاب ابتكرناها ولن تجدها في مكان آخر'] };
+  const CATS = { act: ['أكشن مباشر', 'تصويب وفِرق في الوقت الحقيقي'], board: ['ألعاب الطاولة', 'كلاسيكيات واستراتيجية'], party: ['ألعاب الشلّة', 'أدوار سرية وتصويت وضحك'], brain: ['ذكاء ومعلومات', 'من الأسرع والأدق؟'], fun: ['ضحك وإبداع', 'ارسم، اكتب، اخدع'], orig: ['حصريات ديوانية', 'ألعاب ابتكرناها ولن تجدها في مكان آخر'] };
   const MODES = { f: 'العائلة والأطفال', p: 'الأصدقاء والحفلات', s: 'استراتيجية' };
   const AV0 = ['🦊', '🐪', '🦅', '🐎', '🐢', '🦁', '🐼', '🐙', '🦉', '🐬'], AV1 = { '🦄': 60, '🐉': 90, '🤖': 60, '👑': 150, '🧞': 120, '🚀': 80, '🥷': 100, '🦖': 70 };
   const FR = [['بلا إطار', 0], ['إطار ذهبي', 120], ['إطار زمردي', 80], ['إطار ياقوتي', 80]];
@@ -47,7 +47,10 @@
   let view = 'home', modal = null; const filt = { q: '', cat: 'all', mode: 'all' };
   const newR = code => ({ code, host: P.id, ps: [], ph: 'lobby', gid: null, o: {}, st: null, gps: [], gk: 0, res: null, tot: {}, chat: [], gv: {}, teams: 0, auto: {}, v: 0, _now: Date.now() });
   const defOpts = g => Object.fromEntries((g.opts || []).map(o => [o.k, o.d]));
-  function H() { const R = Room.R, by = {}; R.ps.forEach(x => by[x.id] = x); return { ps: R.gps, nm: id => (by[id] || {}).n || 'لاعب', av: id => okAv((by[id] || {}).av), now: Date.now() + Room.off, o: R.o, ui: Room.ui, keep: (k, f) => Room.keep[k] || (Room.keep[k] = f()) }; }
+  function H() { const R = Room.R, by = {}; R.ps.forEach(x => by[x.id] = x); return { ps: R.gps, nm: id => (by[id] || {}).n || 'لاعب', av: id => okAv((by[id] || {}).av), now: Date.now() + Room.off, o: R.o, ui: Room.ui, keep: (k, f) => Room.keep[k] || (Room.keep[k] = f()), code: R.code, offline: Room.offline, teamsOn: R.teams, team: id => (by[id] || {}).team, isHost: () => Room.host, hostId: () => Room.R ? Room.R.host : null, isBot: id => { const r = Room.R, x = r && r.ps.find(q => q.id === id); return !!(x && x.bot) || !!(r && r.auto[id]); } }; }
+  function setFace(file) {
+    return new Promise((ok, no) => { const img = new Image(), url = URL.createObjectURL(file); img.onload = () => { const c = document.createElement('canvas'); c.width = c.height = 96; const s = Math.min(img.width, img.height) * .8; c.getContext('2d').drawImage(img, (img.width - s) / 2, Math.max(0, (img.height - s) * .35), s, s, 0, 0, 96, 96); P.face = c.toDataURL('image/jpeg', .72); save(); URL.revokeObjectURL(url); window.dispatchEvent(new Event('dw-face')); ok(); }; img.onerror = no; img.src = url; });
+  }
   const sys = m => { const R = Room.R; R.chat.push({ s: m }); if (R.chat.length > 40) R.chat.shift(); };
   const txt = (x, n) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, n);
 
@@ -139,7 +142,7 @@
   /* ---------- الواجهة ---------- */
   function swap(el, html, key) {
     if (el._h === html) return; const a = document.activeElement, id = a && el.contains(a) && a.id, ss = id && a.selectionStart, same = el._k === key, vals = {};
-    el.querySelectorAll('input[id]').forEach(i => { if (same || !i.id.startsWith('f_')) vals[i.id] = i.value; });
+    el.querySelectorAll('input[id]:not([type=file])').forEach(i => { if (same || !i.id.startsWith('f_')) vals[i.id] = i.value; });
     const ms = el.querySelector('.msgs'), mt = ms && ms.scrollTop;
     el.innerHTML = html; el._h = html; el._k = key;
     for (const k in vals) { const i = el.querySelector('#' + k); if (i) i.value = vals[k]; }
@@ -156,7 +159,7 @@
   }
   function homeHTML() {
     const d = dailyGame(), q = U.norm(filt.q), list = G.list.filter(g => (filt.cat === 'all' || g.cat === filt.cat) && (filt.mode === 'all' || g.modes.includes(filt.mode)) && (!q || U.norm(g.n + ' ' + g.d).includes(q)));
-    const fan = ['mafia', 'chess', 'draw', 'auction', 'ludo', 'spy', 'island', 'colors', 'quiz'].map(id => G.by[id]);
+    const fan = ['strike', 'chess', 'draw', 'auction', 'ludo', 'spy', 'island', 'colors', 'quiz'].map(id => G.by[id]);
     let h = `<section class="hero"><div class="wrap"><div><h1>مجلس واحد…<br><em>${G.list.length} لعبة</em> للشلّة والعائلة</h1>
       <p>افتح غرفة، أرسل الرمز، والعبوا كلٌّ من جهازه: شطرنج ولودو ومافيا ورسم وتخمين، وخمس ألعاب ابتكرناها خصيصاً لديوانية.</p>
       <div class="cta"><button class="btn pri lg" data-act="create">افتح غرفة جديدة</button><input class="inp" id="join_in" maxlength="4" placeholder="الرمز" aria-label="رمز الغرفة" autocomplete="off"><button class="btn ghost" data-act="join">ادخل برمز</button></div>
@@ -227,6 +230,7 @@
         <h3>الصور الرمزية والمتجر</h3><div class="avs">${AV0.concat(Object.keys(AV1)).map(a => { const own = AV0.includes(a) || P.own.includes(a); return `<button class="avb ${P.av === a ? 'on' : ''}" data-act="av:${a}" aria-label="صورة رمزية">${a}${own ? '' : `<small>${AV1[a]} 🪙</small>`}</button>`; }).join('')}</div>
         <div class="row">${FR.map((f, i) => { const own = !i || P.own.includes('f' + i); return `<button class="btn sm ${P.fr === i ? 'pri' : ''}" data-act="fr:${i}">${f[0]}${own ? '' : ` · ${f[1]} 🪙`}</button>`; }).join('')}</div>
         <h3 style="margin-top:14px">الإنجازات (${Object.keys(P.ach).length}/${ACH.length})</h3><div class="ach">${ACH.map(a => `<div class="${P.ach[a[0]] ? 'on' : ''}"><b>${a[1]}</b><br>${a[2]}</div>`).join('')}</div>
+        <h3 style="margin-top:14px">وجهك في لعبة طخطخة</h3><div class="row">${P.face ? `<img src="${P.face}" alt="" style="width:54px;height:54px;border-radius:50%;object-fit:cover">` : ''}<label class="btn">📷 ${P.face ? 'غيّر الصورة' : 'أضف صورة وجهك'}<input type="file" accept="image/*" id="face_in" hidden></label>${P.face ? '<button class="btn ghost" data-act="noface">إزالة</button>' : ''}</div><p class="mut" style="font-size:.8rem">تظهر على رأس شخصيتك للاعبين في غرفتك فقط، ولا تُحفظ على الخادم.</p>
         <h3 style="margin-top:14px">آخر المباريات</h3>${P.hist.length ? `<table class="lg">${P.hist.slice(0, 8).map(x => { const g = G.by[x.g]; return g ? `<tr><td>${g.em} ${g.n}</td><td class="mut">${new Date(x.t).toLocaleDateString('ar')}</td><td>${x.w ? 'فوز 🏆' : 'مشاركة'}</td></tr>` : ''; }).join('')}</table>` : '<p class="mut">لم تلعب أي مباراة بعد.</p>'}
         <p class="mut" style="font-size:.8rem">ملفك محفوظ على هذا الجهاز فقط.</p><div class="row"><button class="btn ghost" data-act="close">إغلاق</button></div></div></div></div>`;
     }
@@ -266,10 +270,11 @@
       case 'rules': modal = { t: 'rules', id: x }; break;
       case 'create': createRoom(); return;
       case 'play': createRoom(x); return;
-      case 'solo': createRoom(x, true).then(() => { const g = G.by[x], want = Math.max(g.min, Math.min(g.max, g.min <= 2 ? 3 : g.min + 1)); while (Room.R.ps.length < want) addSeat('bot'); start(); }); return;
+      case 'solo': createRoom(x, true).then(() => { const g = G.by[x], want = g.solo || Math.max(g.min, Math.min(g.max, g.min <= 2 ? 3 : g.min + 1)); while (Room.R.ps.length < want) addSeat('bot'); start(); }); return;
       case 'join': joinRoom(($('#join_in') || {}).value); return;
       case 'leave': leave(); return;
       case 'copy': { const link = location.origin + location.pathname + '#r-' + R.code; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('نُسخ رابط الدعوة ✅'), () => toast('انسخ الرابط الظاهر يدوياً')); return; }
+      case 'noface': delete P.face; save(); window.dispatchEvent(new Event('dw-face')); break;
       case 'name': { const n = txt(($('#pn_in') || {}).value, 16); if (n) { P.n = n; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); toast('تم حفظ الاسم'); } break; }
       case 'av': { const own = AV0.includes(x) || P.own.includes(x); if (!own) { if (P.coins < AV1[x]) { toast('عملاتك لا تكفي. العب أكثر لتجمع العملات'); return; } P.coins -= AV1[x]; P.own.push(x); toast('تم الشراء 🎉'); } P.av = x; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); break; }
       case 'fr': { const i = +x, own = !i || P.own.includes('f' + i); if (!own) { if (P.coins < FR[i][1]) { toast('عملاتك لا تكفي'); return; } P.coins -= FR[i][1]; P.own.push('f' + i); } P.fr = i; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); break; }
@@ -313,12 +318,12 @@
     else if (e.target.id === 'chat_in') cmd('chat'); else if (e.target.id === 'join_in') cmd('join'); else if (e.target.id === 'pn_in') cmd('name');
   });
   document.addEventListener('input', e => { if (e.target.id === 'q') { filt.q = e.target.value; render(); } });
-  document.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.opt, R = Room.R; if (k && R && Room.host) { const o = G.by[R.gid].opts.find(o => o.k === k); R.o[k] = o.v[+e.target.value]; push(); } });
+  document.addEventListener('change', e => { if (e.target.id === 'face_in' && e.target.files[0]) { setFace(e.target.files[0]).then(() => { toast('تم حفظ صورة وجهك ✅'); render(); }, () => toast('تعذر قراءة الصورة')); return; } const k = e.target.dataset && e.target.dataset.opt, R = Room.R; if (k && R && Room.host) { const o = G.by[R.gid].opts.find(o => o.k === k); R.o[k] = o.v[+e.target.value]; push(); } });
 
   /* ---------- الإقلاع ---------- */
   if (P.theme) document.documentElement.dataset.theme = P.theme;
   $('#app').innerHTML = '<header class="top" id="top"></header><main id="main"></main><div id="modal"></div>';
   render();
   Net.ping().then(() => { render(); const m = location.hash.match(/^#r-([A-Za-z0-9]{4})$/); if (m) { if (Net.ok) joinRoom(m[1]); else toast('رابط غرفة مباشرة: يعمل عند فتحه من خادم ديوانية'); } });
-  window.DW = { Room, P, Net };
+  window.DW = { Room, P, Net, setFace };
 })();
