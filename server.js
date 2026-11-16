@@ -3,6 +3,7 @@
    الخادم لا يعرف قواعد الألعاب: يحفظ آخر حالة لكل غرفة ويوصل الأحداث بين اللاعبين (SSE + POST).
    قائد الغرفة يشغّل منطق اللعبة، وإذا انقطع ينقل الخادم القيادة تلقائياً للاعب متصل. */
 const { WebSocketServer } = require('ws');
+const SKC = require('./public/js/strike-core.js');
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, PUB = path.join(__dirname, 'public');
 const MAX_BODY = 400 * 1024, MAX_ROOMS = 3000, IDLE_MS = 3 * 3600e3, HOST_GRACE = 12000;
@@ -76,6 +77,16 @@ const server = http.createServer(async (req, res) => {
     fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end('not found'); } res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }); res.end(d); });
   } catch (e) { if (!res.headersSent) json(res, typeof e === 'number' ? e : 400, { err: 'bad request' }); }
 });
+/* محاكاة طخطخة تعمل هنا على الخادم: هو الحكم في الجولات والضرر والقنبلة والآليين */
+function rtSend(room, m, to) { const out = `{"f":"*","m":${JSON.stringify(m)}}`; if (!room.rt) return; if (to) { const w = room.rt.get(to); if (w && w.readyState === 1) w.send(out); return; } for (const w of room.rt.values()) if (w.readyState === 1 && w.bufferedAmount < 1e6) w.send(out); }
+function startSim(room, c) {
+  if (!c || typeof c !== 'object' || (room.sim && room.sim.gk === c.gk && !room.sim.done)) return;
+  if (!Array.isArray(c.ps) || c.ps.length < 2 || c.ps.length > 12 || !c.ps.every(validId) || !SKC.RAW[c.map]) return;
+  const tm = {}, bots = {}; for (const id of c.ps) { tm[id] = c.tm && c.tm[id] ? 1 : 0; if (c.bots && c.bots[id]) bots[id] = 1; }
+  room.sim = SKC.Sim({ gk: c.gk, ps: c.ps.slice(), tm, bots, map: c.map, target: [3, 5, 8].includes(c.target) ? c.target : 5, diff: [0, 1, 2].includes(c.diff) ? c.diff : 1, now: Date.now, connected: id => !!(room.rt && room.rt.has(id)), emit: (m, to) => rtSend(room, m, to) });
+  for (const id of room.rt.keys()) room.sim.join(id);
+}
+setInterval(() => { const t = Date.now(); for (const r of rooms.values()) { if (!r.sim) continue; if (r.rt && r.rt.size) { r.simIdle = t; try { r.sim.tick(); } catch (e) { console.error('sim', e); r.sim = null; } } else if (t - (r.simIdle || t) > 120000) r.sim = null; else if (!r.simIdle) r.simIdle = t; } }, 50).unref();
 /* قناة الوقت الحقيقي (WebSocket): مرحّل رسائل بين لاعبي الغرفة للألعاب السريعة. لا يُخزَّن شيء. */
 const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
 server.on('upgrade', (req, sock, head) => {
@@ -85,10 +96,14 @@ server.on('upgrade', (req, sock, head) => {
   wss.handleUpgrade(req, sock, head, ws => {
     room.rt = room.rt || new Map(); const old = room.rt.get(pid); if (old) try { old.close(); } catch (e) { }
     room.rt.set(pid, ws); ws.alive = true; ws.on('pong', () => { ws.alive = true; });
+    if (room.sim) room.sim.join(pid);
     ws.on('message', (d, bin) => {
-      if (bin) return; const s = d.toString(); if (s[0] !== '[') return; try { JSON.parse(s); } catch (e) { return; }
-      room.last = Date.now(); const out = `{"f":"${pid}","m":${s}}`;
-      for (const [q, w] of room.rt) if (q !== pid && w.readyState === 1 && w.bufferedAmount < 1e6) w.send(out);
+      if (bin) return; const s = d.toString(); if (s[0] !== '[') return; let q; try { q = JSON.parse(s); } catch (e) { return; }
+      room.last = Date.now(); const t = q[0];
+      if (t === 'init') { if (pid === room.host) startSim(room, q[1]); return; }
+      if (room.sim) { if (t === 'p' || t === 'h' || t === 'buy' || t === 'pl' || t === 'df') { room.sim.msg(pid, q); if (t !== 'p') return; } else if (t === 'f') room.sim.heard(pid); }
+      const out = `{"f":"${pid}","m":${s}}`;
+      for (const [q2, w] of room.rt) if (q2 !== pid && w.readyState === 1 && w.bufferedAmount < 1e6) w.send(out);
     });
     ws.on('close', () => { if (room.rt.get(pid) === ws) room.rt.delete(pid); }); ws.on('error', () => { });
   });

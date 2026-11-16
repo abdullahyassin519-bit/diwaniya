@@ -47,7 +47,7 @@
   let view = 'home', modal = null; const filt = { q: '', cat: 'all', mode: 'all' };
   const newR = code => ({ code, host: P.id, ps: [], ph: 'lobby', gid: null, o: {}, st: null, gps: [], gk: 0, res: null, tot: {}, chat: [], gv: {}, teams: 0, auto: {}, v: 0, _now: Date.now() });
   const defOpts = g => Object.fromEntries((g.opts || []).map(o => [o.k, o.d]));
-  function H() { const R = Room.R, by = {}; R.ps.forEach(x => by[x.id] = x); return { ps: R.gps, nm: id => (by[id] || {}).n || 'لاعب', av: id => okAv((by[id] || {}).av), now: Date.now() + Room.off, o: R.o, ui: Room.ui, keep: (k, f) => Room.keep[k] || (Room.keep[k] = f()), code: R.code, offline: Room.offline, teamsOn: R.teams, team: id => (by[id] || {}).team, isHost: () => Room.host, hostId: () => Room.R ? Room.R.host : null, isBot: id => { const r = Room.R, x = r && r.ps.find(q => q.id === id); return !!(x && x.bot) || !!(r && r.auto[id]); } }; }
+  function H() { const R = Room.R, by = {}; R.ps.forEach(x => by[x.id] = x); return { ps: R.gps, nm: id => (by[id] || {}).n || 'لاعب', av: id => okAv((by[id] || {}).av), now: Date.now() + Room.off, o: R.o, ui: Room.ui, keep: (k, f) => Room.keep[k] || (Room.keep[k] = f()), code: R.code, gk: R.gk, offline: Room.offline, teamsOn: R.teams, team: id => (by[id] || {}).team, isHost: () => Room.host, hostId: () => Room.R ? Room.R.host : null, isBot: id => { const r = Room.R, x = r && r.ps.find(q => q.id === id); return !!(x && x.bot) || !!(r && r.auto[id]); } }; }
   function setFace(file) {
     return new Promise((ok, no) => { const img = new Image(), url = URL.createObjectURL(file); img.onload = () => { const c = document.createElement('canvas'); c.width = c.height = 96; const s = Math.min(img.width, img.height) * .8; c.getContext('2d').drawImage(img, (img.width - s) / 2, Math.max(0, (img.height - s) * .35), s, s, 0, 0, 96, 96); P.face = c.toDataURL('image/jpeg', .72); save(); URL.revokeObjectURL(url); window.dispatchEvent(new Event('dw-face')); ok(); }; img.onerror = no; img.src = url; });
   }
@@ -183,7 +183,7 @@
   const isOff = x => !Room.offline && !x.bot && !x.loc && Room.on.length && !Room.on.includes(x.id);
   function lobbyHTML() {
     const R = Room.R, g = G.by[R.gid], host = Room.host, n = R.ps.length, votes = U.tally(R.gv), meP = R.ps.find(x => x.id === P.id) || {};
-    const pls = R.ps.map(x => `<div class="pc ${x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : ''} ${isOff(x) ? 'off' : ''} ${R.teams ? 't' + (x.team || 1) : ''}"><span class="av f${x.fr | 0}">${okAv(x.av)}</span><span class="nm">${esc(x.n)}<small>${x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : isOff(x) ? 'غير متصل' : x.rdy ? 'جاهز ✅' : 'ينتظر…'}${R.teams ? ' · فريق ' + (x.team === 2 ? 'أزرق' : 'أحمر') : ''}</small></span>${R.teams && (x.id === P.id || host) ? `<button class="x" data-act="team:${x.id}" aria-label="بدّل الفريق">⇄</button>` : ''}${host && x.id !== P.id ? `<button class="x" data-act="kick:${x.id}" aria-label="إزالة">✕</button>` : ''}</div>`).join('');
+    const pls = R.ps.map(x => `<div class="pc ${x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : ''} ${isOff(x) ? 'off' : ''} ${R.teams ? 't' + (x.team || 1) : ''}"><span class="av f${x.fr | 0}">${okAv(x.av)}</span><span class="nm">${esc(x.n)}<small>${x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : isOff(x) ? 'غير متصل' : x.rdy ? 'جاهز ✅' : 'ينتظر…'}${R.teams ? ' · ' + (g && g.teamNames ? g.teamNames[x.team === 2 ? 1 : 0] : 'فريق ' + (x.team === 2 ? 'أزرق' : 'أحمر')) : ''}</small></span>${R.teams && (x.id === P.id || host) ? `<button class="x" data-act="team:${x.id}" aria-label="بدّل الفريق">⇄</button>` : ''}${host && x.id !== P.id ? `<button class="x" data-act="kick:${x.id}" aria-label="إزالة">✕</button>` : ''}</div>`).join('');
     const opts = g && (g.opts || []).map(o => host ? `<label class="chip">${o.n} <select data-opt="${o.k}" id="o_${o.k}">${o.v.map((v, i) => `<option value="${i}" ${String(R.o[o.k] ?? o.d) === String(v) ? 'selected' : ''}>${v}</option>`).join('')}</select></label>` : `<span class="chip">${o.n}: ${R.o[o.k] ?? o.d}</span>`).join('');
     const link = Room.offline ? '' : location.origin + location.pathname + '#r-' + R.code;
     const lg = Object.keys(R.tot).length ? `<div class="pn"><b>دوري الغرفة</b> <small class="mut">فوز = 3 · مشاركة = 1</small><table class="lg">${R.ps.filter(x => R.tot[x.id]).sort((a, b) => R.tot[b.id] - R.tot[a.id]).map((x, i) => `<tr><td>${i + 1}</td><td>${okAv(x.av)} ${esc(x.n)}</td><td>${R.tot[x.id]}</td></tr>`).join('')}</table>${R.teams ? `<p class="mut">🔴 ${R.ps.filter(x => x.team !== 2).reduce((s, x) => s + (R.tot[x.id] || 0), 0)} — ${R.ps.filter(x => x.team === 2).reduce((s, x) => s + (R.tot[x.id] || 0), 0)} 🔵</p>` : ''}${host ? '<button class="btn sm ghost" data-act="resetlg">تصفير الدوري</button>' : ''}</div>` : '';
@@ -211,6 +211,7 @@
     const teams = R.teams ? `<p>🔴 ${r.rank.filter(x => (R.ps.find(p => p.id === x.id) || {}).team !== 2).reduce((s, x) => s + x.s, 0)} — ${r.rank.filter(x => (R.ps.find(p => p.id === x.id) || {}).team === 2).reduce((s, x) => s + x.s, 0)} 🔵</p>` : '';
     return `<div class="ov"><div class="mod res"><div class="sadu"></div><div class="in ctr"><h2>${title}</h2><p class="mut">${esc(r.msg)}</p>
       <div class="rank">${r.rank.map((x, i) => `<div class="${w.includes(x.id) ? 'w' : ''}"><span>${i + 1}</span><span class="av">${h.av(x.id)}</span>${esc(h.nm(x.id))}<b>${x.s}</b></div>`).join('')}</div>${teams}
+      ${G.by[R.gid].resView && R.st ? G.by[R.gid].resView(R.st, h) : ''}
       ${gn && R.gps.includes(P.id) ? `<p><span class="chip ok">+${gn.xp} خبرة</span> <span class="chip ok">+${gn.co} 🪙</span></p>` : ''}
       <div class="row ctr">${Room.host ? '<button class="btn pri" data-act="again">العب مرة أخرى</button><button class="btn" data-act="end">لعبة أخرى</button>' : '<span class="mut">بانتظار قرار قائد الغرفة…</span>'}<button class="btn ghost" data-act="hideres">شاهد اللوحة</button><button class="btn ghost" data-act="leave">خروج</button></div></div></div></div>`;
   }
@@ -218,7 +219,7 @@
     const m = modal; if (!m) return '';
     if (m.t === 'game' || m.t === 'rules') {
       const g = G.by[m.id];
-      return `<div class="ov" data-act="close"><div class="mod" data-stop>${art(g)}<div class="in"><h2>${g.n}</h2><p class="mut">${g.d}</p>${meta(g)}<p class="row">${[...g.modes].map(k => `<span class="chip">${MODES[k]}</span>`).join('')}</p><h3 style="margin-top:10px">طريقة اللعب</h3><p>${g.r}</p>
+      return `<div class="ov" data-act="close"><div class="mod" data-stop>${art(g)}<div class="in"><h2>${g.n}</h2><p class="mut">${g.d}</p>${meta(g)}<p class="row">${[...g.modes].map(k => `<span class="chip">${MODES[k]}</span>`).join('')}</p>${g.menuHTML && m.t === 'game' ? g.menuHTML() : ''}<h3 style="margin-top:10px">طريقة اللعب</h3><p>${g.r}</p>
         <div class="row" style="margin-top:14px">${m.t === 'rules' ? '' : `<button class="btn pri" data-act="play:${g.id}">${Net.ok ? 'افتح غرفة والعب مع الأصدقاء' : 'افتح غرفة على هذا الجهاز'}</button><button class="btn" data-act="solo:${g.id}">جرّبها الآن ضد لاعبين آليين</button>`}<button class="btn ghost" data-act="close">إغلاق</button></div></div></div></div>`;
     }
     if (m.t === 'profile') {
@@ -251,6 +252,7 @@
       const t = g.turn && !R.st.over ? g.turn(R.st) : ''; if (t !== lastTurn) { lastTurn = t; if (t === P.id) beep(880, .1); }
     }
     swap($('#modal'), over || modalHTML(), 'm');
+    if (!over && modal && modal.t === 'game' && G.by[modal.id].preview) G.by[modal.id].preview(document.querySelector('#modal .art'));
   }
   function submit(f) {
     if (!f) return; const a = JSON.parse(f.dataset.form);
@@ -274,6 +276,7 @@
       case 'join': joinRoom(($('#join_in') || {}).value); return;
       case 'leave': leave(); return;
       case 'copy': { const link = location.origin + location.pathname + '#r-' + R.code; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('نُسخ رابط الدعوة ✅'), () => toast('انسخ الرابط الظاهر يدوياً')); return; }
+      case 'skin': if (modal && G.by[modal.id] && G.by[modal.id].setSkin) G.by[modal.id].setSkin(+x); break;
       case 'noface': delete P.face; save(); window.dispatchEvent(new Event('dw-face')); break;
       case 'name': { const n = txt(($('#pn_in') || {}).value, 16); if (n) { P.n = n; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); toast('تم حفظ الاسم'); } break; }
       case 'av': { const own = AV0.includes(x) || P.own.includes(x); if (!own) { if (P.coins < AV1[x]) { toast('عملاتك لا تكفي. العب أكثر لتجمع العملات'); return; } P.coins -= AV1[x]; P.own.push(x); toast('تم الشراء 🎉'); } P.av = x; save(); if (R) act({ t: 'prof', n: P.n, av: P.av, fr: P.fr }); break; }
@@ -288,7 +291,7 @@
     if (host && R) {
       let ch = true;
       switch (c) {
-        case 'pick': R.gid = x; R.o = defOpts(G.by[x]); break;
+        case 'pick': R.gid = x; R.o = defOpts(G.by[x]); if (G.by[x].teams) R.teams = 1; break;
         case 'rand': { const ok = G.list.filter(g => R.ps.length >= g.min && R.ps.length <= g.max && g.id !== R.gid && (g.local || !R.ps.some(p => p.loc))); if (!ok.length) { toast('لا توجد لعبة تناسب هذا العدد'); return; } const g = U.pick(ok); R.gid = g.id; R.o = defOpts(g); break; }
         case 'voted': { const v = U.tally(R.gv), top = Object.keys(v).sort((a, b) => v[b] - v[a])[0]; if (top) { R.gid = top; R.o = defOpts(G.by[top]); } break; }
         case 'bot': addSeat('bot'); break; case 'loc': addSeat('loc'); break;

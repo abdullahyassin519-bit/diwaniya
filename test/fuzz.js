@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),path=require('path');
 const dir=path.join(__dirname,'../public/js');
-for(const f of['kit','g-board1','g-board2','g-party','g-brain','g-creative','g-original','g-strike'])vm.runInThisContext(fs.readFileSync(path.join(dir,f+'.js'),'utf8'),{filename:f});
+for(const f of['kit','g-board1','g-board2','g-party','g-brain','g-creative','g-original'])vm.runInThisContext(fs.readFileSync(path.join(dir,f+'.js'),'utf8'),{filename:f});
 const junk=[{},{t:'x'},{c:99},{i:-1},{p:'zz'},{t:'v',p:'zz'},{t:'w'},{t:'p',i:99},{t:'mv',i:7},{f:1,t:2},{t:'b',x:'abc'},{t:'obj',p:'zz',c:9},{t:'ac',p:'zz'},{t:'gs'},{x:'q'},{t:'st',s:'no'},{t:'g',i:5},{t:'kill',p:'zz'}];
 let fail=0;
 for(const g of G.list){if(g.rt)continue;
