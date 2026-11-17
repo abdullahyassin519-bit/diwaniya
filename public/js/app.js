@@ -190,8 +190,62 @@
       <div class="row"><input class="inp" id="chat_in" maxlength="120" placeholder="اكتب رسالة…" aria-label="رسالة"><button class="btn" data-act="chat">إرسال</button></div></div>`;
   }
   const isOff = x => !Room.offline && !x.bot && !x.loc && Room.on.length && !Room.on.includes(x.id);
+  /* لوبي طخطخة: فريقان، خرائط بمعاينة حقيقية مرسومة من بيانات الخريطة، وشروط بدء واضحة. */
+  const MAP_TAG = { 'الحارة': 'أزقة ضيقة وساحة مركزية، مواجهات قريبة', 'المستودع': 'مساحة مفتوحة وصناديق، وسطح مرتفع بدرج خارجي', 'القلعة': 'أسوار ومداخل محصّنة وممرات طويلة' };
+  const THUMBS = {};
+  function mapThumb(name, width) {
+    const key = name + '|' + width, C = window.SKC;
+    if (THUMBS[key] !== undefined) return THUMBS[key];
+    if (!C || !C.RAW[name]) return '';
+    const m = C.parseMap(name), cell = Math.max(2, Math.floor(width / m.w)), cv = document.createElement('canvas');
+    cv.width = m.w * cell; cv.height = m.h * cell;
+    const g = cv.getContext('2d');
+    const col = { '#': '#262a31', P: '#363b44', W: '#56616b', K: '#7a5a3a', S: '#7a5a3a', o: '#6b4f33', p: '#6b4f33', c: '#9a8a66', v: '#9a8a66', r: '#9a8a66', x: '#9a8a66', Q: '#cdc7b8', y: '#bcb49f', z: '#aca28d', w: '#9d9581', d: '#8b7b5b', a: '#e2b84a', b: '#e2b84a', T: '#c9d8e6', D: '#e0c9b0' };
+    for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) { const c = m.ch[y * m.w + x]; g.fillStyle = col[c] || '#e4dccb'; g.fillRect(x * cell, y * cell, cell, cell); }
+    THUMBS[key] = cv.toDataURL();
+    return THUMBS[key];
+  }
+  function strikeLobbyHTML() {
+    const R = Room.R, host = Room.host, C = window.SKC, ps = R.ps, n = ps.length;
+    const side = t => ps.filter(x => (x.team || 1) === t), A = side(1), D = side(2);
+    const chosen = R.o.map && R.o.map !== 'عشوائي' && C && C.RAW[R.o.map] ? R.o.map : null, rounds = R.o.w || 5;
+    const canStart = host && n >= 2 && A.length > 0 && D.length > 0;
+    const why = n < 2 ? 'تحتاج لاعبين اثنين على الأقل.' : !A.length ? 'فريق المهاجمين فارغ. انقل لاعباً إليه.' : !D.length ? 'فريق المدافعين فارغ. انقل لاعباً إليه.' : '';
+    const me = ps.find(x => x.id === P.id) || {};
+    const seat = x => {
+      const mine = x.id === P.id, canMove = host || mine, off = isOff(x);
+      const sub = x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : off ? 'غير متصل' : x.rdy ? 'جاهز ✓' : 'غير جاهز';
+      const mv = canMove ? '<button class="btn sm ghost" data-act="team:' + x.id + '" title="انقل إلى الفريق الآخر">⇄</button>' : '';
+      const kk = host && (x.bot || x.loc || !mine) ? '<button class="btn sm ghost" data-act="kick:' + x.id + '" title="أزِل">✕</button>' : '';
+      return '<div class="sl-seat ' + (x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : '') + ' ' + (off ? 'off' : '') + '"><span class="av f' + (x.fr | 0) + '">' + okAv(x.av) + '</span><span class="nm">' + esc(x.n) + '<small>' + sub + '</small></span><span class="sl-acts">' + mv + kk + '</span></div>';
+    };
+    const empty = () => '<div class="sl-seat empty">' + (host ? 'مكان فارغ — انقل لاعباً هنا' : 'بانتظار لاعبين') + '</div>';
+    const maps = (C ? Object.keys(C.RAW) : []).map(name => '<button class="sl-map ' + (chosen === name ? 'on' : '') + '" data-act="' + (host ? 'map' : 'noop') + ':' + name + '"' + (host ? '' : ' disabled') + '><img src="' + mapThumb(name, 220) + '" alt="معاينة ' + name + '"><b>' + name + '</b><small>' + (MAP_TAG[name] || '') + '</small></button>').join('');
+    const big = chosen ? mapThumb(chosen, 520) : '';
+    const link = Room.offline ? '' : location.origin + location.pathname + '#r-' + R.code;
+    const roundBtns = [3, 5, 8].map(v => '<button class="btn sm ' + (rounds === v ? 'pri' : 'ghost') + '" data-act="rounds:' + v + '">' + v + '</button>').join('');
+    const goBlock = host
+      ? '<button class="btn pri lg" data-act="start" ' + (canStart ? '' : 'disabled') + '>ابدأ المباراة</button>' + (why ? '<span class="mut">' + why + '</span>' : '')
+      : '<button class="btn ' + (me.rdy ? '' : 'pri') + ' lg" data-act="rdy">' + (me.rdy ? 'ألغِ الجاهزية' : 'أنا جاهز') + '</button><span class="mut">بانتظار قائد الغرفة لبدء المباراة.</span>';
+    return '<div class="wrap room sl">'
+      + '<div class="sl-top"><div><h2 class="big">🔫 طخطخة — غرفة الانتظار</h2><small class="mut">' + n + '/' + (R.max || 12) + ' لاعب · ' + (R.lock ? '🔒 مقفلة' : 'مفتوحة للدعوات') + '</small></div>'
+      + '<div class="sl-code">' + (Room.offline ? '<span class="mut">غرفة على هذا الجهاز</span>' : '<span class="mut">الرمز</span><b>' + R.code + '</b><button class="btn sm pri" data-act="share">📋 نسخ رابط الدعوة</button>') + '</div></div>'
+      + '<div class="sl-teams">'
+      + '<div class="sl-side red"><h3>🔴 المهاجمون <small>(' + A.length + ')</small></h3>' + (A.map(seat).join('') || empty()) + '</div>'
+      + '<div class="sl-mid"><div class="sl-big">' + (big ? '<img src="' + big + '" alt="معاينة الخريطة">' : '<span class="mut">اختر خريطة</span>') + '</div>'
+      + '<b class="big">' + (chosen || 'خريطة عشوائية') + '</b>'
+      + '<div class="row ctr">' + (host ? '<span class="mut">الجولات</span>' + roundBtns : '<span class="chip">الجولات: ' + rounds + '</span>') + '</div>'
+      + '<div class="row ctr">' + (host ? '<button class="btn sm" data-act="bot">+ لاعب آلي</button><button class="btn sm" data-act="loc">+ لاعب على هذا الجهاز</button>' : '') + '</div></div>'
+      + '<div class="sl-side blue"><h3>🔵 المدافعون <small>(' + D.length + ')</small></h3>' + (D.map(seat).join('') || empty()) + '</div>'
+      + '</div>'
+      + '<div class="sl-maps">' + maps + '</div>'
+      + '<div class="row ctr sl-go">' + goBlock + '</div>'
+      + (link ? '<p class="mut sl-link">رابط الدعوة: <span>' + link + '</span></p>' : '')
+      + chatHTML() + '</div>';
+  }
   function lobbyHTML() {
-    const R = Room.R, g = G.by[R.gid], host = Room.host, n = R.ps.length, votes = U.tally(R.gv), meP = R.ps.find(x => x.id === P.id) || {};
+    const R = Room.R; if (R && R.gid === 'strike') return strikeLobbyHTML();
+    const g = G.by[R.gid], host = Room.host, n = R.ps.length, votes = U.tally(R.gv), meP = R.ps.find(x => x.id === P.id) || {};
     const pls = R.ps.map(x => `<div class="pc ${x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : ''} ${isOff(x) ? 'off' : ''} ${R.teams ? 't' + (x.team || 1) : ''}"><span class="av f${x.fr | 0}">${okAv(x.av)}</span><span class="nm">${esc(x.n)}<small>${x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : isOff(x) ? 'غير متصل' : x.rdy ? 'جاهز ✅' : 'ينتظر…'}${R.teams ? ' · ' + (g && g.teamNames ? g.teamNames[x.team === 2 ? 1 : 0] : 'فريق ' + (x.team === 2 ? 'أزرق' : 'أحمر')) : ''}</small></span>${R.teams && (x.id === P.id || host) ? `<button class="x" data-act="team:${x.id}" aria-label="بدّل الفريق">⇄</button>` : ''}${host && x.id !== P.id ? `<button class="x" data-act="kick:${x.id}" aria-label="إزالة">✕</button>` : ''}</div>`).join('');
     const opts = g && (g.opts || []).map(o => host ? `<label class="chip">${o.n} <select data-opt="${o.k}" id="o_${o.k}">${o.v.map((v, i) => `<option value="${i}" ${String(R.o[o.k] ?? o.d) === String(v) ? 'selected' : ''}>${v}</option>`).join('')}</select></label>` : `<span class="chip">${o.n}: ${R.o[o.k] ?? o.d}</span>`).join('');
     const link = Room.offline ? '' : location.origin + location.pathname + '#r-' + R.code;
@@ -313,6 +367,8 @@
       let ch = true;
       switch (c) {
         case 'pick': R.gid = x; R.o = defOpts(G.by[x]); if (G.by[x].teams) R.teams = 1; break;
+        case 'map': if (R.gid === 'strike') R.o.map = x; break;
+        case 'rounds': if (R.gid === 'strike') R.o.w = +x; break;
         case 'rand': { const ok = G.list.filter(g => R.ps.length >= g.min && R.ps.length <= g.max && g.id !== R.gid && (g.local || !R.ps.some(p => p.loc))); if (!ok.length) { toast('لا توجد لعبة تناسب هذا العدد'); return; } const g = U.pick(ok); R.gid = g.id; R.o = defOpts(g); break; }
         case 'voted': { const v = U.tally(R.gv), top = Object.keys(v).sort((a, b) => v[b] - v[a])[0]; if (top) { R.gid = top; R.o = defOpts(G.by[top]); } break; }
         case 'bot': addSeat('bot'); break; case 'loc': addSeat('loc'); break;
