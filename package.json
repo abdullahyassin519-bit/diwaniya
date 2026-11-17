@@ -1,11 +1,11 @@
 {
   "name": "diwaniya",
   "version": "1.0.0",
-  "description": "ديوانية — منصة ألعاب جماعية مباشرة (28 لعبة)",
+  "description": "طخطخة — لعبة تصويب جماعية مباشرة (فريقان حتى 6 ضد 6) على منصة ديوانية",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test/perft.js && node test/fuzz.js && node test/strike.js && node test/api.js"
+    "test": "node test/perft.js && node test/fuzz.js && node test/strike.js && node test/api.js && node test/vertical.js"
   },
   "engines": {
     "node": ">=18"

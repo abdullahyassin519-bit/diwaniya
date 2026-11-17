@@ -2,6 +2,10 @@
    الوحدة = بلاطة واحدة = متران تقريباً. الإحداثيات: x,y على الأرض و z للأعلى. */
 (function (root, f) { if (typeof module === 'object' && module.exports) module.exports = f(); else root.SKC = f(); })(typeof self !== 'undefined' ? self : this, function () {
   const RAD = .22, FREEZE = 10000, ROUND = 115000, ENDT = 6000, BOMB = 40000, PLANT = 3200, DEFUSE = 5000, ARMOR = 650;
+  /* الحركة الرأسية: STEP أقصى ارتفاع يُصعد بلا قفز، GRAV تسارع الجاذبية، JV سرعة القفزة (ذروة ≈ 1.1 وحدة)، WALL_TOP ارتفاع أعلى جدار يحجب الرؤية. */
+  const STEP = .7, GRAV = 14, JV = 5.5, WALL_TOP = 2.9, JMAX = JV * JV / (2 * GRAV) + .25;
+  /* أرضيات مرتفعة: الدرج (y,z,w) والسطح (Q) تُدخَل بالمشي فوق الدرجات دون قفز. */
+  const FH = { y: .65, z: 1.3, w: 1.95, Q: 2.6 };
   const BODY = [{ top: .72, head: .82 }, { top: .46, head: .54 }], HR = .095, BR = .2;
   const WP = {
     pistol: { n: 'مسدس', $: 0, dmg: 28, hs: 2.2, rate: 220, mag: 12, rel: 1300, sp: .012, rec: .02, auto: 0, fall: .012 },
@@ -10,7 +14,11 @@
     rifle: { n: 'بندقية AK', $: 2700, dmg: 33, hs: 3.2, rate: 100, mag: 30, rel: 2200, sp: .012, rec: .017, auto: 1, fall: .008 },
     sniper: { n: 'قناصة', $: 4200, dmg: 92, hs: 3, rate: 1300, mag: 5, rel: 3000, sp: .001, rec: .06, auto: 0, zoom: 1, fall: 0 },
   };
-  const FULL = '#2KSWop', LOWH = { c: .55, v: .6, r: .5, x: .5 };
+  const FULL = '#2KSWopP', LOWH = { c: .55, v: .6, r: .5, x: .5 };
+  /* تراكبات تُطبَّق على الخريطة قبل البناء: سطح مبنى بجدار P (ارتفاع 2.9) وسلم خارجي يصل إلى السطح. */
+  const OV = {
+    'المستودع': [{ x: 7, y: 4, rows: ['   PPPPP', '   PQQQP', 'yzwQQQQP', '   PQQQP', '   PPPPP'] }],
+  };
   const RAW = {
     'الحارة': { theme: 'hara', rows: [
       '################################',
@@ -82,10 +90,11 @@
   };
   const MC = {};
   function parseMap(name) {
-    if (MC[name]) return MC[name]; const r = RAW[name] || RAW[Object.keys(RAW)[0]], h = r.rows.length, w = Math.max(...r.rows.map(x => x.length));
-    const m = { name, theme: r.theme, w, h, g: new Uint8Array(w * h), hh: new Float32Array(w * h), st: new Uint8Array(w * h), cov: new Uint8Array(w * h), ch: [], sp: [[], []], sc: {}, fc: new Map() }, acc = { a: [0, 0, 0], b: [0, 0, 0] };
+    if (MC[name]) return MC[name]; const r = RAW[name] || RAW[Object.keys(RAW)[0]], rows = r.rows.map(s => s.split('')), h = rows.length, w = Math.max(...rows.map(x => x.length));
+    for (const o of OV[name] || []) o.rows.forEach((s, dy) => { for (let dx = 0; dx < s.length; dx++) { const yy = o.y + dy, xx = o.x + dx; if (s[dx] !== ' ' && rows[yy] && xx > 0 && xx < w - 1 && yy > 0 && yy < h - 1) rows[yy][xx] = s[dx]; } });
+    const m = { name, theme: r.theme, w, h, g: new Uint8Array(w * h), hh: new Float32Array(w * h), fh: new Float32Array(w * h), st: new Uint8Array(w * h), cov: new Uint8Array(w * h), ch: [], sp: [[], []], sc: {}, fc: new Map() }, acc = { a: [0, 0, 0], b: [0, 0, 0] };
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      let c = r.rows[y][x] || '#'; if ((!x || !y || x === w - 1 || y === h - 1) && !FULL.includes(c)) c = '#'; const i = y * w + x; m.ch[i] = c;
+      let c = rows[y][x] || '#'; if ((!x || !y || x === w - 1 || y === h - 1) && !FULL.includes(c)) c = '#'; const i = y * w + x; m.ch[i] = c; if (FH[c] != null) m.fh[i] = FH[c];
       if (FULL.includes(c)) { m.g[i] = 1; m.hh[i] = 99; } else if (LOWH[c]) { m.g[i] = 2; m.hh[i] = LOWH[c]; }
       else if (c === 'T') m.sp[0].push([x + .5, y + .5]); else if (c === 'D') m.sp[1].push([x + .5, y + .5]); else if (c === ',') m.cov[i] = 1;
       else if (c === 'a' || c === 'b') { m.st[i] = c === 'a' ? 1 : 2; acc[c][0] += x + .5; acc[c][1] += y + .5; acc[c][2]++; }
@@ -104,7 +113,7 @@
       if (te > max) break;
       if (mx < 0 || my < 0 || mx >= m.w || my >= m.h) { R3.t = te; R3.kind = 'w'; R3.side = side; return te; }
       const k = m.g[my * m.w + mx]; if (!k) continue;
-      if (k === 1) { R3.t = te; R3.kind = 'w'; R3.side = side; return te; }
+      if (k === 1) { if (oz + dz * te < WALL_TOP) { R3.t = te; R3.kind = 'w'; R3.side = side; return te; } continue; }
       if (lowToo === false) continue;
       const hh = m.hh[my * m.w + mx], ze = oz + dz * te; if (ze < hh) { R3.t = te; R3.kind = 'w'; R3.side = side; return te; }
       const tx = Math.min(sdx, sdy), zx = oz + dz * tx; if (zx < hh && dz < 0) { const tt = (hh - oz) / dz; R3.t = tt; R3.kind = 't'; return tt; }
@@ -121,11 +130,24 @@
     if (best > 1e29) return false; H3.t = best; H3.part = part; return true;
   }
   const solid = (m, x, y) => x < 0 || y < 0 || x >= m.w || y >= m.h || m.g[(y | 0) * m.w + (x | 0)] > 0;
-  const blk = (m, x, y) => solid(m, x - RAD, y - RAD) || solid(m, x + RAD, y - RAD) || solid(m, x - RAD, y + RAD) || solid(m, x + RAD, y + RAD);
-  function mv(m, P, dx, dy) { if (!blk(m, P.x + dx, P.y)) P.x += dx; if (!blk(m, P.x, P.y + dy)) P.y += dy; }
+  /* خلية صلبة لجسم عند ارتفاع قدم z: الجدار دائماً، والسواتر تُعبَر بالقفز فوقها، والأرضية المرتفعة تُدخَل إن لم تتجاوز STEP. */
+  const cellSolid = (m, x, y, z) => { if (x < 0 || y < 0 || x >= m.w || y >= m.h) return true; const i = (y | 0) * m.w + (x | 0), k = m.g[i]; if (k === 1) return true; if (k === 2 && z < m.hh[i]) return true; return m.fh[i] > z + STEP; };
+  const blk = (m, x, y, z) => { z = z || 0; return cellSolid(m, x - RAD, y - RAD, z) || cellSolid(m, x + RAD, y - RAD, z) || cellSolid(m, x - RAD, y + RAD, z) || cellSolid(m, x + RAD, y + RAD, z); };
+  function mv(m, P, dx, dy) { if (!blk(m, P.x + dx, P.y, P.z)) P.x += dx; if (!blk(m, P.x, P.y + dy, P.z)) P.y += dy; }
+  /* أعلى أرضية تحت جسد اللاعب (الزوايا الأربع). */
+  function floorMax(m, x, y) { let f = 0; for (const [dx, dy] of [[-RAD, -RAD], [RAD, -RAD], [-RAD, RAD], [RAD, RAD]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= m.w || Y >= m.h) continue; const v = m.fh[(Y | 0) * m.w + (X | 0)]; if (v > f) f = v; } return f; }
+  /* فيزياء رأسية: قفزة إن كان على الأرض، وسقوط بالجاذبية عند ترك حافة. P.z ارتفاع القدم، P.vz السرعة الرأسية، P.gr يعني على الأرض. */
+  function vert(m, P, dt, jump) {
+    if (P.z == null) P.z = 0; if (P.vz == null) P.vz = 0; const fl = floorMax(m, P.x, P.y);
+    if (jump && P.gr && P.z <= fl + .01) { P.vz = JV; P.gr = 0; }
+    if (P.vz <= 0 && P.z - fl <= STEP && P.z > fl) { P.z = fl; P.vz = 0; P.gr = 1; }
+    else if (P.vz > 0 || P.z > fl + .001) { P.vz -= GRAV * dt; P.z += P.vz * dt; if (P.z <= fl && P.vz <= 0) { P.z = fl; P.vz = 0; P.gr = 1; } else P.gr = 0; }
+    else { P.z = fl; P.vz = 0; P.gr = 1; }
+    return P.z;
+  }
   function field(m, gx, gy) {
     const key = gy * m.w + gx; let F = m.fc.get(key); if (F) return F; F = new Int16Array(m.w * m.h).fill(-1); m.fc.set(key, F); if (m.g[key]) return F;
-    const q = [key]; F[key] = 0; for (let i = 0; i < q.length; i++) { const c = q[i], x = c % m.w, y = c / m.w | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy, n = Y * m.w + X; if (X < 0 || Y < 0 || X >= m.w || Y >= m.h || m.g[n] || F[n] >= 0) continue; F[n] = F[c] + 1; q.push(n); } }
+    const q = [key]; F[key] = 0; for (let i = 0; i < q.length; i++) { const c = q[i], x = c % m.w, y = c / m.w | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy, n = Y * m.w + X; if (X < 0 || Y < 0 || X >= m.w || Y >= m.h || m.g[n] || m.fh[n] > 0 || F[n] >= 0) continue; F[n] = F[c] + 1; q.push(n); } }
     return F;
   }
   const nrm = a => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
@@ -170,11 +192,17 @@
     function msg(from, q) {
       const p = S.pl[from], t = now(); if (!p || !Array.isArray(q)) return;
       if (q[0] === 'p') {
-        if (hold[from] > t) return; const x = +q[1], y = +q[2]; if (!(x > 0 && y > 0 && x < m.w && y < m.h) || m.g[(y | 0) * m.w + (x | 0)]) return;
-        const fl = q[5] | 0; pos[from] = { x, y, a: +q[3] || 0, pi: cl(+q[4] || 0, -1.5, 1.5), fl, cr: fl & 1 }; last[from] = t; taken[from] = 0; if (fl & 8) { if (!actT[from]) actT[from] = t; } else delete actT[from];
+        if (hold[from] > t) return; const x = +q[1], y = +q[2], z = q.length > 6 ? +q[6] : 0;
+        if (!(x > 0 && y > 0 && x < m.w && y < m.h) || !(z === z) || cellSolid(m, x, y, z)) return;
+        /* الارتفاع: لا يُسمح بأن يكون اللاعب داخل أرضية، ولا بقفزة أعلى من JMAX فوق أعلى ما كان عليه أو الأرضية. */
+        const fz = m.fh[(y | 0) * m.w + (x | 0)], pz = pos[from] ? pos[from].z || 0 : 0;
+        /* الصعود لا يتجاوز قفزة فوق الارتفاع السابق، والسقوط (هبوط تحت الارتفاع السابق) مسموح دائماً. */
+        if (z < fz - .6 || (z > pz + .05 && (z > pz + JMAX || z > fz + JMAX))) return;
+        const fl = q[5] | 0; pos[from] = { x, y, z, a: +q[3] || 0, pi: cl(+q[4] || 0, -1.5, 1.5), fl, cr: fl & 1 }; last[from] = t; taken[from] = 0; if (fl & 8) { if (!actT[from]) actT[from] = t; } else delete actT[from];
       } else if (q[0] === 'h') {
         const W = WP[q[3] && p.w ? p.w : 'pistol'], A = pos[from], V = pos[q[1]]; if (!A || !V || t - (lastHit[from] || 0) < W.rate * .5) return; const d = Math.hypot(A.x - V.x, A.y - V.y);
-        if (d > 70 || (d > 1.5 && ray3(m, A.x, A.y, .8, (V.x - A.x) / d, (V.y - A.y) / d, 0, d, false) < d - 1.3)) return; lastHit[from] = t; hurt(from, q[1], q[2] ? 1 : 0, q[3] ? 1 : 0, q[4]);
+        const dz = (V.z || 0) - (A.z || 0), D3 = Math.hypot(d, dz) || 1e-6;
+        if (d > 70 || (D3 > 1.5 && ray3(m, A.x, A.y, (A.z || 0) + .8, (V.x - A.x) / D3, (V.y - A.y) / D3, dz / D3, D3, false) < D3 - 1.3)) return; lastHit[from] = t; hurt(from, q[1], q[2] ? 1 : 0, q[3] ? 1 : 0, q[4]);
       } else if (q[0] === 'buy') {
         if (!p.al || S.ph !== 'freeze') return; if (q[1] === 'armor') { if (p.ar < 100 && p.$ >= ARMOR) { p.$ -= ARMOR; p.ar = 100; dirty = true; } } else { const w = WP[q[1]]; if (w && w.$ && p.w !== q[1] && p.$ >= w.$) { p.$ -= w.$; p.w = q[1]; dirty = true; } }
       } else if (q[0] === 'pl') { if (actT[from] && t - actT[from] >= PLANT - 500) plant(from); }
@@ -251,5 +279,5 @@
     startRound(true);
     return { S, pos, tick, msg, join, heard, isBot, get done() { return done; }, gk: cfg.gk };
   }
-  return { RAW, WP, BODY, RAD, HR, BR, ARMOR, PLANT, DEFUSE, FREEZE, parseMap, ray3, R3, los3, hitPlayer, H3, mv, blk, field, nrm, r2, Sim };
+  return { RAW, WP, BODY, RAD, HR, BR, ARMOR, PLANT, DEFUSE, FREEZE, STEP, GRAV, JV, JMAX, WALL_TOP, FH, parseMap, ray3, R3, los3, hitPlayer, H3, mv, blk, cellSolid, floorMax, vert, field, nrm, r2, Sim };
 });

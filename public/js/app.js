@@ -16,7 +16,7 @@
   if (!P.tok) P.tok = rid(28);
   const save = () => LS.set('dw_p', P); save();
   const ACH = [['first', '☕ أول فنجان', 'العب أول مباراة', () => P.played >= 1], ['win1', '🏅 أول فوز', 'افز بمباراة', () => P.won >= 1], ['win5', '🏆 خمسة انتصارات', 'افز بخمس مباريات', () => P.won >= 5], ['play10', '🎮 مدمن ديوانية', 'العب 10 مباريات', () => P.played >= 10],
-  ['var5', '🧭 ذوّاق', 'جرّب 5 ألعاب مختلفة', () => Object.keys(P.games).length >= 5], ['orig', '✨ مستكشف الحصريات', 'العب لعبة من حصريات ديوانية', () => G.list.some(g => g.cat === 'orig' && P.games[g.id])], ['host', '🛋️ راعي المجلس', 'افتح غرفة', () => P.hosted >= 1],
+  ['var5', '🎯 مقاتل الديوانية', 'العب 5 مباريات طخطخة', () => (P.games.strike || 0) >= 5], ['orig', '🏆 فريق الحسم', 'اربح 3 مباريات', () => P.won >= 3], ['host', '🛋️ راعي المجلس', 'افتح غرفة', () => P.hosted >= 1],
   ['streak3', '🔥 سلسلة ثلاثية', 'افز 3 مرات متتالية', () => P.streak >= 3], ['daily', '📅 ملتزم', 'أنجز تحدي اليوم', () => P.day.done], ['rich', '🪙 تاجر', 'اجمع 500 عملة', () => P.coins >= 500]];
   function checkAch() { for (const a of ACH) if (!P.ach[a[0]] && a[3]()) { P.ach[a[0]] = 1; toast('إنجاز جديد: ' + a[1]); } }
   const today = () => new Date().toISOString().slice(0, 10), weekNo = () => Math.floor(Date.now() / 6048e5);
@@ -143,7 +143,7 @@
     const R = Room.R, g = G.by[R.gid], won = R.res.win.includes(P.id); let xp = 20 + (won ? 40 : 0), co = 10 + (won ? 25 : 0);
     P.played++; P.games[g.id] = (P.games[g.id] || 0) + 1; if (won) { P.won++; P.streak++; } else P.streak = 0;
     if (!P.day.done && g.id === dailyGame().id) { P.day.done = 1; co += 50; toast('أنجزت تحدي اليوم! +50 عملة'); }
-    if (!P.week.g.includes(g.id)) P.week.g.push(g.id); if (!P.week.done && P.week.g.length >= 5) { P.week.done = 1; co += 150; toast('أنجزت تحدي الأسبوع! +150 عملة'); }
+    P.week.g.push(g.id); if (!P.week.done && P.week.g.length >= 5) { P.week.done = 1; co += 150; toast('أنجزت تحدي الأسبوع! +150 عملة'); }
     P.xp += xp; P.coins += co; P.hist.unshift({ g: g.id, t: Date.now(), w: won ? 1 : 0, s: (R.st.sc || {})[P.id] || 0, n: R.gps.length }); P.hist = P.hist.slice(0, 20);
     Room.gain = { xp, co }; checkAch(); save(); if (won) { beep(660, .12); setTimeout(() => beep(880, .2), 130); } else beep(300, .25, 'triangle');
   }
@@ -168,16 +168,16 @@
   }
   function homeHTML() {
     const d = dailyGame(), q = U.norm(filt.q), list = G.list.filter(g => (filt.cat === 'all' || g.cat === filt.cat) && (filt.mode === 'all' || g.modes.includes(filt.mode)) && (!q || U.norm(g.n + ' ' + g.d).includes(q)));
-    const fan = ['strike', 'chess', 'draw', 'auction', 'ludo', 'spy', 'island', 'colors', 'quiz'].map(id => G.by[id]);
-    let h = `<section class="hero"><div class="wrap"><div><h1>مجلس واحد…<br><em>${G.list.length} لعبة</em> للشلّة والعائلة</h1>
-      <p>افتح غرفة، أرسل الرمز، والعبوا كلٌّ من جهازه: شطرنج ولودو ومافيا ورسم وتخمين، وخمس ألعاب ابتكرناها خصيصاً لديوانية.</p>
+    const fan = ['strike'].map(id => G.by[id]).filter(Boolean);
+    let h = `<section class="hero"><div class="wrap"><div><h1>طخطخة<br><em>تصويب جماعي مباشر</em></h1>
+      <p>افتح غرفة، أرسل الرمز أو الرابط، والعبوا كلٌّ من جهازه: فريقان من 1 إلى 6 لاعبين في كل فريق، بخرائط فيها أبنية وأسطح ودرج.</p>
       <div class="cta"><button class="btn pri lg" data-act="create">افتح غرفة جديدة</button><input class="inp" id="join_in" maxlength="4" placeholder="الرمز" aria-label="رمز الغرفة" autocomplete="off"><button class="btn ghost" data-act="join">ادخل برمز</button></div>
       <p class="net">${Net.ok ? '<b>●</b> الغرف المباشرة تعمل: شارك الرابط والعبوا من أي مكان.' : '<b>●</b> أنت في وضع المعاينة: العب الآن ضد لاعبين آليين أو مع من بجانبك على الجهاز نفسه. اللعب عن بُعد يتفعّل عند تشغيل خادم ديوانية.'}</p></div>
       <div class="fan" aria-hidden="true">${fan.map(g => `<button tabindex="-1" style="--h:${g.hue}" data-act="game:${g.id}">${g.em}</button>`).join('')}</div></div></section><div class="sadu"></div>
       <div class="wrap"><div class="pn daily"><div><small class="mut">تحدي اليوم ${P.day.done ? '· أُنجز ✅' : '· +50 عملة'}</small><br><b>${d.em} العب مباراة «${d.n}»</b></div>
-      <div><small class="mut">تحدي الأسبوع ${P.week.done ? '· أُنجز ✅' : '· +150 عملة'}</small><br>جرّب 5 ألعاب مختلفة (${Math.min(5, P.week.g.length)}/5)</div><button class="btn" data-act="game:${d.id}">العب تحدي اليوم</button></div>
+      <div><small class="mut">تحدي الأسبوع ${P.week.done ? '· أُنجز ✅' : '· +150 عملة'}</small><br>العب 5 مباريات طخطخة (${Math.min(5, P.week.g.length)}/5)</div><button class="btn" data-act="game:${d.id}">العب تحدي اليوم</button></div>
       <div class="filters"><input class="inp" id="q" placeholder="ابحث عن لعبة…" aria-label="بحث" style="max-width:240px">
-      ${[['all', 'الكل']].concat(Object.entries(CATS).map(([k, v]) => [k, v[0]])).map(([k, n]) => `<button class="tab ${filt.cat === k ? 'on' : ''}" data-act="cat:${k}">${n}</button>`).join('')}<span class="sp"></span>
+      ${[['all', 'الكل']].concat(Object.entries(CATS).filter(([k]) => G.list.some(g => g.cat === k)).map(([k, v]) => [k, v[0]])).map(([k, n]) => `<button class="tab ${filt.cat === k ? 'on' : ''}" data-act="cat:${k}">${n}</button>`).join('')}<span class="sp"></span>
       ${[['all', 'كل الأعمار']].concat(Object.entries(MODES)).map(([k, n]) => `<button class="tab ${filt.mode === k ? 'on' : ''}" data-act="mode:${k}">${n}</button>`).join('')}</div>`;
     for (const c in CATS) { const gs = list.filter(g => g.cat === c); if (gs.length) h += `<section class="cat"><h2>${CATS[c][0]} <small>${CATS[c][1]}</small></h2><div class="grid">${gs.map(g => `<button class="card" data-act="game:${g.id}">${art(g)}<div class="bd"><h3>${g.n}</h3><p>${g.d}</p>${meta(g)}</div></button>`).join('')}</div></section>`; }
     if (!list.length) h += '<p class="ctr mut" style="padding:40px 0">لا توجد لعبة بهذه المواصفات. جرّب بحثاً آخر.</p>';

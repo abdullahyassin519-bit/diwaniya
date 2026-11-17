@@ -54,7 +54,7 @@
 .sk button{font:600 14px 'Readex Pro',sans-serif;color:#fff;background:rgba(10,20,25,.5);border:1.5px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 9px;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .sk-top{position:absolute;top:6px;right:6px;display:flex;gap:5px}.sk-top button{padding:3px 8px}
 .sk-btns{position:absolute;right:10px;bottom:10px;display:none;gap:calc(8px*var(--bs));align-items:flex-end;flex-wrap:wrap-reverse;justify-content:flex-end;width:calc(190px*var(--bs))}.sk.touch .sk-btns{display:flex}.sk.lefty .sk-btns{right:auto;left:10px;flex-direction:row-reverse}.sk.lefty .sk-vit{left:auto;right:10px}
-.sk-btns button{width:calc(46px*var(--bs));height:calc(46px*var(--bs));border-radius:50%;padding:0;font-size:calc(17px*var(--bs))}.sk .sk-fire{width:calc(76px*var(--bs));height:calc(76px*var(--bs));font-size:calc(28px*var(--bs));background:rgba(210,45,45,.42)}.sk .sk-actb{width:auto;border-radius:12px;background:rgba(224,160,8,.8);color:#221700;padding:0 12px;font-size:13px}.sk-btns .on{background:rgba(245,182,46,.7);color:#221700}
+.sk-btns button{width:calc(46px*var(--bs));height:calc(46px*var(--bs));border-radius:50%;padding:0;font-size:calc(17px*var(--bs))}.sk .sk-fire{width:calc(76px*var(--bs));height:calc(76px*var(--bs));font-size:calc(28px*var(--bs));background:rgba(210,45,45,.42)}.sk-jmp{width:calc(58px*var(--bs));height:calc(58px*var(--bs));font-size:calc(24px*var(--bs));background:rgba(60,140,220,.42)}.sk .sk-actb{width:auto;border-radius:12px;background:rgba(224,160,8,.8);color:#221700;padding:0 12px;font-size:13px}.sk-btns .on{background:rgba(245,182,46,.7);color:#221700}
 .sk-pan{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(8,16,20,.93);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 14px;direction:rtl;max-width:94%;max-height:92%;overflow:auto;pointer-events:auto;font-size:13px}.sk-pan h4{margin:0 0 8px;font:400 22px 'Lalezar','Readex Pro',sans-serif;display:flex;justify-content:space-between;gap:20px;align-items:center}.sk-pan h4 em{font:600 14px 'Readex Pro';color:#9be28f;font-style:normal}
 .sk-buy .g{display:grid;grid-template-columns:repeat(3,minmax(104px,1fr));gap:8px}.sk-buy button{display:grid;gap:2px;text-align:right;padding:7px 10px;line-height:1.3}.sk-buy button small{font-weight:400;opacity:.8;font-size:11px}.sk-buy button i{display:block;height:4px;border-radius:3px;background:linear-gradient(to left,#f5b62e var(--w),rgba(255,255,255,.15) 0)}.sk-buy button.own{border-color:#f5b62e;background:rgba(245,182,46,.2)}.sk-buy button:disabled{opacity:.42}
 .sk-set label{display:grid;grid-template-columns:8.5em 1fr 3em;gap:8px;align-items:center;margin:6px 0}.sk-set input[type=range]{width:100%}.sk-set .row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.sk-set .row button.on{background:#e0a008;color:#221700}
@@ -70,14 +70,14 @@
       <canvas class="sk-mm" width="132" height="96"></canvas><div class="sk-team"></div><div class="sk-score"><span style="color:${TC[0]}"><em style="font-style:normal">0</em><small>مهاجمون</small></span><div><b>0:00</b><small></small></div><span style="color:${TC[1]}"><em style="font-style:normal">0</em><small>مدافعون</small></span></div>
       <div class="sk-feed"></div><div class="sk-ban"></div><div class="sk-hint"></div><div class="sk-prog" hidden><i></i></div><div class="sk-vit"><div class="hp">❤ <b>100</b></div><div class="ar">🛡 <b>0</b></div><div class="cash">$800</div></div><div class="sk-ammo"><b>12</b><small>/12</small><em></em></div><div class="sk-spec"></div></div>
       <div class="sk-z sk-joy" data-tc="joy"></div><div class="sk-z sk-look" data-tc="look"></div><div class="sk-stick"><i></i></div>
-      <div class="sk-btns"><button class="sk-fire" data-tc="fire">🔥</button><button data-k="rel" aria-label="تلقيم">🔄</button><button data-k="sw" aria-label="تبديل السلاح">🔁</button><button data-k="cr" aria-label="انحناء">🧎</button><button data-k="zoom" hidden aria-label="منظار">🔭</button><button data-k="buy" hidden aria-label="المتجر">🛒</button><button class="sk-actb" data-tc="act" hidden></button></div>
+      <div class="sk-btns"><button class="sk-fire" data-tc="fire">🔥</button><button class="sk-jmp" data-tc="jump" aria-label="قفز">⤴</button><button data-k="tpv" aria-label="منظور الكتف">🎥</button><button data-k="rel" aria-label="تلقيم">🔄</button><button data-k="sw" aria-label="تبديل السلاح">🔁</button><button data-k="cr" aria-label="انحناء">🧎</button><button data-k="zoom" hidden aria-label="منظار">🔭</button><button data-k="buy" hidden aria-label="المتجر">🛒</button><button class="sk-actb" data-tc="act" hidden></button></div>
       <div class="sk-top"><button data-k="tab" aria-label="النتائج">📋</button><button data-k="set" aria-label="الإعدادات">⚙</button><button data-k="fs" aria-label="ملء الشاشة">⛶</button></div>
       <div class="sk-pan sk-buy" hidden></div><div class="sk-pan sk-set" hidden></div><div class="sk-pan sk-tab" hidden></div><div class="sk-lock">انقر للتحكم بالتصويب · Esc لتحرير الفأرة</div><div class="sk-rot">أدِر جوالك أفقياً 🔄</div><div class="sk-load">جارٍ تجهيز الساحة…</div><input type="file" accept="image/*" hidden>`;
     const $ = s => wrap.querySelector(s), cv = $('.sk-cv'), el = { buy: $('.sk-buy'), set: $('.sk-set'), tab: $('.sk-tab'), act: $('[data-tc=act]'), zoom: $('[data-k=zoom]'), buyB: $('[data-k=buy]'), crB: $('[data-k=cr]'), file: $('input[type=file]'), mm: $('.sk-mm'), team: $('.sk-team'), sc: $('.sk-score'), feed: $('.sk-feed'), ban: $('.sk-ban'), hint: $('.sk-hint'), prog: $('.sk-prog'), vit: $('.sk-vit'), ammo: $('.sk-ammo'), spec: $('.sk-spec'), x: $('.sk-x'), vig: $('.sk-vig'), dmg: $('.sk-dmg'), load: $('.sk-load'), stick: $('.sk-stick') };
-    let T, X = null, m = null, me = null, S = null, sim = null, simIv = 0, ws = null, dead = false, gone = 0, lastF = 0, posT = 0, lastSent = '', initT = 0, overSent = false, started = false, tab = false, spec = 0, hudT = 0, fpsN = 0, fpsT = 0, fpsLow = 0, liveBan = 0, deathT = 0, beepT = 0, viewId = null, shadowKick = 3;
+    let T, X = null, m = null, me = null, S = null, sim = null, simIv = 0, ws = null, dead = false, gone = 0, lastF = 0, posT = 0, lastSent = '', initT = 0, overSent = false, started = false, tab = false, spec = 0, hudT = 0, fpsN = 0, fpsT = 0, fpsLow = 0, liveBan = 0, deathT = 0, beepT = 0, viewId = null, shadowKick = 3, tpv = false;
     let R, cam, vmScene, vmCam, world, vm = null, vmKey = '', bombMesh, boom = null, flashL, holeI = 0, puffI = 0, trI = 0, mmBase = null;
-    const Ppos = {}, faces = {}, skins = {}, chars = {}, feed = [], holes = [], puffs = [], tracers = [], inp = { f: 0, s: 0, fire: 0, act: 0, held: 0, k: {}, cr: 0 }, cache = {};
-    const self = { x: 2, y: 2, a: 0, pi: 0, rp: 0, ry: 0, heat: 0, ammo: [12, 0], slot: 0, rel: 0, relD: 1, sw: 0, last: 0, zoom: 0, act: 0, rd: -1, w: '', bob: 0, kick: 0, hitT: 0, hs: 0, hurtT: 0, hp: 100, mvT: 0, mvS: 0, cr: 0, eye: .8, stepT: 0, swayX: 0, swayY: 0, la: 0, lp: 0 };
+    const Ppos = {}, faces = {}, skins = {}, chars = {}, feed = [], holes = [], puffs = [], tracers = [], inp = { f: 0, s: 0, fire: 0, act: 0, held: 0, k: {}, cr: 0, jq: 0, jp: 0 }, cache = {};
+    const self = { x: 2, y: 2, a: 0, pi: 0, rp: 0, ry: 0, heat: 0, ammo: [12, 0], slot: 0, rel: 0, relD: 1, sw: 0, last: 0, zoom: 0, act: 0, rd: -1, w: '', bob: 0, kick: 0, hitT: 0, hs: 0, hurtT: 0, hp: 100, mvT: 0, mvS: 0, cr: 0, eye: .8, z: 0, vz: 0, gr: 1, stepT: 0, swayX: 0, swayY: 0, la: 0, lp: 0 };
     const AB = new AbortController(), on = (t, ev, fn, o) => t.addEventListener(ev, fn, Object.assign({ signal: AB.signal }, o)), my = () => S && S.pl[me], online = () => !(X.H.offline || X.H.code === 'LOCAL');
     const curW = () => self.slot && self.w ? self.w : 'pistol', setT = (k, node, v) => { if (cache[k] !== v) { cache[k] = v; node.textContent = v; } }, setH = (k, node, v) => { if (cache[k] !== v) { cache[k] = v; node.innerHTML = v; } };
 
@@ -108,7 +108,7 @@
         else if (t === 'tp') { self.x = +q[1]; self.y = +q[2]; self.a = +q[3]; self.rd = q[4]; }
         return;
       }
-      if (t === 'p') { if (f !== me && S && S.pl[f]) { const P = Ppos[f] || (Ppos[f] = { x: +q[1], y: +q[2], a: +q[3], pi: 0 }); if (P.tx == null) setTimeout(sendLook, 300 + Math.random() * 500); P.tx = +q[1]; P.ty = +q[2]; P.ta = +q[3]; P.tpi = +q[4] || 0; P.fl = q[5] | 0; } }
+      if (t === 'p') { if (f !== me && S && S.pl[f]) { const P = Ppos[f] || (Ppos[f] = { x: +q[1], y: +q[2], a: +q[3], pi: 0 }); if (P.tx == null) setTimeout(sendLook, 300 + Math.random() * 500); P.tx = +q[1]; P.ty = +q[2]; P.ta = +q[3]; P.tpi = +q[4] || 0; P.fl = q[5] | 0; P.z = +q[6] || 0; } }
       else if (t === 'f') { if (f !== me) shotFx(f, q[1], +q[2], +q[3]); }
       else if (t === 'fc') { if (f !== me) setFaceImg(f, q[1]); }
       else if (t === 'sk') { if (f !== me && skins[f] !== (q[1] | 0)) { skins[f] = q[1] | 0; dropChar(f); } }
@@ -116,7 +116,7 @@
     /* ---- الإدخال ---- */
     const typing = e => /INPUT|TEXTAREA|SELECT/.test(e.target.tagName), panelOpen = () => !el.set.hidden || (!el.buy.hidden && !wrap.classList.contains('touch') && document.pointerLockElement !== wrap && false);
     on(document, 'keydown', e => {
-      if (typing(e) || !document.body.contains(wrap)) return; AU.init(); const k = e.code; if (e.repeat) { if (/^(Space|Arrow|Tab)/.test(k)) e.preventDefault(); return; } inp.k[k] = 1;
+      if (typing(e) || !document.body.contains(wrap)) return; AU.init(); const k = e.code; if (e.repeat) { if (/^(Space|Arrow|Tab)/.test(k)) e.preventDefault(); return; } inp.k[k] = 1; if (k === 'Space') inp.jq = 1; if (k === 'KeyV') tpv = !tpv;
       if (k === 'KeyR') reload(); else if (k === 'KeyQ') swap(); else if (k === 'Digit1') swap(1); else if (k === 'Digit2') swap(0); else if (k === 'Tab') tab = true; else if (k === 'KeyF') fs(); else if (k === 'KeyB') toggleBuy(); else if (k === 'KeyM') toggleSet();
       if (/^(Space|Arrow|Tab)/.test(k)) e.preventDefault();
     });
@@ -130,21 +130,21 @@
     const tch = {};
     on(wrap, 'touchstart', e => {
       AU.init(); if (!wrap.classList.contains('touch')) { wrap.classList.add('touch', 'fs'); wrap.classList.remove('unlocked'); }
-      for (const t of e.changedTouches) { const z = t.target.closest && t.target.closest('[data-tc]'); if (!z) continue; e.preventDefault(); const r = z.dataset.tc; tch[t.identifier] = { r, x: t.clientX, y: t.clientY, ox: t.clientX, oy: t.clientY }; if (r === 'fire') { inp.fire = 1; inp.held = 0; } if (r === 'act') inp.act = 1; if (r === 'look' && my() && !my().al) spec++; if (r === 'joy') { const b = wrap.getBoundingClientRect(); el.stick.style.display = 'block'; el.stick.style.left = (t.clientX - b.left) + 'px'; el.stick.style.top = (t.clientY - b.top) + 'px'; } }
+      for (const t of e.changedTouches) { const z = t.target.closest && t.target.closest('[data-tc]'); if (!z) continue; e.preventDefault(); const r = z.dataset.tc; tch[t.identifier] = { r, x: t.clientX, y: t.clientY, ox: t.clientX, oy: t.clientY }; if (r === 'fire') { inp.fire = 1; inp.held = 0; } if (r === 'jump') inp.jp = 1; if (r === 'act') inp.act = 1; if (r === 'look' && my() && !my().al) spec++; if (r === 'joy') { const b = wrap.getBoundingClientRect(); el.stick.style.display = 'block'; el.stick.style.left = (t.clientX - b.left) + 'px'; el.stick.style.top = (t.clientY - b.top) + 'px'; } }
     }, { passive: false });
     on(wrap, 'touchmove', e => {
       for (const t of e.changedTouches) { const c = tch[t.identifier]; if (!c) continue; e.preventDefault();
         if (c.r === 'joy') { const dx = (t.clientX - c.ox) / 44, dy = (t.clientY - c.oy) / 44, l = Math.max(1, Math.hypot(dx, dy)); inp.s = dx / l; inp.f = -dy / l; el.stick.firstChild.style.transform = `translate(${inp.s * 28}px,${-inp.f * 28}px)`; }
         else if (c.r === 'look' || c.r === 'fire') { const s = .0052 * CFG.sens * (self.zoom ? .3 : 1); self.a = C.nrm(self.a + (t.clientX - c.x) * s); self.pi = Math.max(-1.45, Math.min(1.45, self.pi - (t.clientY - c.y) * s)); c.x = t.clientX; c.y = t.clientY; } }
     }, { passive: false });
-    const tend = e => { for (const t of e.changedTouches) { const c = tch[t.identifier]; if (!c) continue; delete tch[t.identifier]; if (c.r === 'joy') { inp.f = inp.s = 0; el.stick.style.display = 'none'; el.stick.firstChild.style.transform = ''; } if (c.r === 'fire') inp.fire = 0; if (c.r === 'act') inp.act = 0; } };
+    const tend = e => { for (const t of e.changedTouches) { const c = tch[t.identifier]; if (!c) continue; delete tch[t.identifier]; if (c.r === 'joy') { inp.f = inp.s = 0; el.stick.style.display = 'none'; el.stick.firstChild.style.transform = ''; } if (c.r === 'fire') inp.fire = 0; if (c.r === 'jump') inp.jp = 0; if (c.r === 'act') inp.act = 0; } };
     on(wrap, 'touchend', tend); on(wrap, 'touchcancel', tend);
     on(wrap, 'click', e => {
       const b = e.target.closest('[data-k],[data-w],[data-sk],[data-q]'); if (!b || b.disabled) return; e.stopPropagation(); AU.init();
       if (b.dataset.w) { toHost(['buy', b.dataset.w]); AU.play('buy'); return; }
       if (b.dataset.sk != null) { CFG.skin = +b.dataset.sk; saveCfg(); sendLook(); vmKey = ''; cache.set = null; drawSet(); return; }
       if (b.dataset.q != null) { CFG.q = +b.dataset.q; saveCfg(); applyQ(); cache.set = null; drawSet(); return; }
-      const k = b.dataset.k; if (k === 'fs') fs(); else if (k === 'face') el.file.click(); else if (k === 'tab') tab = !tab; else if (k === 'rel') reload(); else if (k === 'zoom') toggleZoom(); else if (k === 'sw') swap(); else if (k === 'cr') { inp.cr = inp.cr ? 0 : 1; el.crB.classList.toggle('on', !!inp.cr); } else if (k === 'buy' || k === 'buyx') toggleBuy(); else if (k === 'set' || k === 'setx') toggleSet(); else if (k === 'lefty') { CFG.lefty = CFG.lefty ? 0 : 1; saveCfg(); applyQ(); cache.set = null; drawSet(); }
+      const k = b.dataset.k; if (k === 'fs') fs(); else if (k === 'face') el.file.click(); else if (k === 'tab') tab = !tab; else if (k === 'rel') reload(); else if (k === 'zoom') toggleZoom(); else if (k === 'sw') swap(); else if (k === 'tpv') { tpv = !tpv; } else if (k === 'cr') { inp.cr = inp.cr ? 0 : 1; el.crB.classList.toggle('on', !!inp.cr); } else if (k === 'buy' || k === 'buyx') toggleBuy(); else if (k === 'set' || k === 'setx') toggleSet(); else if (k === 'lefty') { CFG.lefty = CFG.lefty ? 0 : 1; saveCfg(); applyQ(); cache.set = null; drawSet(); }
     });
     on(el.set, 'input', e => { const k = e.target.dataset.c; if (!k) return; CFG[k] = +e.target.value; saveCfg(); applyQ(); const o = e.target.nextElementSibling; if (o) o.textContent = k === 'fov' ? CFG.fov : Math.round(CFG[k] * 100) + '%'; });
     on(el.file, 'change', () => { const f = el.file.files[0]; el.file.value = ''; if (f && window.DW && DW.setFace) DW.setFace(f).then(() => { setFaceImg(me, DW.P.face); sendLook(); }, () => { }); });
@@ -192,7 +192,7 @@
     /* ---- إطلاق النار: مسار ثلاثي الأبعاد حقيقي مع صناديق إصابة للرأس والجسم ---- */
     function shoot(now) {
       const wn = curW(), w = WP[wn], p = my(), moving = now - self.mvT < 120, pad = wrap.classList.contains('touch') ? .05 : 0, hits = {};
-      const sp = (w.zoom ? (self.zoom ? .0008 : .06) : w.sp) * (1 + self.heat * 2.2) * (moving ? 2.2 : 1) * (self.cr > .5 ? .7 : 1), ez = self.eye, ay = self.a + self.ry, ap = self.pi + self.rp; let cx = 0, cy = 0, cz = 0;
+      const sp = (w.zoom ? (self.zoom ? .0008 : .06) : w.sp) * (1 + self.heat * 2.2) * (moving ? 2.2 : 1) * (self.cr > .5 ? .7 : 1), ez = (self.z || 0) + self.eye, ay = self.a + self.ry, ap = self.pi + self.rp; let cx = 0, cy = 0, cz = 0;
       for (let i = 0; i < (w.pel || 1); i++) {
         const a = ay + (Math.random() - .5) * 2 * sp, pp = ap + (Math.random() - .5) * 2 * sp, cp = Math.cos(pp), dx = Math.cos(a) * cp, dy = Math.sin(a) * cp, dz = Math.sin(pp); let t = C.ray3(m, self.x, self.y, ez, dx, dy, dz, 70), best = null, part = 0; const kind = C.R3.kind, side = C.R3.side, sx = C.R3.sx, sy = C.R3.sy;
         for (const id in S.pl) { const q = S.pl[id], Q = Ppos[id]; if (id === me || !q.al || q.tm === p.tm || !Q) continue; if (C.hitPlayer(self.x, self.y, ez, dx, dy, dz, Q.x, Q.y, Q.fl & 1, pad) && C.H3.t < t) { t = C.H3.t; best = id; part = C.H3.part; } }
@@ -222,6 +222,7 @@
     function resize() { const r = wrap.getBoundingClientRect(), k = (r.width | 0) + 'x' + (r.height | 0); if (!r.height || cache.size === k) return; cache.size = k; R.setSize(r.width, r.height, false); cam.aspect = vmCam.aspect = r.width / r.height; cam.updateProjectionMatrix(); vmCam.updateProjectionMatrix(); }
     function setVM(now) {
       const key = curW() + '|' + CFG.skin; if (key !== vmKey) { if (vm) { vmScene.remove(vm); vm.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); } vmKey = key; vm = SKW.viewModel(T, curW(), CFG.skin); vmScene.add(vm); }
+      if (vm) vm.visible = !tpv;
       const long = curW() !== 'pistol', swp = self.sw ? Math.max(0, (self.sw - now) / 320) : 0, relp = self.rel ? 1 - Math.max(0, (self.rel - now) / self.relD) : 0, rl = self.rel ? Math.sin(relp * Math.PI) : 0, k = self.kick, mvb = Math.min(1, self.mvS);
       vm.position.set((long ? .1 : .115) + Math.sin(self.bob) * .006 * mvb - self.swayX, (long ? -.105 : -.115) - Math.abs(Math.cos(self.bob)) * .006 * mvb - swp * .25 - rl * .1 + self.swayY, (long ? -.3 : -.4) + k * .04);
       vm.rotation.set(k * .1 - rl * .7 + swp * .8, .07 - self.swayX * 1.5 + rl * .25, rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12;
@@ -271,7 +272,7 @@
       if (S.ph === 'over' && !overSent && X.H.isHost()) { overSent = true; const fin = {}; for (const id in S.pl) { const q = S.pl[id]; fin[id] = [q.k, q.d, q.as, q.hs]; } X.send({ t: 'over', win: S.lw, fin, rs: S.sc.slice(), mvp: S.mvp }); }
       const p = S.pl[me], K = inp.k;
       if (p) {
-        if (self.rd !== S.rd) { self.rd = S.rd; self.x = p.sp[0]; self.y = p.sp[1]; self.a = p.sp[2]; self.pi = 0; for (const h of holes) h.visible = false; }
+        if (self.rd !== S.rd) { self.rd = S.rd; self.x = p.sp[0]; self.y = p.sp[1]; self.a = p.sp[2]; self.pi = 0; self.z = 0; self.vz = 0; self.gr = 1; for (const h of holes) h.visible = false; }
         if (cache.ph !== S.ph) { if (S.ph === 'freeze') { self.rel = 0; self.zoom = 0; self.act = 0; self.w = p.w; self.slot = p.w ? 1 : 0; self.ammo = [WP.pistol.mag, p.w ? WP[p.w].mag : 0]; buyOpen = true; inp.cr = 0; el.crB.classList.remove('on'); } else if (S.ph === 'live') liveBan = now + 1300; else if (S.ph === 'end' || S.ph === 'over') AU.play(S.lw === p.tm ? 'win' : 'lose'); cache.ph = S.ph; }
         if (self.w !== p.w) { self.w = p.w; if (p.w) { self.ammo[1] = WP[p.w].mag; self.slot = 1; self.sw = now + 320; } else self.slot = 0; self.rel = 0; self.zoom = 0; }
         self.hp = p.hp; const f = inp.f + (K.KeyW || K.ArrowUp ? 1 : 0) - (K.KeyS || K.ArrowDown ? 1 : 0), s = inp.s + (K.KeyD ? 1 : 0) - (K.KeyA ? 1 : 0), l = Math.hypot(f, s), tile = m.st[(self.y | 0) * m.w + (self.x | 0)], crouch = !!(inp.cr || K.KeyC || K.ControlLeft), walk = !!K.ShiftLeft;
@@ -283,29 +284,32 @@
             if (run && (self.stepT -= dt) <= 0) { self.stepT = .34; AU.play('step_' + world.theme.step, null, null, .5); } } else self.mvS += (0 - self.mvS) * Math.min(1, dt * 8);
           if (acting) { if (!self.act) AU.play('beep'); self.act += dt; if (self.act * 1000 >= (p.tm ? C.DEFUSE : C.PLANT)) { toHost([p.tm ? 'df' : 'pl']); self.act = 0; } } else self.act = 0;
           const w = WP[curW()]; if (self.rel && now >= self.rel) { self.rel = 0; self.ammo[self.slot] = w.mag; } if (self.sw && now >= self.sw) self.sw = 0;
-          const firing = (inp.fire || K.Space) && !setOpen; if (!firing) inp.held = 0;
+          const firing = inp.fire && !setOpen; if (!firing) inp.held = 0;
           if (firing && S.ph === 'live' && !self.rel && !self.sw && !acting && now - self.last >= w.rate && (w.auto || !inp.held)) { inp.held = 1; if (self.ammo[self.slot] > 0) shoot(now); else reload(); }
         } else { self.act = 0; self.mvS = 0; }
+        const jumpNow = !!(inp.jq || inp.jp) && S.ph === 'live' && !setOpen; inp.jq = 0;
+        if (p.al) C.vert(m, self, dt, jumpNow); else self.vz = 0;
         self.kick = Math.max(0, self.kick - dt * 8); self.rp *= Math.exp(-dt * 6); self.ry *= Math.exp(-dt * 6); self.heat = Math.max(0, self.heat - dt * 1.6);
         const fl = (self.cr > .5 ? 1 : 0) | (run ? 2 : 0) | (self.slot && self.w ? 4 : 0) | (acting ? 8 : 0);
-        if (now - posT >= 66) { const q = `${C.r2(self.x)},${C.r2(self.y)},${C.r2(self.a)},${C.r2(self.pi)},${fl}`; if (q !== lastSent || now - posT >= 700) { posT = now; lastSent = q; const msg = ['p', C.r2(self.x), C.r2(self.y), C.r2(self.a), C.r2(self.pi), fl]; if (sim) sim.msg(me, msg); else send(msg); } }
-        const Me = Ppos[me] || (Ppos[me] = {}); Me.x = Me.tx = self.x; Me.y = Me.ty = self.y; Me.a = Me.ta = self.a; Me.pi = self.pi; Me.fl = fl;
+        if (now - posT >= 66) { const q = `${C.r2(self.x)},${C.r2(self.y)},${C.r2(self.a)},${C.r2(self.pi)},${fl},${C.r2(self.z)}`; if (q !== lastSent || now - posT >= 700) { posT = now; lastSent = q; const msg = ['p', C.r2(self.x), C.r2(self.y), C.r2(self.a), C.r2(self.pi), fl, C.r2(self.z)]; if (sim) sim.msg(me, msg); else send(msg); } }
+        const Me = Ppos[me] || (Ppos[me] = {}); Me.x = Me.tx = self.x; Me.y = Me.ty = self.y; Me.a = Me.ta = self.a; Me.pi = self.pi; Me.fl = fl; Me.z = self.z || 0;
       }
       /* اللاعبون الآخرون */
-      const kk = 1 - Math.exp(-dt * 13); let vx = self.x, vy = self.y, va = self.a + self.ry, vp = self.pi + self.rp, vz = self.eye, watching = null; viewId = me;
-      if (p && !p.al && now - deathT > 1400) { const mates = Object.keys(S.pl).filter(i => i !== me && S.pl[i].al && Ppos[i] && S.pl[i].tm === p.tm); if (mates.length) { watching = mates[spec % mates.length]; const P = Ppos[watching]; vx = P.x; vy = P.y; va = P.a; vp = P.pi || 0; vz = C.BODY[P.fl & 1 ? 1 : 0].head - .02; viewId = watching; } if (inp.fire && !inp.held) { inp.held = 1; spec++; } }
+      const kk = 1 - Math.exp(-dt * 13); let vx = self.x, vy = self.y, va = self.a + self.ry, vp = self.pi + self.rp, vz = (self.z || 0) + self.eye, watching = null; viewId = me;
+      if (p && !p.al && now - deathT > 1400) { const mates = Object.keys(S.pl).filter(i => i !== me && S.pl[i].al && Ppos[i] && S.pl[i].tm === p.tm); if (mates.length) { watching = mates[spec % mates.length]; const P = Ppos[watching]; vx = P.x; vy = P.y; va = P.a; vp = P.pi || 0; vz = (P.z || 0) + C.BODY[P.fl & 1 ? 1 : 0].head - .02; viewId = watching; } if (inp.fire && !inp.held) { inp.held = 1; spec++; } }
       else if (p && !p.al) { vz = Math.max(.15, self.eye - (now - deathT) / 1400 * .6); vp = self.pi - Math.min(.5, (now - deathT) / 1400 * .5); viewId = null; }
       for (const id in S.pl) {
         const q = S.pl[id], P = id === me ? Ppos[me] : Ppos[id]; if (!P) continue;
         if (id !== me && P.tx != null) { const ox = P.x, oy = P.y; if (Math.hypot(P.tx - P.x, P.ty - P.y) > 4) { P.x = P.tx; P.y = P.ty; } P.x += (P.tx - P.x) * kk; P.y += (P.ty - P.y) * kk; P.a = C.nrm(P.a + C.nrm(P.ta - P.a) * kk); P.pi = (P.pi || 0) + ((P.tpi || 0) - (P.pi || 0)) * kk; P.spd = Math.hypot(P.x - ox, P.y - oy) / Math.max(dt, .001); }
-        const c = getChar(id), hide = id === viewId || (id === me && p && p.al); c.root.visible = !hide; if (hide) continue;
-        if (q.al || !c.dead) c.root.position.set(P.x, c.root.position.y, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, pitch: P.pi || 0, acting: P.fl & 8 }); c.blob.visible = q.al && CFG.q < 2;
+        const c = getChar(id), hide = id === me ? !(tpv && p && p.al && !watching) : id === viewId; c.root.visible = !hide; if (hide) continue;
+        if (q.al || !c.dead) c.root.position.set(P.x, P.z || 0, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, pitch: P.pi || 0, acting: P.fl & 8 }); c.blob.visible = q.al && CFG.q < 2;
         c.tag.visible = q.al && p && (q.tm === p.tm || !p.al); c.tag.position.y = 1.05 - c.cr * .28;
         if (q.al && id !== me && P.fl & 2 && !(P.fl & 1)) { P.st = (P.st || 0) - dt; if (P.st <= 0) { P.st = .34; AU.play('step_' + world.theme.step, P.x, P.y, .9); } }
       }
       /* الكاميرا والمؤثرات */
       const zoomOn = self.zoom && p && p.al && !watching, shake = self.shake && now - self.shake < 600 ? (1 - (now - self.shake) / 600) * .05 : 0; cam.fov += ((zoomOn ? 18 : CFG.fov) - cam.fov) * Math.min(1, dt * 14); cam.updateProjectionMatrix();
-      cam.position.set(vx + (Math.random() - .5) * shake, vz + Math.abs(Math.cos(self.bob)) * .012 * self.mvS * (watching ? 0 : 1) + (Math.random() - .5) * shake, vy); cam.rotation.set(vp, -va - Math.PI / 2, 0); AU.listen(vx, vy, vz, va);
+      let camX = vx, camY = vz, camZ = vy; if (tpv && p && p.al && !watching) { const D = 2.6, cA = Math.cos(va), sA = Math.sin(va); camX = vx - cA * D; camZ = vy - sA * D; camY = vz + .55; }
+      cam.position.set(camX + (Math.random() - .5) * shake, camY + Math.abs(Math.cos(self.bob)) * .012 * self.mvS * (watching ? 0 : 1) + (Math.random() - .5) * shake, camZ); cam.rotation.set(vp, -va - Math.PI / 2, 0); AU.listen(vx, vy, vz, va);
       self.swayX += ((C.nrm(self.a - self.la)) * .25 - self.swayX) * Math.min(1, dt * 10); self.swayY += ((self.pi - self.lp) * .25 - self.swayY) * Math.min(1, dt * 10); self.swayX = Math.max(-.03, Math.min(.03, self.swayX)); self.swayY = Math.max(-.03, Math.min(.03, self.swayY)); self.la = self.a; self.lp = self.pi;
       flashL.position.set(vx + Math.cos(va) * .5, vz, vy + Math.sin(va) * .5); flashL.intensity = Math.max(0, flashL.intensity - dt * 60);
       for (const h of holes) if (h.visible && now - h.userData.t > 14000) h.visible = false;
