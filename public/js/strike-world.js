@@ -105,7 +105,8 @@
       else if (c === 'x') { for (let k = 0; k < 3; k++) for (let j = -1; j <= 1; j += 2) G.box('sack', cx + j * .23 + (k % 2 ? .08 : -.08), .085 + k * .166, cz, .44, .16, .52 - k * .04, [1, .97, .9], 2); }
       else if (c === 'v') {
         const horiz = !full(x - 1, y) || !full(x + 1, y) ? hash(x, y, 6) < .5 : false, L = horiz ? [.96, .5] : [.5, .96];
-        if (m.theme === 'depot') { G.box('flat', cx, .22, cz, .6, .3, .8, [.9, .7, .1]); G.box('flat', cx, .45, cz - .12, .5, .16, .4, [.15, .15, .15]); for (const s of [-.2, .2]) { G.box('metal', cx + s, .5, cz + .42, .05, 1, .05, [.3, .3, .3]); G.box('metal', cx + s, .08, cz + .62, .06, .04, .4, [.6, .6, .6]); } for (const [a, b] of [[-.3, -.25], [.3, -.25], [-.3, .25], [.3, .25]]) G.box('flat', cx + a, .09, cz + b, .08, .18, .2, [.08, .08, .08]); }
+        if (window.SKM && SKM.ready()) { const v = SKM.vehicle(['car', 'pickup', 'truck'][Math.floor(r * 3)], 1, horiz); if (v) { v.position.set(cx, 0, cz); v.rotation.y = (r * 7 % 1) < .5 ? 0 : Math.PI; scene.add(v); } }
+        else if (m.theme === 'depot') { G.box('flat', cx, .22, cz, .6, .3, .8, [.9, .7, .1]); G.box('flat', cx, .45, cz - .12, .5, .16, .4, [.15, .15, .15]); for (const s of [-.2, .2]) { G.box('metal', cx + s, .5, cz + .42, .05, 1, .05, [.3, .3, .3]); G.box('metal', cx + s, .08, cz + .62, .06, .04, .4, [.6, .6, .6]); } for (const [a, b] of [[-.3, -.25], [.3, -.25], [-.3, .25], [.3, .25]]) G.box('flat', cx + a, .09, cz + b, .08, .18, .2, [.08, .08, .08]); }
         else { const col = [[.75, .75, .78], [.6, .12, .12], [.15, .25, .45], [.9, .9, .88], [.2, .2, .22]][Math.floor(r * 5)]; G.box('car', cx, .27, cz, L[0], .24, L[1], col, 1); G.box('glass', cx, .47, cz, L[0] * (horiz ? .55 : .86), .2, L[1] * (horiz ? .86 : .55), [.9, .95, 1], 1, 'car'); for (const a of [-1, 1]) for (const b of [-1, 1]) G.box('flat', cx + a * L[0] * (horiz ? .3 : .47), .09, cz + b * L[1] * (horiz ? .47 : .3), horiz ? .2 : .08, .18, horiz ? .08 : .2, [.07, .07, .07]); G.box('glow', cx + (horiz ? .485 : 0), .26, cz + (horiz ? 0 : .485), horiz ? .01 : .4, .05, horiz ? .4 : .01, [1, .95, .7]); }
       }
       if (m.cov[i]) { const sm = m.theme === 'depot' ? 'conc' : m.theme === 'castle' ? 'stone' : 'plaster'; G.box(sm, cx, 1.36, cz, 1, .22, 1, m.theme === 'hara' ? TINT[Math.floor(hash(x >> 2, y >> 2, 3) * TINT.length)] : wht, .5); }
@@ -172,7 +173,7 @@
   }
   /* سلاح منظور الشخص الأول مع الذراعين */
   function viewModel(THREE_, name, outfit) {
-    T = THREE_; const o = OUTFITS[outfit | 0] || OUTFITS[0], g = new T.Group(), gn = gun(T, name), sl = new T.MeshLambertMaterial({ color: o.u, map: tex('camo', 128, 128, DRAW.camo) }), gl = new T.MeshLambertMaterial({ color: 0x25272a });
+    T = THREE_; const o = OUTFITS[outfit | 0] || OUTFITS[0], g = new T.Group(), gn = (window.SKM && SKM.ready() && SKM.weapon(name)) || gun(T, name), sl = new T.MeshLambertMaterial({ color: o.u, map: tex('camo', 128, 128, DRAW.camo) }), gl = new T.MeshLambertMaterial({ color: 0x25272a });
     gn.rotation.y = Math.PI; g.add(gn); const long = name !== 'pistol';
     const arm = (x, y, z, rx, ry, len) => { const p = new T.Group(); p.position.set(x, y, z); p.rotation.set(rx, ry, 0); const a = new T.Mesh(new T.BoxGeometry(.044, .044, len), sl); a.position.z = len / 2 + .03; p.add(a); const h = new T.Mesh(new T.BoxGeometry(.04, .05, .065), gl); h.position.z = -.005; p.add(h); g.add(p); return p; };
     arm(.0, -.04, .0, .42, -.1, .4); const l = arm(long ? -.005 : -.012, long ? -.005 : -.045, long ? -.2 : -.0, .34, .6, .42);

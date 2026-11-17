@@ -4,7 +4,8 @@
   const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } } };
   const coarse = () => matchMedia('(pointer:coarse)').matches;
   const CFG = Object.assign({ sens: 1, vol: .8, fov: 78, q: coarse() ? ((navigator.deviceMemory || 4) < 4 ? 0 : 1) : 2, btn: 1, lefty: 0, skin: 0 }, LS.get('dw_sk', {})), saveCfg = () => LS.set('dw_sk', CFG);
-  let threeP; const loadThree = () => threeP || (threeP = new Promise((ok, no) => { if (window.THREE) return ok(); const s = document.createElement('script'); s.src = 'js/vendor/three.min.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); }));
+  const addScript = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  let threeP; const loadThree = () => threeP || (threeP = (window.THREE ? Promise.resolve() : addScript('js/vendor/three.min.js')).then(() => addScript('js/vendor/gltf-loader.js').catch(() => { })).then(() => Promise.resolve(window.SKM ? SKM.load(window.THREE) : false).catch(() => { })));
 
   /* ---------- الصوت: مُولَّد كله برمجياً، وموضعي ثلاثي الأبعاد ---------- */
   const AU = { ac: null, out: null, nb: null, amb: null,
@@ -185,7 +186,7 @@
     function explode(x, y) { AU.play('boom', x, y, 2.5); puff(x, y, .4, 0x3a3530, 16, 2.6, 2200, 1.6); puff(x, y, .5, 0xff9a3c, 10, 3.5, 600, 1.1); boom = { t: performance.now(), x, y }; if (Math.hypot(x - self.x, y - self.y) < 12) self.shake = performance.now(); }
     function dropChar(id) { const c = chars[id]; if (!c) return; world.scene.remove(c.root); c.dispose(); if (c.tag) { c.tag.material.map.dispose(); c.tag.material.dispose(); } delete chars[id]; }
     function getChar(id) {
-      if (chars[id]) return chars[id]; const p = S.pl[id], c = SKW.soldier(T, { outfit: id === me ? CFG.skin : skins[id] != null ? skins[id] : (X.H.isBot(id) ? (id.charCodeAt(id.length - 1) % 4) : 0), team: p.tm, face: faces[id] }); world.scene.add(c.root);
+      if (chars[id]) return chars[id]; const p = S.pl[id], so = { outfit: id === me ? CFG.skin : skins[id] != null ? skins[id] : (X.H.isBot(id) ? (id.charCodeAt(id.length - 1) % 4) : 0), team: p.tm, face: faces[id] }, c = (window.SKM && SKM.ready() && SKM.character(so)) || SKW.soldier(T, so); world.scene.add(c.root);
       const tc = document.createElement('canvas'); tc.width = 256; tc.height = 48; const x = tc.getContext('2d'); x.font = '600 26px "Readex Pro",sans-serif'; x.textAlign = 'center'; x.lineWidth = 5; x.strokeStyle = 'rgba(0,0,0,.8)'; x.strokeText(X.H.nm(id), 128, 32); x.fillStyle = TC[p.tm]; x.fillText(X.H.nm(id), 128, 32);
       const tx = new T.CanvasTexture(tc); tx.colorSpace = T.SRGBColorSpace; c.tag = new T.Sprite(new T.SpriteMaterial({ map: tx, transparent: true, depthTest: false, fog: false, sizeAttenuation: false })); c.tag.scale.set(.17, .032, 1); c.tag.position.y = 1.05; c.tag.renderOrder = 5; c.root.add(c.tag); return chars[id] = c;
     }
@@ -303,7 +304,7 @@
         const q = S.pl[id], P = id === me ? Ppos[me] : Ppos[id]; if (!P) continue;
         if (id !== me && P.tx != null) { const ox = P.x, oy = P.y; if (Math.hypot(P.tx - P.x, P.ty - P.y) > 4) { P.x = P.tx; P.y = P.ty; } P.x += (P.tx - P.x) * kk; P.y += (P.ty - P.y) * kk; P.a = C.nrm(P.a + C.nrm(P.ta - P.a) * kk); P.pi = (P.pi || 0) + ((P.tpi || 0) - (P.pi || 0)) * kk; P.spd = Math.hypot(P.x - ox, P.y - oy) / Math.max(dt, .001); }
         const c = getChar(id), hide = id === me ? !(tpv && p && p.al && !watching) : id === viewId; c.root.visible = !hide; if (hide) continue;
-        if (q.al || !c.dead) c.root.position.set(P.x, P.z || 0, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, pitch: P.pi || 0, acting: P.fl & 8 }); c.blob.visible = q.al && CFG.q < 2;
+        if (q.al || !c.dead) c.root.position.set(P.x, P.z || 0, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, spd: P.spd || 0, pitch: P.pi || 0, acting: P.fl & 8 }); if (c.blob) c.blob.visible = q.al && CFG.q < 2;
         c.tag.visible = q.al && p && (q.tm === p.tm || !p.al); c.tag.position.y = 1.05 - c.cr * .28;
         if (q.al && id !== me && P.fl & 2 && !(P.fl & 1)) { P.st = (P.st || 0) - dt; if (P.st <= 0) { P.st = .34; AU.play('step_' + world.theme.step, P.x, P.y, .9); } }
       }
