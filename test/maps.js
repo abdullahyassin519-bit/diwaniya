@@ -21,4 +21,12 @@ const ox = outCell % m.w + .5, oy = (outCell / m.w | 0) + .5; C.ray3(m, ox, oy, 
 ok(C.ray3(m, ix, iy, 5, 0, 0, -1, 10) < 5 - C.ROOF + 1e-6 && C.R3.kind === 't', 'shot downward from above a building hits its roof');
 ok(m.ind.reduce((a, v) => a + v, 0) > 50 && C.parseMap('المدرسة').ind.reduce((a, v) => a + v, 0) > 50 && C.parseMap('الميناء').ind.reduce((a, v) => a + v, 0) > 30, 'new maps have enterable interiors');
 ok(Object.keys(C.RAW).length >= 6, 'six maps available');
+/* النوافذ: تمنع المشي، والرصاص يعبر من ارتفاع النافذة فقط */
+{ let wins = 0, tested = 0; for (const name of Object.keys(C.RAW)) { const M = C.parseMap(name); for (let i = 0; i < M.w * M.h; i++) { if (!M.win[i]) continue; wins++; const x = i % M.w, y = i / M.w | 0;
+    for (const [dx, dy] of [[0, 1], [1, 0]]) { const a = (y - dy) * M.w + x - dx, b = (y + dy) * M.w + x + dx; if (M.g[a] || M.g[b]) continue; tested++;
+      const ox = x - dx + .5, oy = y - dy + .5, t = C.ray3(M, ox, oy, .8, dx, dy, 0, 2.2); ok(t >= 2.2 - 1e-6, name + ' window ' + x + ',' + y + ': shot at eye height passes through (t=' + t.toFixed(2) + ')');
+      ok(C.ray3(M, ox, oy, 1.6, dx, dy, 0, 2.2) < 1, name + ' window ' + x + ',' + y + ': shot above the window hits the wall');
+      ok(C.ray3(M, ox, oy, .2, dx, dy, 0, 2.2) < 1, name + ' window ' + x + ',' + y + ': shot below the sill hits the wall');
+      ok(C.cellSolid(M, x + .5, y + .5, 0), name + ' window ' + x + ',' + y + ': cannot walk through'); } } }
+  ok(wins >= 60 && tested >= 50, 'enough windows across maps (' + wins + ' windows, ' + tested + ' tested both ways)'); }
 console.log(`maps: ${pass} pass, ${fail} fail`); process.exit(fail ? 1 : 0);

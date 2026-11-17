@@ -20,10 +20,10 @@
   const WFILES = { pistol: 'weapons/Pistol.glb', smg: 'weapons/SMG.glb', shotgun: 'weapons/Shotgun.glb', rifle: 'weapons/Rifle.glb', sniper: 'weapons/Sniper.glb' };
   const VFILES = { car: 'vehicles/Sports.glb', truck: 'vehicles/Truck.glb', pickup: 'vehicles/Pickup.glb' };
   // أطوال الأسلحة بالوحدات (تطابق مقاس الشخصية ≈ 0.9)
-  const WLEN = { pistol: .3, smg: .4, shotgun: .56, rifle: .58, sniper: .66 };
+  const WLEN = { pistol: .22, smg: .4, shotgun: .56, rifle: .58, sniper: .66 };
   const WROT = { sniper: -Math.PI / 2 };
   /* أطوال منظور الشخص الأول (تطابق مقاس النموذج الإجرائي السابق) */
-  const VLEN = { pistol: .22, smg: .36, shotgun: .52, rifle: .52, sniper: .58 };
+  const VLEN = { pistol: .2, smg: .44, shotgun: .64, rifle: .64, sniper: .72 };
   const TWOH = { smg: 1, shotgun: 1, rifle: 1, sniper: 1 };
   const SCALE = .64;
   const TEAMC = [0xff6a2a, 0x2f86ff], ALLY = 0x35a8ff, ENEMY = 0xff2a2a;
@@ -48,31 +48,69 @@
     if (!window.GLX || !window.GLX.GLTFLoader || !window.GLX.SkeletonUtils) return Promise.resolve(false);
     const jobs = [];
     CHARS.forEach(c => jobs.push(loadOne(c.f).then(g => { cache.ch[c.k] = { scene: g.scene, clips: g.animations }; })));
-    Object.keys(WFILES).forEach(k => jobs.push(loadOne(WFILES[k]).then(g => { cache.w[k] = g.scene; }, () => { })));
     Object.keys(VFILES).forEach(k => jobs.push(loadOne(VFILES[k]).then(g => { cache.v[k] = g.scene; }, () => { })));
     loading = Promise.all(jobs).then(() => (ready = true), () => (ready = false));
     return loading;
   }
 
+  /* ---------- أسلحة واقعية مبنية برمجياً (أسود مطفي، معدن وبوليمر) ----------
+     الأصل عند قبضة اليد، والفوهة نحو +z. الوحدات بالأمتار الحقيقية تقريباً، ثم يُعاد تحجيمها. */
+  const RG = {};
+  function realGun(name) {
+    if (RG[name]) return RG[name];
+    const parts = { metal: [], poly: [], dark: [], glass: [], tan: [] }, M4 = new T.Matrix4(), Q4 = new T.Quaternion(), E = new T.Euler(), V3 = new T.Vector3(), S3 = new T.Vector3();
+    const put = (mat, geo, x, y, z, rx, ry, rz) => { E.set(rx || 0, ry || 0, rz || 0); Q4.setFromEuler(E); M4.compose(V3.set(x, y, z), Q4, S3.set(1, 1, 1)); const g = geo.index ? geo.toNonIndexed() : geo; g.applyMatrix4(M4); parts[mat].push(g); };
+    const B = (mat, w, h, l, x, y, z, rx, ry, rz) => put(mat, new T.BoxGeometry(w, h, l), x, y, z, rx, ry, rz);
+    const Cz = (mat, r1, r2, l, x, y, z, seg) => put(mat, new T.CylinderGeometry(r2, r1, l, seg || 12), x, y, z, Math.PI / 2, 0, 0);
+    const rail = (x0, x1, y, w) => { B('metal', w || .026, .008, x1 - x0, 0, y, (x0 + x1) / 2); for (let z = x0 + .006; z < x1; z += .014) B('dark', (w || .026) + .006, .006, .006, 0, y + .006, z); };
+    if (name === 'rifle') { /* M4 */
+      B('metal', .05, .07, .2, 0, .005, .03); B('metal', .056, .062, .25, 0, .066, .05); rail(-.06, .19, .102);
+      Cz('poly', .034, .034, .2, 0, .062, .28, 8); rail(.19, .38, .1, .022); B('dark', .006, .01, .19, .035, .062, .28); B('dark', .006, .01, .19, -.035, .062, .28);
+      Cz('metal', .01, .01, .2, 0, .062, .47); B('metal', .012, .07, .014, 0, .1, .385); Cz('dark', .013, .013, .045, 0, .062, .585, 8);
+      B('poly', .026, .15, .068, 0, -.08, .085, .28); B('poly', .03, .1, .042, 0, -.055, -.04, -.32); B('metal', .006, .006, .06, 0, -.025, .02);
+      Cz('metal', .017, .017, .17, 0, .05, -.15); B('poly', .042, .085, .13, 0, .035, -.28); B('poly', .044, .03, .1, 0, -.015, -.27);
+      B('dark', .032, .03, .05, 0, .13, .02); B('glass', .024, .02, .004, 0, .13, -.004); B('dark', .01, .012, .03, .03, .07, -.04);
+    } else if (name === 'smg') { /* رشاش مدمج */
+      B('metal', .046, .07, .26, 0, .04, .06); rail(-.03, .16, .081, .022); Cz('poly', .026, .028, .1, 0, .04, .24, 10); Cz('metal', .009, .009, .08, 0, .045, .32); Cz('dark', .012, .012, .03, 0, .045, .37);
+      B('poly', .024, .16, .05, 0, -.08, .12, .35); B('poly', .03, .095, .04, 0, -.045, -.02, -.3); B('metal', .006, .006, .05, 0, -.01, .03);
+      B('metal', .008, .04, .16, .02, .03, -.14); B('metal', .008, .04, .16, -.02, .03, -.14); B('poly', .04, .06, .02, 0, .03, -.22); B('dark', .01, .03, .015, 0, .09, .14);
+    } else if (name === 'shotgun') { /* مضخة */
+      B('metal', .05, .075, .24, 0, .03, .05); Cz('metal', .014, .014, .46, 0, .052, .4); Cz('metal', .012, .012, .38, 0, .018, .36); Cz('poly', .024, .024, .14, 0, .02, .3, 10);
+      B('poly', .03, .1, .045, 0, -.05, -.05, -.32); B('poly', .045, .085, .26, 0, .02, -.24, .06); B('dark', .046, .09, .02, 0, .01, -.37); B('metal', .006, .006, .05, 0, -.02, .01); B('metal', .006, .016, .01, 0, .074, .62);
+    } else if (name === 'sniper') { /* قناصة بمنظار */
+      B('metal', .05, .065, .26, 0, .045, .06); Cz('metal', .012, .011, .62, 0, .05, .5); Cz('dark', .016, .016, .07, 0, .05, .84, 10);
+      B('tan', .05, .055, .38, 0, .02, .2); B('tan', .046, .12, .26, 0, .0, -.22, .05); B('tan', .03, .1, .045, 0, -.05, -.02, -.35); B('dark', .048, .1, .02, 0, -.005, -.36); B('poly', .024, .07, .06, 0, -.04, .1);
+      Cz('dark', .022, .022, .28, 0, .13, .07, 14); Cz('dark', .03, .022, .06, 0, .13, .24, 14); Cz('dark', .026, .022, .05, 0, .13, -.09, 14); B('glass', .036, .036, .004, 0, .13, .272); B('dark', .02, .03, .02, 0, .1, .0); B('dark', .02, .03, .02, 0, .1, .14);
+      B('dark', .012, .012, .03, .035, .06, .02, 0, 0, .6); B('metal', .005, .1, .008, .015, -.03, .48, .3); B('metal', .005, .1, .008, -.015, -.03, .48, -.3);
+    } else { /* مسدس */
+      B('metal', .03, .036, .19, 0, .052, .05); B('dark', .031, .004, .19, 0, .071, .05); B('poly', .028, .03, .15, 0, .022, .06); B('poly', .028, .1, .045, 0, -.03, -.005, -.28);
+      B('metal', .006, .006, .04, 0, .0, .045); B('dark', .006, .008, .006, 0, .074, .14); B('dark', .014, .008, .006, 0, .074, -.04); Cz('dark', .006, .006, .01, 0, .052, .147, 8);
+    }
+    const MAT = { metal: new T.MeshStandardMaterial({ color: 0x24272b, metalness: .75, roughness: .38 }), poly: new T.MeshStandardMaterial({ color: 0x1b1d20, metalness: .1, roughness: .72 }), dark: new T.MeshStandardMaterial({ color: 0x0e0f11, metalness: .5, roughness: .5 }), glass: new T.MeshStandardMaterial({ color: 0x2a4a7a, metalness: .9, roughness: .05, emissive: 0x0a1a33 }), tan: new T.MeshStandardMaterial({ color: 0x8a7650, metalness: .05, roughness: .8 }) };
+    const meshes = [];
+    for (const k in parts) { if (!parts[k].length) continue; let n = 0; for (const g of parts[k]) n += g.attributes.position.count; const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3); let o = 0; for (const g of parts[k]) { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); o += g.attributes.position.count; g.dispose(); } const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setAttribute('normal', new T.BufferAttribute(nor, 3)); geo.computeBoundingBox(); meshes.push([geo, MAT[k]]); }
+    const box = new T.Box3(); meshes.forEach(([g]) => box.union(g.boundingBox));
+    return RG[name] = { meshes, box };
+  }
+
   /* سلاح مُحجَّم. hold=true: الأصل عند المقبض (للإمساك)، وإلا يتمركز في الوسط (لمنظور الشخص الأول) */
+  /* موضع اليد الثانية وارتفاع السبطانة لكل سلاح (بالأمتار في نموذج realGun) */
+  const FORE = { rifle: .27, smg: .2, shotgun: .3, sniper: .24, pistol: .01 }, BORE = { rifle: .062, smg: .045, shotgun: .052, sniper: .05, pistol: .052 };
   function weapon(name, hold) {
     if (!ready) return null;
-    const src = cache.w[name] || cache.w[name === 'sniper' ? 'rifle' : 'rifle'];
-    if (!src) return null;
-    const m0 = src.clone(true), m = new T.Group(), g = new T.Group(), h = new T.Group(); m.add(m0); if (WROT[name]) { m0.rotation.y = WROT[name]; } m.updateMatrixWorld(true);
-    const box = new T.Box3().setFromObject(m), size = box.getSize(new T.Vector3()), center = box.getCenter(new T.Vector3());
-    const len = Math.max(size.x, size.y, size.z), s = ((hold ? WLEN : VLEN)[name] || .5) / len;
-    if (hold) m.position.set(-center.x, -box.min.y - size.y * .18, -box.min.z - size.z * (name === 'pistol' ? .12 : .3)); else m.position.sub(center);
-    h.add(m); h.scale.setScalar(s); g.add(h);
-    g.userData.len = size.z * s; g.userData.name = name;
-    g.userData.fore = (hold ? size.z * s * (name === 'pistol' ? .05 : .38) : 0);
-    g.userData.mz = hold ? size.z * s * (name === 'pistol' ? .9 : .72) : size.z * s / 2 + .02;
-    g.traverse(c => { if (c.isMesh) { c.castShadow = true; } });
+    if (!RG[name] && !['pistol', 'smg', 'shotgun', 'rifle', 'sniper'].includes(name)) name = 'rifle';
+    const R = realGun(name), g = new T.Group(), h = new T.Group(), size = R.box.getSize(new T.Vector3()), c = R.box.getCenter(new T.Vector3());
+    for (const [geo, mat] of R.meshes) { const me = new T.Mesh(geo, mat); me.castShadow = true; if (!hold) me.position.sub(c); h.add(me); }
+    const s = ((hold ? WLEN : VLEN)[name] || .5) / size.z; h.scale.setScalar(s); g.add(h);
+    const o = hold ? new T.Vector3() : c.clone().multiplyScalar(-1);
+    g.userData = { len: size.z * s, name, mz: (R.box.max.z + o.z) * s, my: (BORE[name] + o.y) * s, fore: (FORE[name] + o.z) * s, grip: new T.Vector3(o.x * s, o.y * s, o.z * s), foreV: new T.Vector3(o.x * s, (BORE[name] - .045 + o.y) * s, (FORE[name] + o.z) * s) };
     return g;
   }
 
+
   const V = () => new T.Vector3(), Q = () => new T.Quaternion();
   let UP = null;
+  const WALK_V = .8 * SCALE / .64, RUN_V = 1.16 * SCALE / .64;
 
   /* دوران عظمة حول محور في الإحداثيات العالمية */
   function rotWorld(bone, axisW, ang) {
@@ -98,6 +136,42 @@
     }
   }
 
+  /* ---------- عتاد عسكري: خوذة وصدرية بجيوب، مقاسة من رؤوس النموذج نفسه ومثبتة على عظام الرأس والجذع ---------- */
+  const GEAR = {}, GEARC = [[0x7b6a4c, 0x5e5038], [0x46523a, 0x343d2b]];
+  /* groups: { عظمة التثبيت: [العظام التي تُقاس رؤوسها] } */
+  function measure(def, model, groups) {
+    model.updateMatrixWorld(true); const out = {};
+    for (const bn in groups) {
+      const bone = model.getObjectByName(bn); if (!bone) continue; const box = new T.Box3(), v = new T.Vector3();
+      model.traverse(o => { if (!o.isSkinnedMesh) return; const ids = groups[bn].map(n => o.skeleton.bones.findIndex(b => b.name === n)).filter(i => i >= 0); if (!ids.length) return; const si = o.geometry.attributes.skinIndex, sw = o.geometry.attributes.skinWeight;
+        for (let i = 0; i < si.count; i++) { let w = 0; for (let k = 0; k < 4; k++) if (ids.includes(si.getComponent(i, k))) w += sw.getComponent(i, k); if (w > .5) { o.getVertexPosition(i, v); v.applyMatrix4(o.matrixWorld); box.expandByPoint(v); } } });
+      if (box.isEmpty()) continue;
+      const inv = bone.matrixWorld.clone().invert(), bq = new T.Quaternion(), bs = new T.Vector3(); bone.matrixWorld.decompose(new T.Vector3(), bq, bs);
+      out[bn] = { box, inv, q: bq.invert(), s: bs };
+    }
+    return out;
+  }
+  function addGear(def, model, team) {
+    const G0 = GEAR[def.k] || (GEAR[def.k] = measure(def, model, { Head: ['Head'], Torso: ['Torso', 'Abdomen', 'ShoulderL', 'ShoulderR', 'Neck'] })), mats = [], cols = GEARC[team ? 1 : 0];
+    const mat = c => { const m = new T.MeshStandardMaterial({ color: c, roughness: .78, metalness: .05 }); mats.push(m); return m; };
+    const attach = (bn, build) => { const g0 = G0[bn], bone = model.getObjectByName(bn); if (!g0 || !bone) return; const wrap = new T.Group(), c = g0.box.getCenter(new T.Vector3()), sz = g0.box.getSize(new T.Vector3());
+      build(wrap, c, sz); const holder = new T.Group(); holder.add(wrap); /* من فضاء العالم (وضع القياس) إلى فضاء العظمة */ const mW = new T.Matrix4().makeTranslation(0, 0, 0); holder.applyMatrix4(g0.inv); bone.add(holder); };
+    /* خوذة: قبة بحافة وحامل أمامي */
+    attach('Head', (w, c, sz) => { const r = Math.max(sz.x, sz.z) * .54, hm = mat(cols[0]);
+      const dome = new T.Mesh(new T.SphereGeometry(r, 20, 12, 0, Math.PI * 2, 0, Math.PI * .56), hm); dome.scale.set(1, .86, 1.04); dome.position.set(c.x, c.y + sz.y * .5 - r * .78, c.z - r * .04); w.add(dome);
+      const rim = new T.Mesh(new T.TorusGeometry(r * .99, r * .05, 6, 24), hm); rim.rotation.x = Math.PI / 2; rim.scale.set(1, 1.05, 1); rim.position.set(c.x, dome.position.y - r * .12, dome.position.z); w.add(rim);
+      const nv = new T.Mesh(new T.BoxGeometry(r * .32, r * .22, r * .12), mat(0x15171a)); nv.position.set(c.x, dome.position.y + r * .38, dome.position.z + r * .93); w.add(nv);
+      const strap = new T.Mesh(new T.BoxGeometry(r * 2.02, r * .1, r * .1), mat(0x2a2a2a)); strap.position.set(c.x, dome.position.y + r * .05, dome.position.z); w.add(strap); });
+    /* صدرية: لوح أمامي وخلفي بجيوب للمخازن */
+    attach('Torso', (w, c, sz) => { const vm = mat(cols[1]), pm = mat(cols[0]);
+      const body = new T.Mesh(new T.BoxGeometry(sz.x * .78, sz.y * .78, sz.z * 1.16), vm); body.position.set(c.x, c.y - sz.y * .06, c.z + sz.z * .02); w.add(body);
+      for (const sx of [-1, 1]) { const st = new T.Mesh(new T.BoxGeometry(sz.x * .13, sz.y * .2, sz.z * 1.12), vm); st.position.set(c.x + sx * sz.x * .22, c.y + sz.y * .4, c.z); w.add(st); }
+      for (let k = -1; k <= 1; k++) { const p = new T.Mesh(new T.BoxGeometry(sz.x * .18, sz.y * .28, sz.z * .2), pm); p.position.set(c.x + k * sz.x * .21, c.y - sz.y * .2, c.z + sz.z * .66); w.add(p); }
+      const rad = new T.Mesh(new T.BoxGeometry(sz.x * .1, sz.y * .26, sz.z * .14), mat(0x1c1e20)); rad.position.set(c.x + sz.x * .3, c.y + sz.y * .14, c.z + sz.z * .62); w.add(rad); });
+    model.traverse(o => { if (o.isMesh && !o.isSkinnedMesh) o.castShadow = true; });
+    return mats;
+  }
+
   /* شخصية بالواجهة التي تستخدمها اللعبة: root, setGun, setFace, update, hit, dispose, dead, kick */
   function character(opt) {
     if (!ready) return null;
@@ -110,7 +184,8 @@
       o.castShadow = true; o.frustumCulled = false;
       const m = o.material.clone(); addRim(m, uRim); o.material = m; mats.push(m);
     });
-    model.scale.setScalar(SCALE); body.add(model); root.add(body);
+    model.scale.setScalar(SCALE); body.add(model); root.add(body); root.updateMatrixWorld(true);
+    const gearMats = addGear(def, model, team);
     const B = n => model.getObjectByName(n);
     const bone = { hips: B('Hips'), abd: B('Abdomen'), torso: B('Torso'), head: B('Head'),
       /* اليد الرئيسية هي التي كان المسدس مثبتاً فيها في الملف الأصلي */
@@ -133,12 +208,12 @@
     const tmp = { hp: V(), lp: V(), fwd: V(), right: V(), tg: V() };
     const st0 = { lx: null, lz: null, ly: 0, vx: 0, vz: 0, vy: 0, yaw: 0, dir: 1, hitT: 0, landT: 0, air: 0 };
 
-    const S = { root, dead: 0, kick: 0, cr: 0, gunName: '', g: null, cur: null, tag: null, blob: null, band: ring, def,
+    const S = { root, mixer, model, dead: 0, kick: 0, cr: 0, gunName: '', g: null, cur: null, tag: null, blob: null, band: ring, def,
       setGun(n) {
         if (S.gunName === n) return; S.gunName = n;
         if (S.g) holder.remove(S.g);
         S.g = weapon(n, true); if (S.g) holder.add(S.g);
-        flash.position.set(0, .015, S.g ? S.g.userData.mz : .2);
+        flash.position.set(0, S.g ? S.g.userData.my : .015, S.g ? S.g.userData.mz : .2);
       },
       setFace() { },
       side: null,
@@ -153,15 +228,15 @@
         a.enabled = true; a.reset(); a.setEffectiveWeight(1); if (ts == null) a.setEffectiveTimeScale(1); a.play();
         if (prev) prev.crossFadeTo(a, fade == null ? .18 : fade, false);
       },
-      update(dt, st) {
-        dt = Math.min(dt, .1);
+      update(dtReal, st) {
+        const dtv = Math.max(dtReal || .016, 1e-3), dt = Math.min(dtv, .1);
         /* السرعة والاتجاه من حركة الجذر الفعلية */
         const px = root.position.x, pz = root.position.z, py = root.position.y;
         if (st0.lx == null) { st0.lx = px; st0.lz = pz; st0.ly = py; }
-        const ivx = (px - st0.lx) / Math.max(dt, 1e-3), ivz = (pz - st0.lz) / Math.max(dt, 1e-3), ivy = (py - st0.ly) / Math.max(dt, 1e-3);
+        const ivx = (px - st0.lx) / dtv, ivz = (pz - st0.lz) / dtv, ivy = (py - st0.ly) / dtv;
         st0.lx = px; st0.lz = pz; st0.ly = py;
         const k = 1 - Math.exp(-dt * 10); st0.vx += (ivx - st0.vx) * k; st0.vz += (ivz - st0.vz) * k; st0.vy += (ivy - st0.vy) * Math.min(1, dt * 14);
-        let spd = Math.hypot(st0.vx, st0.vz); if (spd > 9) spd = 0;
+        let spd = Math.hypot(st0.vx, st0.vz); if (spd > 14) { spd = 0; st0.vx = st0.vz = 0; }
         S.cr += ((st.cr ? 1 : 0) - S.cr) * Math.min(1, dt * 10);
 
         /* اختيار المقطع */
@@ -180,9 +255,10 @@
           S.dead = 0;
           if (st0.air > 0) S.play('Jump_Idle', .12);
           else if (st0.hitT > 0 && acts.HitReact) S.play('HitReact', .06);
-          else if (S.cr > .5) S.play(spd > .35 ? 'Walk_Gun' : 'Duck', .2, spd > .35 ? dir * .7 : 1);
-          else if (spd > 2.5) S.play('Run_Gun', .2, dir * Math.max(.75, Math.min(1.35, spd / 4)));
-          else if (spd > .35) S.play('Walk_Gun', .2, dir * Math.max(.7, Math.min(1.5, spd / 1.7)));
+          /* سرعة المقطع = السرعة الفعلية ÷ خطوة المقطع المقاسة (مشي 0.8، جري 1.16 وحدة/ث عند هذا المقاس) فلا تنزلق القدمان */
+          else if (S.cr > .5) S.play(spd > .35 ? 'Walk_Gun' : 'Duck', .2, spd > .35 ? dir * Math.min(2.2, spd / WALK_V) : 1);
+          else if (spd > 1.05) S.play('Run_Gun', .18, dir * Math.max(.8, Math.min(2.6, spd / RUN_V)));
+          else if (spd > .3) S.play('Walk_Gun', .2, dir * Math.max(.5, Math.min(2.2, spd / WALK_V)));
           else S.play('Idle_Gun', .25);
         }
         mixer.update(dt);
@@ -215,7 +291,7 @@
           tmp.tg.set(0, 0, 0); holder.localToWorld(tmp.tg);
           ik([M.la, M.ua], M.h, tmp.tg, 3);
           if (O.ua && O.la && O.h) {
-            tmp.tg.set(0, two ? -.015 : -.025, two ? g.userData.fore : -.01); holder.localToWorld(tmp.tg);
+            if (two) tmp.tg.copy(g.userData.foreV); else tmp.tg.set(0, -.025, -.01); holder.localToWorld(tmp.tg);
             ik([O.la, O.ua], O.h, tmp.tg, 3);
           }
           flash.visible = S.kick > .72; if (flash.visible) flash.scale.setScalar(.7 + Math.random() * .7);
@@ -225,7 +301,7 @@
       },
       dispose() {
         mixer.stopAllAction(); mixer.uncacheRoot(model);
-        mats.forEach(m => m.dispose()); ring.geometry.dispose(); flash.geometry.dispose();
+        mats.forEach(m => m.dispose()); gearMats.forEach(m => m.dispose()); ring.geometry.dispose(); flash.geometry.dispose();
         if (root.parent) root.parent.remove(root);
       }
     };
@@ -239,7 +315,7 @@
     if (!ready) return null;
     const def = CHARS[(outfit | 0) % CHARS.length], src = cache.ch[def.k];
     const g = new T.Group(), gn = weapon(name, false); if (!gn) return null;
-    const len = VLEN[name] || .5, pistol = name === 'pistol', zo = pistol ? .02 : -.15;
+    const len = VLEN[name] || .5, pistol = name === 'pistol', zo = pistol ? .05 : -.07;
     gn.rotation.y = Math.PI; gn.position.z = zo; g.add(gn);
     const model = window.GLX.SkeletonUtils.clone(src.scene), mats = [];
     const junk = []; model.traverse(o => { if (o.isMesh && !o.isSkinnedMesh) junk.push(o); }); junk.forEach(o => o.parent && o.parent.remove(o));
@@ -251,7 +327,7 @@
     const mixer = new T.AnimationMixer(model), clip = src.clips.find(c => c.name === 'Idle_Gun') || src.clips[0];
     const act = clip ? mixer.clipAction(clip) : null; if (act) act.play();
     const M = { ua: B('UpperArmL'), la: B('LowerArmL'), h: B('Middle1L') }, O = { ua: B('UpperArmR'), la: B('LowerArmR'), h: B('Middle1R') };
-    const chest = B('Torso') || B('Abdomen'), tg = new T.Vector3(), cw = new T.Vector3(), grip = new T.Vector3(0, -.035, zo + len * (pistol ? .3 : .16));
+    gn.updateMatrix(); const chest = B('Torso') || B('Abdomen'), tg = new T.Vector3(), cw = new T.Vector3(), grip = gn.userData.grip.clone().applyMatrix4(gn.matrix), foreP = gn.userData.foreV.clone().applyMatrix4(gn.matrix);
     g.userData = {
       mz: gn.userData.mz, left: null, arms: holder,
       /* يُستدعى بعد تحديد موضع المجموعة أمام الكاميرا */
@@ -261,10 +337,10 @@
         /* الصدر خلف المقبض وأسفله، خارج مجال الرؤية، فتصل الذراعان إلى السلاح */
         g.updateMatrixWorld(true); holder.position.set(0, 0, 0); holder.updateMatrixWorld(true);
         chest.getWorldPosition(cw); g.worldToLocal(cw);
-        holder.position.set(grip.x - cw.x - .015, grip.y - cw.y - (pistol ? .085 : .1), grip.z - cw.z + (pistol ? .15 : .12));
+        holder.position.set(grip.x - cw.x - .015, grip.y - cw.y - (pistol ? .12 : .15), grip.z - cw.z + (pistol ? .16 : .1));
         holder.updateMatrixWorld(true);
         if (M.ua && M.la && M.h) { tg.copy(grip); g.localToWorld(tg); ik([M.la, M.ua], M.h, tg, 5); }
-        if (O.ua && O.la && O.h) { tg.set(pistol ? -.012 : 0, pistol ? -.05 : -.025, zo + (pistol ? len * .27 : -len * .22)); g.localToWorld(tg); ik([O.la, O.ua], O.h, tg, 5); }
+        if (O.ua && O.la && O.h) { if (pistol) tg.set(grip.x - .012, grip.y - .02, grip.z - .01); else tg.copy(foreP); g.localToWorld(tg); ik([O.la, O.ua], O.h, tg, 5); }
       },
       dispose() { mixer.stopAllAction(); mats.forEach(m => m.dispose()); }
     };

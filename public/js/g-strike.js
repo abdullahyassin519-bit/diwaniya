@@ -114,6 +114,14 @@
       if (k === 'sea') { for (let i = 0; i < 2 + (Math.random() * 2 | 0); i++) AU.tn(d, 1900 + Math.random() * 400, 1100, .32, .03, 'sine', i * .4); }
       else if (k === 'wind') { const f = 2800 + Math.random() * 1500; for (let i = 0; i < 3 + (Math.random() * 3 | 0); i++) AU.tn(d, f * (1 + Math.random() * .2), f * .8, .07, .025, 'sine', i * .12); }
     },
+    /* صوت المروحية: ضجيج منخفض بتقطيع إيقاعي (دوران الشفرات)، موضعه يتبع المروحية */
+    heli(on) {
+      if (!AU.ac) return null; if (AU.hl) { if (!on) { try { AU.hl.s.stop(); AU.hl.l.stop(); } catch (e) { } AU.hl = null; } return AU.hl; } if (!on) return null;
+      try { const ac = AU.ac, s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(), l = ac.createOscillator(), lg = ac.createGain(), p = ac.createPanner();
+        s.buffer = AU.nb; s.loop = true; f.type = 'lowpass'; f.frequency.value = 260; g.gain.value = .5; l.type = 'sawtooth'; l.frequency.value = 13; lg.gain.value = .45; l.connect(lg).connect(g.gain);
+        p.panningModel = 'HRTF'; p.distanceModel = 'inverse'; p.refDistance = 5; p.rolloffFactor = 1.1; s.connect(f).connect(g).connect(p).connect(AU.bus.amb); s.start(); l.start(); AU.hl = { s, l, p }; } catch (e) { AU.hl = null; }
+      return AU.hl;
+    },
     stopAmb() { if (AU.amb) for (const n of AU.amb) try { n.stop(); } catch (e) { } AU.amb = null; },
   };
 
@@ -336,7 +344,7 @@
     /* ---- إطلاق النار: مسار ثلاثي الأبعاد حقيقي مع صناديق إصابة للرأس والجسم ---- */
     function shoot(now) {
       const wn = curW(), w = WP[wn], p = my(), moving = now - self.mvT < 120, pad = wrap.classList.contains('touch') ? .05 : 0, hits = {};
-      const sp = (w.zoom ? (self.zoom ? .0008 : .06) : w.sp) * (1 + self.heat * 2.2) * (moving ? 2.2 : 1) * (self.cr > .5 ? .7 : 1), ez = (self.z || 0) + self.eye, ay = self.a + self.ry, ap = self.pi + self.rp; let cx = 0, cy = 0, cz = 0;
+      const sp = (w.zoom ? (self.zoom ? .0008 : .06) : w.sp) * (1 + self.heat * 2.2) * (moving ? 2.2 : 1) * (self.gr === 0 && (self.z || 0) > .02 ? 4.5 : 1) * (self.cr > .5 ? .7 : 1), ez = (self.z || 0) + self.eye, ay = self.a + self.ry, ap = self.pi + self.rp; let cx = 0, cy = 0, cz = 0;
       for (let i = 0; i < (w.pel || 1); i++) {
         const a = ay + (Math.random() - .5) * 2 * sp, pp = ap + (Math.random() - .5) * 2 * sp, cp = Math.cos(pp), dx = Math.cos(a) * cp, dy = Math.sin(a) * cp, dz = Math.sin(pp); let t = C.ray3(m, self.x, self.y, ez, dx, dy, dz, 70), best = null, part = 0; const kind = C.R3.kind, side = C.R3.side, sx = C.R3.sx, sy = C.R3.sy;
         for (const id in S.pl) { const q = S.pl[id], Q = Ppos[id]; if (id === me || !q.al || q.tm === p.tm || !Q) continue; if (C.hitPlayer(self.x, self.y, ez, dx, dy, dz, Q.x, Q.y, Q.fl & 1, pad) && C.H3.t < t) { t = C.H3.t; best = id; part = C.H3.part; } }
@@ -462,7 +470,7 @@
       let aimEn = false;
       for (const id in S.pl) {
         const q = S.pl[id], P = id === me ? Ppos[me] : Ppos[id]; if (!P) continue;
-        if (id !== me && P.tx != null) { const ox = P.x, oy = P.y; const age = (now - (P.rt || now)) / 1000; if (age < .15 && P.vx != null && !C.cellSolid(m, P.tx + P.vx * dt, P.ty + P.vy * dt, P.tz || 0)) { P.tx += P.vx * dt; P.ty += P.vy * dt; } if (Math.hypot(P.tx - P.x, P.ty - P.y) > 4) { P.x = P.tx; P.y = P.ty; } P.x += (P.tx - P.x) * kk; P.y += (P.ty - P.y) * kk; if (P.tz != null) P.z = (P.z || 0) + (P.tz - (P.z || 0)) * Math.min(1, dt * 18); P.a = C.nrm(P.a + C.nrm(P.ta - P.a) * kk); P.pi = (P.pi || 0) + ((P.tpi || 0) - (P.pi || 0)) * kk; P.spd = Math.hypot(P.x - ox, P.y - oy) / Math.max(dt, .001); }
+        if (id !== me && P.tx != null) { const ox = P.x, oy = P.y; const age = (now - (P.rt || now)) / 1000; if (age < .1 && P.vx != null && !C.cellSolid(m, P.tx + P.vx * dt, P.ty + P.vy * dt, P.tz || 0)) { P.tx += P.vx * dt; P.ty += P.vy * dt; } if (Math.hypot(P.tx - P.x, P.ty - P.y) > 4) { P.x = P.tx; P.y = P.ty; } P.x += (P.tx - P.x) * kk; P.y += (P.ty - P.y) * kk; if (P.tz != null) P.z = (P.z || 0) + (P.tz - (P.z || 0)) * Math.min(1, dt * 18); P.a = C.nrm(P.a + C.nrm(P.ta - P.a) * kk); P.pi = (P.pi || 0) + ((P.tpi || 0) - (P.pi || 0)) * kk; P.spd = Math.hypot(P.x - ox, P.y - oy) / Math.max(dt, .001); }
         const c = getChar(id), hide = id === me ? !(tpv && p && p.al && !watching) : id === viewId; c.root.visible = !hide; if (hide) continue;
         if (q.al || !c.dead) c.root.position.set(P.x, P.z || 0, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, spd: P.spd || 0, pitch: P.pi || 0, acting: P.fl & 8 }); if (c.blob) c.blob.visible = q.al && CFG.q < 2;
         const ally = !!p && q.tm === p.tm; if (c.setSide) c.setSide(id === me ? 'self' : ally);
@@ -483,6 +491,7 @@
       if (S.bomb && S.ph !== 'freeze') { bombMesh.visible = true; bombMesh.position.set(S.bomb.x, 0, S.bomb.y); const left = Math.max(0, S.bomb._dl - performance.now()), iv = S.ph === 'live' ? Math.max(130, left / 40000 * 950) : 1e9; bombMesh.userData.led.visible = now % iv < iv * .4; if (S.ph === 'live' && now - beepT > iv) { beepT = now; AU.play('beep', S.bomb.x, S.bomb.y, 1.6); } } else bombMesh.visible = false;
       if (boom) { const a = (now - boom.t) / 650; if (a >= 1) { boom = null; boomMesh.visible = false; } else { boomMesh.visible = true; boomMesh.position.set(boom.x, .5, boom.y); boomMesh.scale.setScalar(.4 + a * 4.5); boomMesh.material.opacity = .85 * (1 - a); flashL.position.set(boom.x, 1, boom.y); flashL.intensity = 40 * (1 - a); } }
       if (shadowKick > 0) { shadowKick--; R.shadowMap.needsUpdate = true; }
+      if (world.tick) world.tick(dt); { const hp = world.heli && world.heli(); if (hp && AU.on()) { const H = AU.heli(true); if (H) { const P = H.p; if (P.positionX) { P.positionX.value = hp.position.x; P.positionY.value = hp.position.y; P.positionZ.value = hp.position.z; } else P.setPosition(hp.position.x, hp.position.y, hp.position.z); } } else AU.heli(false); }
       AU.tickAmb(); stepPts(FX.spk, dt, 6); stepPts(FX.deb, dt, 9); stepShells(dt); postSetup(); if (world.scene.userData.clouds) world.scene.userData.clouds.rotation.y += world.scene.userData.clouds.userData.spin * dt;
       if (comp) comp.render(dt); else { R.clear(); R.render(world.scene, cam); }
       if (p && p.al && !watching && !zoomOn) { setVM(now); R.clearDepth(); R.render(vmScene, vmCam); }
@@ -490,7 +499,7 @@
       if (++fpsN, now - fpsT > 2000) { const fps = fpsN * 1000 / (now - fpsT); fpsN = 0; fpsT = now; self.fps = fps; if (fps < 26 && CFG.q > 0 && !CFG.lock && ++fpsLow >= 2) { fpsLow = 0; CFG.q--; applyQ(); } else if (fps >= 26) fpsLow = 0; }
     }
     function destroy() {
-      if (dead) return; dead = true; clearInterval(simIv); AB.abort(); AU.stopAmb(); try { ws && ws.close(); } catch (e) { } try { if (document.pointerLockElement === wrap) document.exitPointerLock(); } catch (e) { }
+      if (dead) return; dead = true; clearInterval(simIv); AB.abort(); AU.stopAmb(); AU.heli(false); try { ws && ws.close(); } catch (e) { } try { if (document.pointerLockElement === wrap) document.exitPointerLock(); } catch (e) { }
       if (R) { for (const id in chars) dropChar(id); for (const a of [holes, puffs, tracers]) for (const o of a) { if (o.geometry && o.geometry !== holes[0].geometry) o.geometry.dispose(); o.material.dispose(); } if (holes[0]) holes[0].geometry.dispose(); world.dispose(); if (vm) vm.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); R.dispose(); try { R.forceContextLoss(); } catch (e) { } }
     }
     function set(st, id, sendFn, H) {
