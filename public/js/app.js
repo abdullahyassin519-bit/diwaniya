@@ -205,6 +205,43 @@
     THUMBS[key] = cv.toDataURL();
     return THUMBS[key];
   }
+  /* صورة ثلاثية الأبعاد لجندي الفريق داخل اللوبي: تُرسم مرة واحدة لكل زي وفريق ثم تُخزَّن. */
+  let SKR = null;
+  const SOLDIER_IMG = {};
+  function soldierThumb(outfit, team) {
+    const key = outfit + '|' + team, T = window.THREE, W = window.SKW;
+    if (SOLDIER_IMG[key] !== undefined) return SOLDIER_IMG[key];
+    if (!T || !W || !W.soldier) return '';
+    try {
+      if (!SKR) {
+        const cv = document.createElement('canvas');
+        cv.width = 160; cv.height = 220;
+        const r = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+        r.setClearColor(0x000000, 0);
+        r.toneMapping = T.ACESFilmicToneMapping; r.outputColorSpace = T.SRGBColorSpace;
+        const sc = new T.Scene(), cam = new T.PerspectiveCamera(28, 160 / 220, .1, 50);
+        cam.position.set(0, 1.2, 4.6); cam.lookAt(0, .95, 0);
+        sc.add(new T.HemisphereLight(0xffffff, 0x4a4f55, 2.2));
+        const key1 = new T.DirectionalLight(0xfff3dc, 2.2); key1.position.set(-2.5, 3, 3); sc.add(key1);
+        const rim = new T.DirectionalLight(0x9fc4ff, 1.1); rim.position.set(3, 2, -3); sc.add(rim);
+        SKR = { cv, r, sc, cam };
+      }
+      const s = W.soldier(T, { outfit: outfit | 0, team: team | 0, face: null });
+      SKR.sc.add(s.root);
+      const box = new T.Box3().setFromObject(s.root), c = box.getCenter(new T.Vector3()), h = Math.max(.5, box.max.y - box.min.y);
+      const d = (h / 2) / Math.tan(T.MathUtils.degToRad(SKR.cam.fov / 2)) * 1.14;
+      SKR.cam.position.set(c.x, c.y, c.z + d); SKR.cam.lookAt(c.x, c.y, c.z);
+      SKR.r.render(SKR.sc, SKR.cam);
+      const url = SKR.cv.toDataURL('image/png');
+      SKR.sc.remove(s.root);
+      if (s.dispose) s.dispose();
+      SOLDIER_IMG[key] = url;
+      return url;
+    } catch (e) {
+      SOLDIER_IMG[key] = '';
+      return '';
+    }
+  }
   function strikeLobbyHTML() {
     const R = Room.R, host = Room.host, C = window.SKC, ps = R.ps, n = ps.length;
     const side = t => ps.filter(x => (x.team || 1) === t), A = side(1), D = side(2);
@@ -217,7 +254,9 @@
       const sub = x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : off ? 'غير متصل' : x.rdy ? 'جاهز ✓' : 'غير جاهز';
       const mv = canMove ? '<button class="btn sm ghost" data-act="team:' + x.id + '" title="انقل إلى الفريق الآخر">⇄</button>' : '';
       const kk = host && (x.bot || x.loc || !mine) ? '<button class="btn sm ghost" data-act="kick:' + x.id + '" title="أزِل">✕</button>' : '';
-      return '<div class="sl-seat ' + (x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : '') + ' ' + (off ? 'off' : '') + '"><span class="av f' + (x.fr | 0) + '">' + okAv(x.av) + '</span><span class="nm">' + esc(x.n) + '<small>' + sub + '</small></span><span class="sl-acts">' + mv + kk + '</span></div>';
+      const outfit = [...String(x.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 4, team = (x.team || 1) - 1, img = soldierThumb(outfit, team);
+      const pic = img ? '<img class="sl-3d" src="' + img + '" alt="">' : '<span class="av f' + (x.fr | 0) + '">' + okAv(x.av) + '</span>';
+      return '<div class="sl-seat ' + (x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : '') + ' ' + (off ? 'off' : '') + '">' + pic + '<span class="nm">' + esc(x.n) + '<small>' + sub + '</small></span><span class="sl-acts">' + mv + kk + '</span></div>';
     };
     const empty = () => '<div class="sl-seat empty">' + (host ? 'مكان فارغ — انقل لاعباً هنا' : 'بانتظار لاعبين') + '</div>';
     const maps = (C ? Object.keys(C.RAW) : []).map(name => '<button class="sl-map ' + (chosen === name ? 'on' : '') + '" data-act="' + (host ? 'map' : 'noop') + ':' + name + '"' + (host ? '' : ' disabled') + '><img src="' + mapThumb(name, 220) + '" alt="معاينة ' + name + '"><b>' + name + '</b><small>' + (MAP_TAG[name] || '') + '</small></button>').join('');
