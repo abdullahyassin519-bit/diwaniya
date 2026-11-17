@@ -207,7 +207,7 @@
     /* ---- التهيئة ثلاثية الأبعاد ---- */
     function init3() {
       T = window.THREE; R = new T.WebGLRenderer({ canvas: cv, antialias: CFG.q > 0, powerPreference: 'high-performance' }); R.autoClear = false; R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.12; R.shadowMap.enabled = true; R.shadowMap.type = T.PCFSoftShadowMap;
-      cam = new T.PerspectiveCamera(CFG.fov, 16 / 9, .03, 140); cam.rotation.order = 'YXZ'; world = SKW.build(T, m, CFG.q); world.scene.add(cam);
+      cam = new T.PerspectiveCamera(CFG.fov, 16 / 9, .03, 140); cam.rotation.order = 'YXZ'; world = SKW.build(T, m, CFG.q); world.scene.add(cam); if (SKW.envMap && CFG.q > 0) { try { world.scene.environment = SKW.envMap(T, R, m.theme); } catch (e) { } }
       vmScene = new T.Scene(); vmScene.add(new T.HemisphereLight(0xffffff, 0x77705f, 2.2)); const dl = new T.DirectionalLight(0xffffff, 1.6); dl.position.set(-1, 2, 1); vmScene.add(dl); vmCam = new T.PerspectiveCamera(58, 16 / 9, .01, 4);
       flashL = new T.PointLight(0xffc56a, 0, 7, 1.5); world.scene.add(flashL);
       const ht = SKW.tex('hole', 32, 32, (x) => { const g = x.createRadialGradient(16, 16, 1, 16, 16, 15); g.addColorStop(0, 'rgba(10,8,6,1)'); g.addColorStop(.4, 'rgba(30,25,20,.8)'); g.addColorStop(1, 'rgba(30,25,20,0)'); x.fillStyle = g; x.fillRect(0, 0, 32, 32); }, true), pt = SKW.tex('puff', 32, 32, (x) => { const g = x.createRadialGradient(16, 16, 1, 16, 16, 15); g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, 32, 32); }, true), hg = new T.PlaneGeometry(.075, .075);

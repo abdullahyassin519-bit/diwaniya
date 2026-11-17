@@ -178,5 +178,19 @@
     arm(.0, -.04, .0, .42, -.1, .4); const l = arm(long ? -.005 : -.012, long ? -.005 : -.045, long ? -.2 : -.0, .34, .6, .42);
     g.userData = { mz: gn.userData.mz, left: l }; return g;
   }
-  window.SKW = { build, gun, soldier, viewModel, faceTex, OUTFITS, TEAMC, tex, DRAW, dispose() { for (const k in TX) TX[k].dispose(); } };
+    /* إضاءة مصوّرة (IBL) إجرائية: سماء متدرجة تُحوَّل إلى خريطة انعكاس عبر PMREM، فتلمع الخامات وتتلون بمحيطها. */
+  function envMap(THREE_, renderer, theme) {
+    const th = THEMES[theme] || {}, sky = (th.sky || ['#2f6fc4', '#9cc3ea', '#f3dcb4']);
+    const sc = new THREE_.Scene();
+    const geo = new THREE_.SphereGeometry(50, 32, 16);
+    const mat = new THREE_.ShaderMaterial({ side: THREE_.BackSide, depthWrite: false, uniforms: { top: { value: new THREE_.Color(sky[0]) }, mid: { value: new THREE_.Color(sky[1]) }, low: { value: new THREE_.Color(sky[2]) } },
+      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+      fragmentShader: 'uniform vec3 top; uniform vec3 mid; uniform vec3 low; varying vec3 vP; void main(){ float h = vP.y; vec3 c = h > 0.0 ? mix(mid, top, smoothstep(0.0, 0.7, h)) : mix(low * 0.45, low, smoothstep(-0.4, 0.0, h)); gl_FragColor = vec4(c * 1.0, 1.0); }' });
+    sc.add(new THREE_.Mesh(geo, mat));
+    const pm = new THREE_.PMREMGenerator(renderer);
+    const tex = pm.fromScene(sc, 0.02).texture;
+    geo.dispose(); mat.dispose(); pm.dispose();
+    return tex;
+  }
+window.SKW = { build, envMap, gun, soldier, viewModel, faceTex, OUTFITS, TEAMC, tex, DRAW, dispose() { for (const k in TX) TX[k].dispose(); } };
 })();
