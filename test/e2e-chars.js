@@ -9,7 +9,7 @@ const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++;
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const errors = [];
   try {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); await page.addInitScript(() => { if (!localStorage.getItem('dw_sk')) localStorage.setItem('dw_sk', JSON.stringify({ q: 1 })); }); /* جودة متوسطة: المتصفح الآلي يرسم بلا معالج رسوميات */
     page.on('pageerror', e => errors.push(String(e)));
     await page.goto(URL); await page.waitForFunction(() => window.DW);
     await page.click('.card[data-act="game:strike"]'); await sleep(800);

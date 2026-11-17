@@ -192,7 +192,7 @@
   }
   const isOff = x => !Room.offline && !x.bot && !x.loc && Room.on.length && !Room.on.includes(x.id);
   /* لوبي طخطخة: فريقان، خرائط بمعاينة حقيقية مرسومة من بيانات الخريطة، وشروط بدء واضحة. */
-  const MAP_TAG = { 'الحارة': 'أزقة ضيقة وساحة مركزية، مواجهات قريبة', 'المستودع': 'مساحة مفتوحة وصناديق، وسطح مرتفع بدرج خارجي', 'القلعة': 'أسوار ومداخل محصّنة وممرات طويلة' };
+  const MAP_TAG = { 'الحارة': 'أزقة ضيقة وساحة مركزية، مواجهات قريبة', 'المستودع': 'مساحة مفتوحة وصناديق، وسطح مرتفع بدرج خارجي', 'القلعة': 'أسوار ومداخل محصّنة وممرات طويلة', 'السوق': 'سوق مسقوف ودكاكين، والموقع A داخل قاعة مغلقة', 'الميناء': 'مستودع على البحر وممرات حاويات ومكتب إدارة', 'المدرسة': 'فصول وممرات داخلية، والموقع B في الصالة الرياضية' };
   const THUMBS = {};
   function mapThumb(name, width) {
     const key = name + '|' + width, C = window.SKC;
@@ -202,7 +202,7 @@
     cv.width = m.w * cell; cv.height = m.h * cell;
     const g = cv.getContext('2d');
     const col = { '#': '#262a31', P: '#363b44', W: '#56616b', K: '#7a5a3a', S: '#7a5a3a', o: '#6b4f33', p: '#6b4f33', c: '#9a8a66', v: '#9a8a66', r: '#9a8a66', x: '#9a8a66', Q: '#cdc7b8', y: '#bcb49f', z: '#aca28d', w: '#9d9581', d: '#8b7b5b', a: '#e2b84a', b: '#e2b84a', T: '#c9d8e6', D: '#e0c9b0' };
-    for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) { const c = m.ch[y * m.w + x]; g.fillStyle = col[c] || '#e4dccb'; g.fillRect(x * cell, y * cell, cell, cell); }
+    for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) { const c = m.ch[y * m.w + x]; g.fillStyle = col[c] || '#e4dccb'; g.fillRect(x * cell, y * cell, cell, cell); if (m.ind && m.ind[y * m.w + x]) { g.fillStyle = 'rgba(70,90,120,.32)'; g.fillRect(x * cell, y * cell, cell, cell); } }
     THUMBS[key] = cv.toDataURL();
     return THUMBS[key];
   }

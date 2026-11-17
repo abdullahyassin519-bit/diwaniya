@@ -15,6 +15,8 @@
     sniper: { n: 'قناصة', $: 4200, dmg: 92, hs: 3, rate: 1300, mag: 5, rel: 3000, sp: .001, rec: .06, auto: 0, zoom: 1, fall: 0 },
   };
   const FULL = '#2KSWopP', LOWH = { c: .55, v: .6, r: .5, x: .5 };
+  /* داخل المباني: أرضية بسقف على ارتفاع CEIL. الحروف الكبيرة نسخ داخلية من العوائق والمواقع. */
+  const CEIL = 2, ROOF = 2.25, INMAP = { i: '.', C: 'c', X: 'x', A: 'a', B: 'b', R: 'r' };
   /* تراكبات تُطبَّق على الخريطة قبل البناء: سطح مبنى بجدار P (ارتفاع 2.9) وسلم خارجي يصل إلى السطح. */
   const OV = {
     'المستودع': [{ x: 7, y: 4, rows: ['   PPPPP', '   PQQQP', 'yzwQQQQP', '   PQQQP', '   PPPPP'] }],
@@ -87,14 +89,93 @@
       '#.........#bbbbbbbb#...........#',
       '#......#..##########....#......#',
       'W##############WW##############W'] },
+    /* خرائط بمبانٍ يمكن دخولها: i أرضية داخلية مسقوفة، C/X/R عوائق داخلية، A/B مواقع داخلية */
+    'السوق': { theme: 'hara', rows: [
+      '################################',
+      '#TTT..................##########',
+      '#TTT......##########..#iCAAAAi##',
+      '#TTT......iiiiiC####..iiiAAAAi##',
+      '#.........#iiiii####..iiiAAAAi##',
+      '#....c....###i######..#iiiiiiC##',
+      '#.v..........,........####ii####',
+      '#...................c..........#',
+      '#.#####.#######ii#######.......#',
+      '#.#Cii#.#iC#iii#iii#iCi#.#####.#',
+      '#.#iiii.#ii#iXi#iii#iii#.#####.#',
+      '#.#iii#.iiiiiiiiiiiiiiii.#####.#',
+      '#.#iii#.iiiiiiiiiiiiiiii.#####.#',
+      '#.##i##.#ii#iii#iXi#iii#.#####.#',
+      '#.......#ii#iii#iCi#iii#.......#',
+      '#...p..c####i######i####,.c....#',
+      '#.#####....x...............v...#',
+      '#.#####.........c...######.....#',
+      '#..c.....#####......######.....#',
+      '#.bbbbb..#####..............DDD#',
+      '#.bbbbbc.#####......x.......DDD#',
+      '#.bbbxb..#####c..v......p...DDD#',
+      '#.bbbbb.....................DDD#',
+      '################################',
+    ] },
+    'الميناء': { theme: 'port', rows: [
+      '################################',
+      '#...........................DDD#',
+      '#.###########..KK..K........DDD#',
+      '#.#CAAAAAiCi#..KK..K........DDD#',
+      '#.#iAAAAAiiii..KK..K..KKKK..DDD#',
+      '#.#iAAAAAXiii..................#',
+      '#.iiAAAAAiii#...........r..KK..#',
+      '#.#iiXiiiiii#..KK..............#',
+      '#.#iiiiiiiCi#..KK...########...#',
+      '#.####ii#####.......#ii#iCi#.c.#',
+      '#..........v......c.iii#iii#...#',
+      '#...................#iiiiiii...#',
+      '#..x.c..KKK...KKK...#iC#iii#...#',
+      '#................r..####i###...#',
+      '#.........................x..###',
+      '#.##c...K.....K......v.......###',
+      '#.##....K.....K....KKKK..K.....#',
+      '#..........c..K..........K.....#',
+      '#............x...........K..c..#',
+      '#TTT..................c...bbbbb#',
+      '#TTT.....r.......KKK......bbbbb#',
+      '#TTT..v......c..........c.bbbbb#',
+      '#TTT......................bbbbb#',
+      '################################',
+    ] },
+    'المدرسة': { theme: 'hara', rows: [
+      '################################',
+      '#TTTT..########i#########......#',
+      '#TTTT..#Cii#iCii#AAA#Cii#......#',
+      '#TTTT..#iXi#iiXi#AAA#iiX#......#',
+      '#......iiiiiiiiiiiiiiiiii..v...#',
+      '#......#iiiiiiiiiiiiiiii#......#',
+      '#....v.#iiiiiiiiiiiiiiii#......#',
+      '#......#####i######i#####.######',
+      '#.........................#iiC##',
+      '###.......................iiii##',
+      '###..c.....c........c.....#iii##',
+      '#........p.....c......p...##i###',
+      '#............x....x............#',
+      '#..................#######.....#',
+      '#.#####i######.....#iCiiii..c..#',
+      '#.#CiiiiiiiiC#...p.iiiiii#.....#',
+      '#.#iiBBBBBiiii.....#iiiiC#.....#',
+      '#.#iiBBBBBXiii.....###i###.....#',
+      '#.iiiBBBBBiii#.................#',
+      '#.#iiBBBBBiii#..c..............#',
+      '#.#iXiiiiiiCi#..........c..DDDD#',
+      '#.############.####........DDDD#',
+      '#..............####........DDDD#',
+      '################################',
+    ] },
   };
   const MC = {};
   function parseMap(name) {
     if (MC[name]) return MC[name]; const r = RAW[name] || RAW[Object.keys(RAW)[0]], rows = r.rows.map(s => s.split('')), h = rows.length, w = Math.max(...rows.map(x => x.length));
     for (const o of OV[name] || []) o.rows.forEach((s, dy) => { for (let dx = 0; dx < s.length; dx++) { const yy = o.y + dy, xx = o.x + dx; if (s[dx] !== ' ' && rows[yy] && xx > 0 && xx < w - 1 && yy > 0 && yy < h - 1) rows[yy][xx] = s[dx]; } });
-    const m = { name, theme: r.theme, w, h, g: new Uint8Array(w * h), hh: new Float32Array(w * h), fh: new Float32Array(w * h), st: new Uint8Array(w * h), cov: new Uint8Array(w * h), ch: [], sp: [[], []], sc: {}, fc: new Map() }, acc = { a: [0, 0, 0], b: [0, 0, 0] };
+    const m = { name, theme: r.theme, w, h, ind: new Uint8Array(w * h), g: new Uint8Array(w * h), hh: new Float32Array(w * h), fh: new Float32Array(w * h), st: new Uint8Array(w * h), cov: new Uint8Array(w * h), ch: [], sp: [[], []], sc: {}, fc: new Map() }, acc = { a: [0, 0, 0], b: [0, 0, 0] };
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      let c = rows[y][x] || '#'; if ((!x || !y || x === w - 1 || y === h - 1) && !FULL.includes(c)) c = '#'; const i = y * w + x; m.ch[i] = c; if (FH[c] != null) m.fh[i] = FH[c];
+      let c = rows[y][x] || '#'; if ((!x || !y || x === w - 1 || y === h - 1) && !FULL.includes(c)) c = '#'; const i = y * w + x; if (INMAP[c]) { m.ind[i] = 1; c = INMAP[c]; } m.ch[i] = c; if (FH[c] != null) m.fh[i] = FH[c];
       if (FULL.includes(c)) { m.g[i] = 1; m.hh[i] = 99; } else if (LOWH[c]) { m.g[i] = 2; m.hh[i] = LOWH[c]; }
       else if (c === 'T') m.sp[0].push([x + .5, y + .5]); else if (c === 'D') m.sp[1].push([x + .5, y + .5]); else if (c === ',') m.cov[i] = 1;
       else if (c === 'a' || c === 'b') { m.st[i] = c === 'a' ? 1 : 2; acc[c][0] += x + .5; acc[c][1] += y + .5; acc[c][2]++; }
@@ -108,6 +189,12 @@
     let mx = ox | 0, my = oy | 0, side = 0, te = 0; const ddx = dx ? Math.abs(1 / dx) : 1e30, ddy = dy ? Math.abs(1 / dy) : 1e30, sx = dx < 0 ? -1 : 1, sy = dy < 0 ? -1 : 1, tf = dz < 0 ? -oz / dz : 1e30;
     let sdx = dx < 0 ? (ox - mx) * ddx : (mx + 1 - ox) * ddx, sdy = dy < 0 ? (oy - my) * ddy : (my + 1 - oy) * ddy; R3.sx = sx; R3.sy = sy;
     for (let i = 0; i < 160; i++) {
+      /* السقف: داخل خلية مسقوفة يتوقف الرصاص عند السقف (من الداخل) أو عند السطح (من الأعلى) */
+      if (dz && mx >= 0 && my >= 0 && mx < m.w && my < m.h && m.ind[my * m.w + mx]) {
+        const tn = Math.min(sdx, sdy), z0 = oz + dz * te, z1 = oz + dz * tn;
+        if (dz > 0 && z0 <= CEIL && z1 > CEIL) { const tc = (CEIL - oz) / dz; if (tc <= max) { R3.t = tc; R3.kind = 'c'; return tc; } }
+        if (dz < 0 && z0 >= ROOF && z1 < ROOF) { const tc = (ROOF - oz) / dz; if (tc <= max) { R3.t = tc; R3.kind = 't'; return tc; } }
+      }
       if (sdx < sdy) { te = sdx; sdx += ddx; mx += sx; side = 0; } else { te = sdy; sdy += ddy; my += sy; side = 1; }
       if (tf <= te) { if (tf > max) break; R3.t = tf; R3.kind = 'f'; return tf; }
       if (te > max) break;
@@ -279,5 +366,5 @@
     startRound(true);
     return { S, pos, tick, msg, join, heard, isBot, get done() { return done; }, gk: cfg.gk };
   }
-  return { RAW, WP, BODY, RAD, HR, BR, ARMOR, PLANT, DEFUSE, FREEZE, STEP, GRAV, JV, JMAX, WALL_TOP, FH, parseMap, ray3, R3, los3, hitPlayer, H3, mv, blk, cellSolid, floorMax, vert, field, nrm, r2, Sim };
+  return { RAW, WP, BODY, RAD, HR, BR, ARMOR, PLANT, DEFUSE, FREEZE, STEP, GRAV, JV, JMAX, WALL_TOP, CEIL, ROOF, INMAP, FH, parseMap, ray3, R3, los3, hitPlayer, H3, mv, blk, cellSolid, floorMax, vert, field, nrm, r2, Sim };
 });

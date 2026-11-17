@@ -53,7 +53,7 @@ const URL = 'http://localhost:3113/', sleep = ms => new Promise(r => setTimeout(
   await A.close(); await B.close();
 
   /* تدريب بلا اتصال بالخادم (المحاكاة نفسها محلياً) + لقطات */
-  const S = await mk('S', { width: 1280, height: 800 }, false, 2); await S.goto(URL); await S.waitForFunction(() => window.DW);
+  const S = await mk('S', { width: 1280, height: 800 }, false, 1); await S.goto(URL); await S.waitForFunction(() => window.DW);
   await S.click('.card[data-act="game:strike"]'); await sleep(2500); await S.screenshot({ path: 'test/sk-menu.png' }); await S.click('[data-act="solo:strike"]');
   ok(await until(async () => (await SS(S)) && (await SS(S)).ph === 'freeze', 40000), 'training: offline match vs bots starts (6 players)');
   await S.evaluate(() => { document.querySelector('.sk-lock').style.display = 'none'; }); await sleep(1500); await S.screenshot({ path: 'test/sk-buy.png' });
