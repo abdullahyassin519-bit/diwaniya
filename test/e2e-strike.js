@@ -16,7 +16,7 @@ const URL = 'http://localhost:3113/', sleep = ms => new Promise(r => setTimeout(
   await A.click('[data-act=create]'); await until(() => A.evaluate(() => DW.Room.R && DW.Room.R.code !== 'LOCAL'));
   const code = await A.evaluate(() => DW.Room.R.code); await B.goto(URL + '#r-' + code); await until(() => A.evaluate(() => DW.Room.R.ps.length === 2));
   await A.click('[data-act="pick:strike"]'); ok(await A.evaluate(() => DW.Room.R.teams === 1), 'lobby: picking the shooter turns on team assignment');
-  await A.selectOption('#o_w', '0'); await A.selectOption('#o_map', '3'); await A.click('[data-act=start]');
+  await A.click('[data-act="rounds:3"]'); await sleep(200); await A.evaluate(() => { const C = window.SKC, n = Object.keys(C.RAW)[2]; document.querySelector('[data-act="map:' + n + '"]').click(); }); await sleep(200); await A.click('[data-act=start]');
   ok(await until(async () => (await SS(A)) && (await SS(B)) && (await SS(B)).rd === 1, 40000, 'snapshot'), 'both devices get round state from the server simulation');
   const idA = await A.evaluate(() => DW.P.id), idB = await B.evaluate(() => DW.P.id);
   ok(await until(() => B.evaluate(a => !!SK.dbg.faces[a], idA), 12000), 'face photo of A delivered to B');

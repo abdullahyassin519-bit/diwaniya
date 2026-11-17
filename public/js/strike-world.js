@@ -173,6 +173,7 @@
   }
   /* سلاح منظور الشخص الأول مع الذراعين */
   function viewModel(THREE_, name, outfit) {
+    if (window.SKM && SKM.ready()) { const va = SKM.viewArms(name, outfit); if (va) return va; }
     T = THREE_; const o = OUTFITS[outfit | 0] || OUTFITS[0], g = new T.Group(), gn = (window.SKM && SKM.ready() && SKM.weapon(name)) || gun(T, name), sl = new T.MeshLambertMaterial({ color: o.u, map: tex('camo', 128, 128, DRAW.camo) }), gl = new T.MeshLambertMaterial({ color: 0x25272a });
     gn.rotation.y = Math.PI; g.add(gn); const long = name !== 'pistol';
     const arm = (x, y, z, rx, ry, len) => { const p = new T.Group(); p.position.set(x, y, z); p.rotation.set(rx, ry, 0); const a = new T.Mesh(new T.BoxGeometry(.044, .044, len), sl); a.position.z = len / 2 + .03; p.add(a); const h = new T.Mesh(new T.BoxGeometry(.04, .05, .065), gl); h.position.z = -.005; p.add(h); g.add(p); return p; };

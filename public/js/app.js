@@ -63,6 +63,7 @@
       case 'prof': if (pl) { pl.n = txt(a.n, 16) || pl.n; pl.av = okAv(a.av); pl.fr = a.fr | 0; } break;
       case 'rdy': if (pl) pl.rdy = pl.rdy ? 0 : 1; break;
       case 'team': if (pl) pl.team = pl.team === 1 ? 2 : 1; break;
+      case 'sk': if (pl) pl.sk = Math.max(0, Math.min(3, a.s | 0)); break;
       case 'chat': if (pl && txt(a.m, 120)) { R.chat.push({ p, n: pl.n, a: pl.av, m: txt(a.m, 120) }); if (R.chat.length > 40) R.chat.shift(); } break;
       case 'gv': if (pl && G.by[a.g]) R.gv[p] = a.g; break;
       case 'leave': if (pl) { if (R.ph === 'game' && R.gps.includes(p)) R.auto[p] = 1; else R.ps = R.ps.filter(x => x.id !== p); sys(`غادر ${pl.n}`); } break;
@@ -242,6 +243,19 @@
       return '';
     }
   }
+  /* تحميل نماذج الشخصيات للوبي (مرة واحدة)، ثم إعادة الرسم */
+  let MODELS_P = null, SKIN_SENT = '';
+  function ensureModels() {
+    if (MODELS_P) return MODELS_P;
+    const add = src => new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+    MODELS_P = (window.THREE ? Promise.resolve() : add('js/vendor/three.min.js'))
+      .then(() => (window.GLX ? 0 : add('js/vendor/gltf-loader.js')))
+      .then(() => (window.SKM ? SKM.load(window.THREE) : false))
+      .then(ok => { if (ok && Room.R && Room.R.gid === 'strike' && Room.R.ph !== 'game') render(); }, () => { });
+    return MODELS_P;
+  }
+  const mySkin = () => { const c = LS.get('dw_sk', {}); return Math.max(0, Math.min(3, (c && c.skin) | 0)); };
+  const seatSkin = x => x.id === P.id ? mySkin() : x.sk != null ? x.sk | 0 : [...String(x.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 4;
   function strikeLobbyHTML() {
     const R = Room.R, host = Room.host, C = window.SKC, ps = R.ps, n = ps.length;
     const side = t => ps.filter(x => (x.team || 1) === t), A = side(1), D = side(2);
@@ -249,12 +263,14 @@
     const canStart = host && n >= 2 && A.length > 0 && D.length > 0;
     const why = n < 2 ? 'تحتاج لاعبين اثنين على الأقل.' : !A.length ? 'فريق المهاجمين فارغ. انقل لاعباً إليه.' : !D.length ? 'فريق المدافعين فارغ. انقل لاعباً إليه.' : '';
     const me = ps.find(x => x.id === P.id) || {};
+    const ready3 = !!(window.SKM && SKM.ready()); if (!ready3) ensureModels();
+    if (me.id && me.sk !== mySkin() && SKIN_SENT !== R.code + mySkin()) { SKIN_SENT = R.code + mySkin(); setTimeout(() => act({ t: 'sk', s: mySkin() }), 0); }
     const seat = x => {
       const mine = x.id === P.id, canMove = host || mine, off = isOff(x);
       const sub = x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : off ? 'غير متصل' : x.rdy ? 'جاهز ✓' : 'غير جاهز';
       const mv = canMove ? '<button class="btn sm ghost" data-act="team:' + x.id + '" title="انقل إلى الفريق الآخر">⇄</button>' : '';
       const kk = host && (x.bot || x.loc || !mine) ? '<button class="btn sm ghost" data-act="kick:' + x.id + '" title="أزِل">✕</button>' : '';
-      const outfit = [...String(x.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 4, team = (x.team || 1) - 1, img = soldierThumb(outfit, team);
+      const outfit = seatSkin(x), team = (x.team || 1) - 1, img = ready3 ? SKM.thumb(outfit, team, 116, 160) : soldierThumb(outfit, team);
       const pic = img ? '<img class="sl-3d" src="' + img + '" alt="">' : '<span class="av f' + (x.fr | 0) + '">' + okAv(x.av) + '</span>';
       return '<div class="sl-seat ' + (x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : '') + ' ' + (off ? 'off' : '') + '">' + pic + '<span class="nm">' + esc(x.n) + '<small>' + sub + '</small></span><span class="sl-acts">' + mv + kk + '</span></div>';
     };
@@ -277,6 +293,7 @@
       + '<div class="row ctr">' + (host ? '<button class="btn sm" data-act="bot">+ لاعب آلي</button><button class="btn sm" data-act="loc">+ لاعب على هذا الجهاز</button>' : '') + '</div></div>'
       + '<div class="sl-side blue"><h3>🔵 المدافعون <small>(' + D.length + ')</small></h3>' + (D.map(seat).join('') || empty()) + '</div>'
       + '</div>'
+      + '<div class="sl-pick"><h3>اختر شخصيتك</h3><div class="sl-chars">' + (ready3 ? SKM.CHARS.map((c, i) => '<button class="sl-char ' + (mySkin() === i ? 'on' : '') + '" data-act="char:' + i + '"><img src="' + SKM.thumb(i, ((me.team || 1) - 1), 180, 240) + '" alt="' + c.n + '"><b>' + c.n + '</b><small>' + c.d + '</small></button>').join('') : '<span class="mut">جارٍ تحميل الشخصيات…</span>') + '</div></div>'
       + '<div class="sl-maps">' + maps + '</div>'
       + '<div class="row ctr sl-go">' + goBlock + '</div>'
       + (link ? '<p class="mut sl-link">رابط الدعوة: <span>' + link + '</span></p>' : '')
@@ -398,6 +415,7 @@
       case 'chat': { const i = $('#chat_in'), m = txt(i && i.value, 120); if (m) { i.value = ''; act({ t: 'chat', m }); } return; }
       case 'react': act({ t: 'chat', m: x }); return;
       case 'rdy': act({ t: 'rdy' }); return;
+      case 'char': { const c = LS.get('dw_sk', {}) || {}; c.skin = Math.max(0, Math.min(3, +x | 0)); LS.set('dw_sk', c); SKIN_SENT = R ? R.code + c.skin : ''; if (R) act({ t: 'sk', s: c.skin }); render(); return; }
       case 'gv': act({ t: 'gv', g: x }); return;
       case 'team': if (host) { const pl = R.ps.find(p => p.id === x); if (pl) pl.team = pl.team === 1 ? 2 : 1; push(); } else act({ t: 'team' }); return;
       case 'hideres': Room.hideRes = 1; break;

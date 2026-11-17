@@ -5,7 +5,7 @@
   const coarse = () => matchMedia('(pointer:coarse)').matches;
   const CFG = Object.assign({ sens: 1, vol: .8, fov: 78, q: coarse() ? ((navigator.deviceMemory || 4) < 4 ? 0 : 1) : 2, btn: 1, lefty: 0, skin: 0 }, LS.get('dw_sk', {})), saveCfg = () => LS.set('dw_sk', CFG);
   const addScript = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-  let threeP; const loadThree = () => threeP || (threeP = (window.THREE ? Promise.resolve() : addScript('js/vendor/three.min.js')).then(() => addScript('js/vendor/gltf-loader.js').catch(() => { })).then(() => Promise.resolve(window.SKM ? SKM.load(window.THREE) : false).catch(() => { })));
+  let threeP; const loadThree = () => threeP || (threeP = (window.THREE ? Promise.resolve() : addScript('js/vendor/three.min.js')).then(() => Promise.resolve(window.GLX ? 0 : addScript('js/vendor/gltf-loader.js')).catch(() => { })).then(() => Promise.resolve(window.SKM ? SKM.load(window.THREE) : false).catch(() => { })));
 
   /* ---------- الصوت: مُولَّد كله برمجياً، وموضعي ثلاثي الأبعاد ---------- */
   const AU = { ac: null, out: null, nb: null, amb: null,
@@ -33,11 +33,12 @@
   };
 
   const CSS = `.sk{position:relative;width:100%;aspect-ratio:16/9;max-height:max(260px,calc(100vh - 215px));background:#05090b;border-radius:12px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;margin:auto;direction:ltr;font-family:'Readex Pro',sans-serif;color:#fff;--bs:1}
+.sk-quit{color:#ff8a8a!important}body:has(.sk.fs){overflow:hidden}
 .sk.fs{position:fixed;inset:0;z-index:200;max-height:none;border-radius:0;aspect-ratio:auto;width:100vw;height:100vh;height:100dvh}
 .sk canvas.sk-cv{width:100%;height:100%;display:block}.sk [hidden]{display:none!important}.sk-hud{position:absolute;inset:0;pointer-events:none;text-shadow:0 1px 3px #000}
 .sk-scope{position:absolute;inset:0;display:none;background:radial-gradient(circle at 50% 50%,transparent 0 33vh,#000 33.6vh)}.sk.scoped .sk-scope{display:block}.sk-scope:before,.sk-scope:after{content:"";position:absolute;background:#000}.sk-scope:before{left:50%;top:0;bottom:0;width:1.5px}.sk-scope:after{top:50%;left:0;right:0;height:1.5px}
 .sk-vig{position:absolute;inset:0;box-shadow:inset 0 0 90px 30px rgba(220,0,0,.8);opacity:0;transition:opacity .25s}.sk-dmg{position:absolute;left:50%;top:50%;width:220px;height:220px;margin:-110px;border-radius:50%;border:8px solid transparent;border-top-color:rgba(255,60,60,.9);opacity:0;transition:opacity .4s}
-.sk-x{position:absolute;left:50%;top:50%;--g:7px}.sk-x i{position:absolute;background:#eaffea;box-shadow:0 0 2px #000}.sk-x i:nth-child(1){width:9px;height:2px;left:var(--g);top:-1px}.sk-x i:nth-child(2){width:9px;height:2px;right:var(--g);top:-1px}.sk-x i:nth-child(3){width:2px;height:9px;top:var(--g);left:-1px}.sk-x i:nth-child(4){width:2px;height:9px;bottom:var(--g);left:-1px}
+.sk-x{position:absolute;left:50%;top:50%;--g:7px}.sk-x.en i{background:#ff3b3b!important}.sk-x i{position:absolute;background:#eaffea;box-shadow:0 0 2px #000}.sk-x i:nth-child(1){width:9px;height:2px;left:var(--g);top:-1px}.sk-x i:nth-child(2){width:9px;height:2px;right:var(--g);top:-1px}.sk-x i:nth-child(3){width:2px;height:9px;top:var(--g);left:-1px}.sk-x i:nth-child(4){width:2px;height:9px;bottom:var(--g);left:-1px}
 .sk-x b{position:absolute;left:-13px;top:-13px;width:26px;height:26px;opacity:0;background:linear-gradient(45deg,transparent 45%,#fff 45% 55%,transparent 55%),linear-gradient(-45deg,transparent 45%,#fff 45% 55%,transparent 55%);-webkit-mask:radial-gradient(circle,transparent 5px,#000 6px);mask:radial-gradient(circle,transparent 5px,#000 6px)}.sk-x b.hs{filter:drop-shadow(0 0 3px #f33) hue-rotate(0deg);background:linear-gradient(45deg,transparent 43%,#ff4d4d 43% 57%,transparent 57%),linear-gradient(-45deg,transparent 43%,#ff4d4d 43% 57%,transparent 57%)}.sk.scoped .sk-x i{display:none}
 .sk-mm{position:absolute;left:8px;top:8px;width:132px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.55))}
 .sk-team{position:absolute;left:8px;top:112px;font-size:11px;display:grid;gap:3px;direction:rtl;min-width:118px}.sk-team div{background:rgba(5,12,15,.55);border-inline-start:3px solid var(--c);padding:1px 6px;display:flex;justify-content:space-between;gap:8px}.sk-team .dead{opacity:.45;text-decoration:line-through}
@@ -66,13 +67,13 @@
 
   function Engine() {
     if (!document.getElementById('sk-css')) { const s = document.createElement('style'); s.id = 'sk-css'; s.textContent = CSS; document.head.appendChild(s); }
-    const touch0 = coarse(), wrap = document.createElement('div'); wrap.className = 'sk' + (touch0 ? ' touch fs' : ' unlocked');
+    Object.assign(CFG, LS.get('dw_sk', {})); const touch0 = coarse(), wrap = document.createElement('div'); wrap.className = 'sk fs' + (touch0 ? ' touch' : ' unlocked');
     wrap.innerHTML = `<canvas class="sk-cv"></canvas><div class="sk-hud"><div class="sk-scope"></div><div class="sk-vig"></div><div class="sk-dmg"></div><div class="sk-x"><i></i><i></i><i></i><i></i><b></b></div>
       <div class="sk-hm" aria-hidden="true"><i></i><i></i><i></i><i></i></div><canvas class="sk-mm" width="132" height="96"></canvas><div class="sk-team"></div><div class="sk-score"><span style="color:${TC[0]}"><em style="font-style:normal">0</em><small>مهاجمون</small></span><div><b>0:00</b><small></small></div><span style="color:${TC[1]}"><em style="font-style:normal">0</em><small>مدافعون</small></span></div>
       <div class="sk-feed"></div><div class="sk-ban"></div><div class="sk-hint"></div><div class="sk-prog" hidden><i></i></div><div class="sk-vit"><div class="hp">❤ <b>100</b></div><div class="ar">🛡 <b>0</b></div><div class="cash">$800</div></div><div class="sk-ammo"><b>12</b><small>/12</small><em></em></div><div class="sk-spec"></div></div>
       <div class="sk-z sk-joy" data-tc="joy"></div><div class="sk-z sk-look" data-tc="look"></div><div class="sk-stick"><i></i></div>
       <div class="sk-btns"><button class="sk-fire" data-tc="fire">🔥</button><button class="sk-jmp" data-tc="jump" aria-label="قفز">⤴</button><button data-k="tpv" aria-label="منظور الكتف">🎥</button><button data-k="rel" aria-label="تلقيم">🔄</button><button data-k="sw" aria-label="تبديل السلاح">🔁</button><button data-k="cr" aria-label="انحناء">🧎</button><button data-k="zoom" hidden aria-label="منظار">🔭</button><button data-k="buy" hidden aria-label="المتجر">🛒</button><button class="sk-actb" data-tc="act" hidden></button></div>
-      <div class="sk-top"><button data-k="tab" aria-label="النتائج">📋</button><button data-k="set" aria-label="الإعدادات">⚙</button><button data-k="fs" aria-label="ملء الشاشة">⛶</button></div>
+      <div class="sk-top"><button data-k="tab" aria-label="النتائج">📋</button><button data-k="set" aria-label="الإعدادات">⚙</button><button data-k="fs" aria-label="ملء الشاشة">⛶</button><button data-k="quit" aria-label="خروج من المباراة" class="sk-quit">✕</button></div>
       <div class="sk-pan sk-buy" hidden></div><div class="sk-pan sk-set" hidden></div><div class="sk-pan sk-tab" hidden></div><div class="sk-lock">انقر للتحكم بالتصويب · Esc لتحرير الفأرة</div><div class="sk-rot">أدِر جوالك أفقياً 🔄</div><div class="sk-load">جارٍ تجهيز الساحة…</div><input type="file" accept="image/*" hidden>`;
     const $ = s => wrap.querySelector(s), cv = $('.sk-cv'), el = { hm: $('.sk-hm'), buy: $('.sk-buy'), set: $('.sk-set'), tab: $('.sk-tab'), act: $('[data-tc=act]'), zoom: $('[data-k=zoom]'), buyB: $('[data-k=buy]'), crB: $('[data-k=cr]'), file: $('input[type=file]'), mm: $('.sk-mm'), team: $('.sk-team'), sc: $('.sk-score'), feed: $('.sk-feed'), ban: $('.sk-ban'), hint: $('.sk-hint'), prog: $('.sk-prog'), vit: $('.sk-vit'), ammo: $('.sk-ammo'), spec: $('.sk-spec'), x: $('.sk-x'), vig: $('.sk-vig'), dmg: $('.sk-dmg'), load: $('.sk-load'), stick: $('.sk-stick') };
     let T, X = null, m = null, me = null, S = null, sim = null, simIv = 0, ws = null, dead = false, gone = 0, lastF = 0, posT = 0, lastSent = '', initT = 0, overSent = false, started = false, tab = false, spec = 0, hudT = 0, fpsN = 0, fpsT = 0, fpsLow = 0, liveBan = 0, deathT = 0, beepT = 0, viewId = null, shadowKick = 3, tpv = false;
@@ -104,7 +105,7 @@
         else if (t === 'b') { for (const b of q[1]) { const P = Ppos[b[0]] || (Ppos[b[0]] = { x: b[1], y: b[2], a: b[3], pi: 0 }); P.tx = b[1]; P.ty = b[2]; P.ta = b[3]; P.tpi = b[4]; P.fl = b[5]; } }
         else if (t === 'f') shotFx(q[4], q[1], q[2], q[3]);
         else if (t === 'k') { feed.push({ a: q[1], v: q[2], w: q[3], hs: q[4], t: performance.now() }); if (feed.length > 5) feed.shift(); cache.feed = null; if (q[2] === me) { deathT = performance.now(); self.zoom = 0; } if (q[1] === me) AU.play('win', null, null, .35); }
-        else if (t === 'dm') { if (q[2] === me) { self.hmT = performance.now(); self.hmH = q[4] | 0; } if (q[1] === me) { self.hurtT = performance.now(); AU.play('hurt'); const A = Ppos[q[2]]; if (A) { self.dmgA = Math.atan2(A.y - self.y, A.x - self.x); self.dmgT = performance.now(); } } if (q[2] === me) AU.play(q[4] ? 'head' : 'hit'); }
+        else if (t === 'dm') { if (chars[q[1]] && chars[q[1]].hit) chars[q[1]].hit(); if (q[2] === me) { self.hmT = performance.now(); self.hmH = q[4] | 0; } if (q[1] === me) { self.hurtT = performance.now(); AU.play('hurt'); const A = Ppos[q[2]]; if (A) { self.dmgA = Math.atan2(A.y - self.y, A.x - self.x); self.dmgT = performance.now(); } } if (q[2] === me) AU.play(q[4] ? 'head' : 'hit'); }
         else if (t === 'e') { if (q[1] === 'boom') explode(q[2], q[3]); else AU.play(q[1] === 'pl' ? 'plant' : 'defuse', q[2], q[3], 1.5); }
         else if (t === 'tp') { self.x = +q[1]; self.y = +q[2]; self.a = +q[3]; self.rd = q[4]; }
         return;
@@ -125,7 +126,7 @@
     on(document, 'mousemove', e => { if (document.pointerLockElement !== wrap) return; const s = .0022 * CFG.sens * (self.zoom ? .28 : 1); self.a = C.nrm(self.a + e.movementX * s); self.pi = Math.max(-1.45, Math.min(1.45, self.pi - e.movementY * s)); });
     on(cv, 'mousedown', e => { AU.init(); if (wrap.classList.contains('touch')) return; if (document.pointerLockElement !== wrap) return lock(); if (e.button === 2) toggleZoom(); else if (e.button === 0) { inp.fire = 1; inp.held = 0; } });
     on($('.sk-lock'), 'click', () => { AU.init(); lock(); });
-    function lock() { try { const p = wrap.requestPointerLock(); if (p && p.catch) p.catch(() => { }); } catch (er) { } }
+    function lock() { if (wrap.classList.contains('fs') && !document.fullscreenElement && wrap.requestFullscreen) { try { const fp = wrap.requestFullscreen({ navigationUI: 'hide' }); if (fp && fp.then) fp.then(() => { try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }, () => { }); } catch (e) { } } try { const p = wrap.requestPointerLock(); if (p && p.catch) p.catch(() => { }); } catch (er) { } }
     on(document, 'pointerlockchange', () => { wrap.classList.toggle('unlocked', document.pointerLockElement !== wrap); if (document.pointerLockElement !== wrap) inp.fire = 0; });
     on(document, 'mouseup', () => { inp.fire = 0; }); on(wrap, 'contextmenu', e => e.preventDefault()); on(wrap, 'wheel', e => { if (document.pointerLockElement === wrap) { e.preventDefault(); swap(); } }, { passive: false });
     const tch = {};
@@ -143,15 +144,15 @@
     on(wrap, 'click', e => {
       const b = e.target.closest('[data-k],[data-w],[data-sk],[data-q]'); if (!b || b.disabled) return; e.stopPropagation(); AU.init();
       if (b.dataset.w) { toHost(['buy', b.dataset.w]); AU.play('buy'); return; }
-      if (b.dataset.sk != null) { CFG.skin = +b.dataset.sk; saveCfg(); sendLook(); vmKey = ''; cache.set = null; drawSet(); return; }
+      if (b.dataset.sk != null) { CFG.skin = +b.dataset.sk; saveCfg(); sendLook(); if (chars[me]) dropChar(me); vmKey = ''; cache.set = null; drawSet(); return; }
       if (b.dataset.q != null) { CFG.q = +b.dataset.q; saveCfg(); applyQ(); cache.set = null; drawSet(); return; }
-      const k = b.dataset.k; if (k === 'fs') fs(); else if (k === 'face') el.file.click(); else if (k === 'tab') tab = !tab; else if (k === 'rel') reload(); else if (k === 'zoom') toggleZoom(); else if (k === 'sw') swap(); else if (k === 'tpv') { tpv = !tpv; } else if (k === 'cr') { inp.cr = inp.cr ? 0 : 1; el.crB.classList.toggle('on', !!inp.cr); } else if (k === 'buy' || k === 'buyx') toggleBuy(); else if (k === 'set' || k === 'setx') toggleSet(); else if (k === 'lefty') { CFG.lefty = CFG.lefty ? 0 : 1; saveCfg(); applyQ(); cache.set = null; drawSet(); }
+      const k = b.dataset.k; if (k === 'quit') { try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) { } wrap.classList.remove('fs'); const lv = document.querySelector('[data-act="leave"]'); if (lv && confirm('الخروج من المباراة؟')) lv.click(); return; } if (k === 'fs') fs(); else if (k === 'face') el.file.click(); else if (k === 'tab') tab = !tab; else if (k === 'rel') reload(); else if (k === 'zoom') toggleZoom(); else if (k === 'sw') swap(); else if (k === 'tpv') { tpv = !tpv; } else if (k === 'cr') { inp.cr = inp.cr ? 0 : 1; el.crB.classList.toggle('on', !!inp.cr); } else if (k === 'buy' || k === 'buyx') toggleBuy(); else if (k === 'set' || k === 'setx') toggleSet(); else if (k === 'lefty') { CFG.lefty = CFG.lefty ? 0 : 1; saveCfg(); applyQ(); cache.set = null; drawSet(); }
     });
     on(el.set, 'input', e => { const k = e.target.dataset.c; if (!k) return; CFG[k] = +e.target.value; saveCfg(); applyQ(); const o = e.target.nextElementSibling; if (o) o.textContent = k === 'fov' ? CFG.fov : Math.round(CFG[k] * 100) + '%'; });
     on(el.file, 'change', () => { const f = el.file.files[0]; el.file.value = ''; if (f && window.DW && DW.setFace) DW.setFace(f).then(() => { setFaceImg(me, DW.P.face); sendLook(); }, () => { }); });
     on(window, 'dw-face', () => sendLook());
     function fs() { const onNow = wrap.classList.toggle('fs'); try { if (onNow) { const p = wrap.requestFullscreen && wrap.requestFullscreen(); if (p && p.then) p.then(() => { try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }, () => { }); } else if (document.fullscreenElement) document.exitFullscreen(); } catch (e) { } }
-    on(document, 'fullscreenchange', () => { if (!document.fullscreenElement && wrap.classList.contains('fs') && !wrap.classList.contains('touch')) wrap.classList.remove('fs'); });
+    on(document, 'fullscreenchange', () => { });
     let buyOpen = true, setOpen = false;
     function toggleBuy() { buyOpen = !buyOpen; cache.buy = null; } function toggleSet() { setOpen = !setOpen; el.set.hidden = !setOpen; if (setOpen) { drawSet(); if (document.pointerLockElement === wrap) document.exitPointerLock(); } }
     function drawSet() {
@@ -161,7 +162,7 @@
         <label>مجال الرؤية <input type="range" min="60" max="100" step="1" value="${CFG.fov}" data-c="fov" id="sk_fov"><span>${CFG.fov}</span></label>
         <label>حجم أزرار اللمس <input type="range" min=".7" max="1.5" step=".05" value="${CFG.btn}" data-c="btn" id="sk_btn"><span>${Math.round(CFG.btn * 100)}%</span></label>
         <div class="row">جودة الرسم: ${['منخفضة', 'متوسطة', 'عالية'].map((n, i) => `<button data-q="${i}" class="${CFG.q === i ? 'on' : ''}">${n}</button>`).join('')}</div>
-        <div class="row">الزي: ${SKW.OUTFITS.map((o, i) => `<button data-sk="${i}" class="${CFG.skin === i ? 'on' : ''}">${o.n}</button>`).join('')}</div>
+        <div class="row">الشخصية: ${(window.SKM && SKM.ready() ? SKM.CHARS : SKW.OUTFITS).map((o, i) => `<button data-sk="${i}" class="${CFG.skin === i ? 'on' : ''}">${o.n}</button>`).join('')}</div>
         <div class="row"><button data-k="face">📷 صورة وجهي على الشخصية</button><button data-k="lefty" class="${CFG.lefty ? 'on' : ''}">أزرار لليد اليسرى</button></div>`);
     }
     function applyQ() {
@@ -187,8 +188,8 @@
     function dropChar(id) { const c = chars[id]; if (!c) return; world.scene.remove(c.root); c.dispose(); if (c.tag) { c.tag.material.map.dispose(); c.tag.material.dispose(); } delete chars[id]; }
     function getChar(id) {
       if (chars[id]) return chars[id]; const p = S.pl[id], so = { outfit: id === me ? CFG.skin : skins[id] != null ? skins[id] : (X.H.isBot(id) ? (id.charCodeAt(id.length - 1) % 4) : 0), team: p.tm, face: faces[id] }, c = (window.SKM && SKM.ready() && SKM.character(so)) || SKW.soldier(T, so); world.scene.add(c.root);
-      const tc = document.createElement('canvas'); tc.width = 256; tc.height = 48; const x = tc.getContext('2d'); x.font = '600 26px "Readex Pro",sans-serif'; x.textAlign = 'center'; x.lineWidth = 5; x.strokeStyle = 'rgba(0,0,0,.8)'; x.strokeText(X.H.nm(id), 128, 32); x.fillStyle = TC[p.tm]; x.fillText(X.H.nm(id), 128, 32);
-      const tx = new T.CanvasTexture(tc); tx.colorSpace = T.SRGBColorSpace; c.tag = new T.Sprite(new T.SpriteMaterial({ map: tx, transparent: true, depthTest: false, fog: false, sizeAttenuation: false })); c.tag.scale.set(.17, .032, 1); c.tag.position.y = 1.05; c.tag.renderOrder = 5; c.root.add(c.tag); return chars[id] = c;
+      const tc = document.createElement('canvas'); tc.width = 256; tc.height = 48; const x = tc.getContext('2d'); x.font = '700 34px "Readex Pro",sans-serif'; x.textAlign = 'center'; x.lineWidth = 5; x.strokeStyle = 'rgba(0,0,0,.8)'; x.strokeText(X.H.nm(id), 128, 32); x.fillStyle = '#fff'; x.fillText(X.H.nm(id), 128, 32);
+      const tx = new T.CanvasTexture(tc); tx.colorSpace = T.SRGBColorSpace; c.tag = new T.Sprite(new T.SpriteMaterial({ map: tx, transparent: true, depthTest: false, fog: false, sizeAttenuation: false })); c.tag.scale.set(.3, .056, 1); c.tag.position.y = 1.05; c.tag.renderOrder = 5; c.root.add(c.tag); return chars[id] = c;
     }
     /* ---- إطلاق النار: مسار ثلاثي الأبعاد حقيقي مع صناديق إصابة للرأس والجسم ---- */
     function shoot(now) {
@@ -203,7 +204,7 @@
       }
       const ca = Math.cos(self.a), sa = Math.sin(self.a); tracer(self.x + ca * .4 - sa * .09, self.y + sa * .4 + ca * .09, ez - .07, self.x + cx, self.y + cy, ez + cz);
       for (const id in hits) { toHost(['h', id, hits[id][1], self.slot && self.w ? 1 : 0, hits[id][0]]); self.hitT = now; self.hs = hits[id][1]; }
-      toHost(['f', self.slot && self.w ? 1 : 0, C.r2(ay), C.r2(ap)]); AU.play(wn); self.kick = 1; self.last = now; self.ammo[self.slot]--; self.rp += w.rec * (.7 + Math.random() * .6); self.ry += (Math.random() - .5) * w.rec * .9; self.heat = Math.min(1, self.heat + (w.auto ? .13 : .3)); flashL.intensity = 5; if (w.zoom) self.zoom = 0;
+      toHost(['f', self.slot && self.w ? 1 : 0, C.r2(ay), C.r2(ap)]); AU.play(wn); self.kick = 1; if (chars[me]) chars[me].kick = 1; self.last = now; self.ammo[self.slot]--; self.rp += w.rec * (.7 + Math.random() * .6); self.ry += (Math.random() - .5) * w.rec * .9; self.heat = Math.min(1, self.heat + (w.auto ? .13 : .3)); flashL.intensity = 5; if (w.zoom) self.zoom = 0;
     }
     /* ---- التهيئة ثلاثية الأبعاد ---- */
     function init3() {
@@ -222,11 +223,11 @@
     let boomMesh;
     function resize() { const r = wrap.getBoundingClientRect(), k = (r.width | 0) + 'x' + (r.height | 0); if (!r.height || cache.size === k) return; cache.size = k; R.setSize(r.width, r.height, false); cam.aspect = vmCam.aspect = r.width / r.height; cam.updateProjectionMatrix(); vmCam.updateProjectionMatrix(); }
     function setVM(now) {
-      const key = curW() + '|' + CFG.skin; if (key !== vmKey) { if (vm) { vmScene.remove(vm); vm.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); } vmKey = key; vm = SKW.viewModel(T, curW(), CFG.skin); vmScene.add(vm); }
+      const key = curW() + '|' + CFG.skin; if (key !== vmKey) { if (vm) { vmScene.remove(vm); if (vm.userData.dispose) vm.userData.dispose(); else vm.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); } vmKey = key; vm = SKW.viewModel(T, curW(), CFG.skin); vmScene.add(vm); }
       if (vm) vm.visible = !tpv;
       const long = curW() !== 'pistol', swp = self.sw ? Math.max(0, (self.sw - now) / 320) : 0, relp = self.rel ? 1 - Math.max(0, (self.rel - now) / self.relD) : 0, rl = self.rel ? Math.sin(relp * Math.PI) : 0, k = self.kick, mvb = Math.min(1, self.mvS);
       vm.position.set((long ? .1 : .115) + Math.sin(self.bob) * .006 * mvb - self.swayX, (long ? -.105 : -.115) - Math.abs(Math.cos(self.bob)) * .006 * mvb - swp * .25 - rl * .1 + self.swayY, (long ? -.3 : -.4) + k * .04);
-      vm.rotation.set(k * .1 - rl * .7 + swp * .8, .07 - self.swayX * 1.5 + rl * .25, rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12;
+      vm.rotation.set(k * .1 - rl * .7 + swp * .8, .07 - self.swayX * 1.5 + rl * .25, rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12; if (vm.userData.tick) vm.userData.tick(now, vmCam);
     }
     /* ---- الواجهة ---- */
     const fmt = ms => { const s = Math.ceil(Math.max(0, ms) / 1000); return (s / 60 | 0) + ':' + String(s % 60).padStart(2, '0'); };
@@ -300,14 +301,18 @@
       const kk = 1 - Math.exp(-dt * 13); let vx = self.x, vy = self.y, va = self.a + self.ry, vp = self.pi + self.rp, vz = (self.z || 0) + self.eye, watching = null; viewId = me;
       if (p && !p.al && now - deathT > 1400) { const mates = Object.keys(S.pl).filter(i => i !== me && S.pl[i].al && Ppos[i] && S.pl[i].tm === p.tm); if (mates.length) { watching = mates[spec % mates.length]; const P = Ppos[watching]; vx = P.x; vy = P.y; va = P.a; vp = P.pi || 0; vz = (P.z || 0) + C.BODY[P.fl & 1 ? 1 : 0].head - .02; viewId = watching; } if (inp.fire && !inp.held) { inp.held = 1; spec++; } }
       else if (p && !p.al) { vz = Math.max(.15, self.eye - (now - deathT) / 1400 * .6); vp = self.pi - Math.min(.5, (now - deathT) / 1400 * .5); viewId = null; }
+      let aimEn = false;
       for (const id in S.pl) {
         const q = S.pl[id], P = id === me ? Ppos[me] : Ppos[id]; if (!P) continue;
         if (id !== me && P.tx != null) { const ox = P.x, oy = P.y; if (Math.hypot(P.tx - P.x, P.ty - P.y) > 4) { P.x = P.tx; P.y = P.ty; } P.x += (P.tx - P.x) * kk; P.y += (P.ty - P.y) * kk; P.a = C.nrm(P.a + C.nrm(P.ta - P.a) * kk); P.pi = (P.pi || 0) + ((P.tpi || 0) - (P.pi || 0)) * kk; P.spd = Math.hypot(P.x - ox, P.y - oy) / Math.max(dt, .001); }
         const c = getChar(id), hide = id === me ? !(tpv && p && p.al && !watching) : id === viewId; c.root.visible = !hide; if (hide) continue;
         if (q.al || !c.dead) c.root.position.set(P.x, P.z || 0, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, spd: P.spd || 0, pitch: P.pi || 0, acting: P.fl & 8 }); if (c.blob) c.blob.visible = q.al && CFG.q < 2;
-        c.tag.visible = q.al && p && (q.tm === p.tm || !p.al); c.tag.position.y = 1.05 - c.cr * .28;
+        const ally = !!p && q.tm === p.tm; if (c.setSide) c.setSide(id === me ? 'self' : ally);
+        let seen = false; if (q.al && id !== me && !ally && p) { const ez = (P.z || 0) + .55, dd = Math.hypot(P.x - vx, P.y - vy); if (dd < 30 && C.los3(m, vx, vy, vz, P.x, P.y, ez)) { seen = true; const da = C.nrm(Math.atan2(P.y - vy, P.x - vx) - va), dp = Math.atan2(ez - vz, dd) - vp, r = Math.atan2(.24, Math.max(dd, .5)); if (Math.abs(da) < r && Math.abs(dp) < r * 1.6) aimEn = true; } }
+        c.tag.visible = q.al && id !== me && (ally || seen || (p && !p.al)); if (c.tag.visible) c.tag.material.color.set(ally ? 0x8fd0ff : 0xff6060); c.tag.position.y = 1.05 - (c.cr || 0) * .28;
         if (q.al && id !== me && P.fl & 2 && !(P.fl & 1)) { P.st = (P.st || 0) - dt; if (P.st <= 0) { P.st = .34; AU.play('step_' + world.theme.step, P.x, P.y, .9); } }
       }
+      if (aimEn !== cache.aimEn) { cache.aimEn = aimEn; const xh = wrap.querySelector('.sk-x'); if (xh) xh.classList.toggle('en', aimEn); }
       /* الكاميرا والمؤثرات */
       const zoomOn = self.zoom && p && p.al && !watching, shake = self.shake && now - self.shake < 600 ? (1 - (now - self.shake) / 600) * .05 : 0; cam.fov += ((zoomOn ? 18 : CFG.fov) - cam.fov) * Math.min(1, dt * 14); cam.updateProjectionMatrix();
       let camX = vx, camY = vz, camZ = vy; if (tpv && p && p.al && !watching) { const D = 2.6, cA = Math.cos(va), sA = Math.sin(va); camX = vx - cA * D; camZ = vy - sA * D; camY = vz + .55; }
