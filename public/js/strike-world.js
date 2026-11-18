@@ -90,14 +90,19 @@
     SHOPS.forEach((s, i) => M('shop' + i, { map: tex('shop' + i, 256, 256, (x, w, h) => DRAW.gShop(x, w, h, s[0], s[1])) })); M('flat', {}); M('leaf', { side: T.DoubleSide }); M('glow', { emissive: 0xffffff, emissiveIntensity: 1 });
     const at = (x, y) => x < 0 || y < 0 || x >= W || y >= H ? '#' : m.ch[y * W + x], full = (x, y) => x < 0 || y < 0 || x >= W || y >= H || m.g[y * W + x] === 1;
     const TINT = [[1, .97, .9], [.99, .9, .76], [.96, .84, .74], [.9, .88, .82], [1, .92, .84], [.85, .9, .93]], CCOL = [[.75, .22, .18], [.2, .4, .68], [.22, .5, .3], [.85, .5, .15], [.5, .5, .52]];
-    const wallH = (x, y) => { const c = at(x, y); if (c === 'O') return 2.3; if (c === 'W') return 3.6; if (c === 'P') return 2.9; if (c === 'K') return 1.3; if (c === 'S') return 1.7; if (c === 'o' || c === 'p') return 0; if (DEP) return 3; if (m.theme === 'castle') return (!x || !y || x === W - 1 || y === H - 1) ? 2.6 : 2; return 1.3 + 1.2 * (1 + Math.floor(hash(x >> 2, y >> 2, 7) * 3)); };
+    /* أسطح يُصعد إليها بالدرج: كل الغرف المتصلة بأعلى درجة. جدرانها تصبح حاجز سطح بارتفاع ما يوقف الرصاص (2.9) فيطابق الشكل اللعب */
+    const RF = new Uint8Array(W * H); { const q = []; for (let i = 0; i < W * H; i++) if (m.ch[i] === 'w') for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = i + dy * W + dx; if (m.ind[n] && !RF[n]) { RF[n] = 1; q.push(n); } }
+      for (let k = 0; k < q.length; k++) { const c = q[k]; for (const d of [1, -1, W, -W]) { const n = c + d; if (n >= 0 && n < W * H && m.ind[n] && !RF[n]) { RF[n] = 1; q.push(n); } } } }
+    const roofNb = (x, y) => { for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < W && Y < H && RF[Y * W + X]) return true; } return false; };
+    const wallH = (x, y) => { const c = at(x, y); if ((c === '#' || c === 'O') && roofNb(x, y)) return 2.9; if (c === 'O') return 2.3; if (c === 'W') return 3.6; if (c === 'P') return 2.9; if (c === 'K') return 1.3; if (c === 'S') return 1.7; if (c === 'o' || c === 'p') return 0; if (DEP) return 3; if (m.theme === 'castle') return (!x || !y || x === W - 1 || y === H - 1) ? 2.6 : 2; return 1.3 + 1.2 * (1 + Math.floor(hash(x >> 2, y >> 2, 7) * 3)); };
+    let railM = null;
     const NB = [[0, 1, 0], [0, -1, 1], [1, 0, 2], [-1, 0, 3]], CEIL = 2, ROOF = 2.25, IN_TINT = [1.04, 1, .93], lampPos = [], fires = [], poles = [];
     G.top(th.floor, 0, 0, W, H, 0, [0, 0, W * (DEP || th.walk ? 1 : m.theme === 'castle' ? 3 : 2), H * (DEP || th.walk ? 1 : m.theme === 'castle' ? 3 : 2)], wht);
     /* نافذة مفتوحة في جدار: يمكن الإطلاق والرؤية عبرها (بين العتبة والساكف)، ولا يمكن المشي عبرها */
     const WLO = .42, WHI = 1.25, SHUT = [[.16, .45, .42], [.18, .36, .62], [.55, .32, .18], [.2, .5, .35]];
     function drawWin(x, y, cx, cz) {
       const alongX = full(x - 1, y) || full(x + 1, y), nbH = (a, b) => full(a, b) && at(a, b) !== 'O' ? wallH(a, b) : 0;
-      const hgt = Math.max(alongX ? Math.max(nbH(x - 1, y), nbH(x + 1, y)) : Math.max(nbH(x, y - 1), nbH(x, y + 1)), 2.3);
+      const hgt = roofNb(x, y) ? 2.9 : Math.max(alongX ? Math.max(nbH(x - 1, y), nbH(x + 1, y)) : Math.max(nbH(x, y - 1), nbH(x, y + 1)), 2.3);
       const ext = m.theme === 'castle' ? 'stone' : DEP ? 'conc' : 'plaster', inM = m.theme === 'castle' ? 'stone' : DEP ? 'conc' : 'wallIn';
       const tint = m.theme === 'hara' ? TINT[Math.floor(hash(x >> 2, y >> 2, 3) * TINT.length)] : wht, ow = .28, sc = SHUT[Math.floor(hash(x, y, 13) * 4)];
       const sides = alongX ? [[0, 1, 0], [0, -1, 1]] : [[1, 0, 2], [-1, 0, 3]];
@@ -146,7 +151,16 @@
         if (m.theme === 'castle') { for (const [dx, dy] of NB) { if (full(x + dx, y + dy) && wallH(x + dx, y + dy) >= hgt) continue; G.box('stone', cx + dx * .36 + (dx ? 0 : -.25), hgt + .13, cz + dy * .36 + (dy ? 0 : -.25), .26, .26, .26, tint, .5); G.box('stone', cx + dx * .36 + (dx ? 0 : .25), hgt + .13, cz + dy * .36 + (dy ? 0 : .25), .26, .26, .26, tint, .5); } if (c === 'W') { G.box('wood', cx, hgt + .55, cz, .05, 1.1, .05, [.5, .4, .3]); G.q('cloth', [cx, hgt + .75, cz, cx + .5, hgt + .8, cz + .05, cx + .5, hgt + 1.08, cz + .05, cx, hgt + 1.08, cz], [0, 0, 1], [0, 0, 1, 1], [.75, .12, .12]); } }
         else if (m.theme === 'hara' && r < .07) G.cyl('flat', cx, hgt, cz, .28, .5, [.93, .93, .9], 10);
         else if (m.theme === 'hara' && r < .22) G.box('conc', cx, hgt + .09, cz, 1, .18, 1, tint, 1);
-      } else if (c === 'y' || c === 'z' || c === 'w') { const sh = m.fh[i], sm = DEP ? 'conc' : 'stone'; G.box(sm, cx, sh / 2, cz, 1, sh, 1, DEP ? [.62, .64, .66] : [.9, .86, .8], 1); }
+      } else if (c === 'y' || c === 'z' || c === 'w') {
+        /* درج حقيقي: ثلاث درجات في كل خلية باتجاه الصعود، ودرابزين معدني على الجوانب المفتوحة */
+        const sh = m.fh[i], sm = DEP ? 'conc' : 'stone', col = DEP ? [.62, .64, .66] : [.9, .86, .8], nx = { y: 'z', z: 'w' }[c];
+        let ux = 0, uy = 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = at(x + dx, y + dy); if (nx ? n === nx : (m.fh[(y - dy) * W + x - dx] > 0 && at(x - dx, y - dy) === 'z')) { ux = dx; uy = dy; } }
+        if (!ux && !uy) G.box(sm, cx, sh / 2, cz, 1, sh, 1, col, 1);
+        else { const h0 = sh - .65; for (let k = 0; k < 3; k++) { const hk = h0 + .65 * (k + 1) / 3, o = -.5 + (k + .5) / 3; G.box(sm, cx + ux * o, hk / 2, cz + uy * o, ux ? 1 / 3 : 1, hk, uy ? 1 / 3 : 1, col.map(v => v * (k % 2 ? .94 : 1)), 1); }
+          for (const sg of [-1, 1]) { const sx = uy ? sg : 0, sy = ux ? sg : 0, n = (y + sy) * W + x + sx; if (m.g[n] === 1) continue; const px = cx + sx * .46, pz = cz + sy * .46;
+            const r = new T.Mesh(new T.BoxGeometry(ux ? 1.2 : .04, .04, uy ? 1.2 : .04), railM || (railM = new T.MeshStandardMaterial({ color: 0x5a5f66, metalness: .7, roughness: .35 }), disposables.push(railM), railM)); r.position.set(px, h0 + .325 + .55, pz); if (ux) r.rotation.z = Math.atan2(.65, 1) * ux; else r.rotation.x = -Math.atan2(.65, 1) * uy; scene.add(r); disposables.push(r.geometry);
+            for (const e of [-.42, .42]) G.box('metal', px + ux * e, h0 + .325 + .65 * e + .28, pz + uy * e, .03, .56, .03, [.3, .31, .33]); } }
+      }
       else if (c === 'Q') { G.box(DEP ? 'conc' : 'stone', cx, 1.3, cz, 1, 2.6, 1, [.8, .78, .74], 1); }
       else if (c === 'K') { const col = CCOL[Math.floor(hash(x >> 1, y >> 1, 4) * CCOL.length)]; for (const [dx, dy, d] of NB) if (at(x + dx, y + dy) !== 'K') G.face('corr', d, cx + dx * .5, cz + dy * .5, .5, 0, 1.3, [0, 0, 1, 1], col); G.top('metal', x, y, x + 1, y + 1, 1.3, [0, 0, 1, 1], col); }
       else if (c === 'S') { for (const [a, b] of [[-.42, -.42], [.42, -.42], [-.42, .42], [.42, .42]]) G.box('metal', cx + a, .85, cz + b, .05, 1.7, .05, [.25, .35, .6]); for (let k = 0; k < 4; k++) { G.box('metal', cx, .12 + k * .5, cz, .94, .04, .94, [.7, .45, .15]); if (k < 3) for (let j = 0; j < 2; j++) { const s = .25 + hash(x * 3 + j, y * 5 + k, 2) * .14; G.box('crate', cx - .22 + j * .44, .14 + k * .5 + s / 2, cz + (hash(x + j, y + k, 8) - .5) * .3, s, s, s + .1, [.95, .9, .8], 1 / s); } } }
@@ -173,7 +187,8 @@
         G.top(m.theme === 'castle' ? 'stone' : 'roof', x, y, x + 1, y + 1, ROOF, [0, 0, .5, .5], [.8, .78, .74]);
         const hm = m.theme === 'castle' ? 'stone' : DEP ? 'conc' : 'plaster';
         for (const [dx, dy, d] of NB) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H || m.ind[ny * W + nx]) continue; const fx = cx + dx * .5, fz = cz + dy * .5;
-          if (!full(nx, ny)) G.box(hm, fx - dx * .06, (1.35 + ROOF) / 2, fz - dy * .06, dx ? .12 : 1, ROOF - 1.35, dy ? .12 : 1, m.theme === 'hara' ? TINT[Math.floor(hash(x >> 2, y >> 2, 3) * TINT.length)] : wht, 1);
+          if (!full(nx, ny) && m.fh[ny * W + nx] > 0) G.box(hm, fx - dx * .03, (CEIL + ROOF) / 2, fz - dy * .03, dx ? .06 : 1, ROOF - CEIL, dy ? .06 : 1, [.85, .84, .8], 1); /* حافة فتحة الدرج في السقف */
+          else if (!full(nx, ny)) G.box(hm, fx - dx * .06, (1.35 + ROOF) / 2, fz - dy * .06, dx ? .12 : 1, ROOF - 1.35, dy ? .12 : 1, m.theme === 'hara' ? TINT[Math.floor(hash(x >> 2, y >> 2, 3) * TINT.length)] : wht, 1);
           else if (wallH(nx, ny) < ROOF) G.face(hm, d, fx, fz, .5, wallH(nx, ny), ROOF, [0, 0, 1, .3], wht); }
         if ((x + y * 3) % 5 === 0) { G.top('glow', cx - .28, cz - .1, cx + .28, cz + .1, CEIL - .01, [0, 0, 1, 1], [1, .95, .82], true); lampPos.push([cx, cz]); }
       }

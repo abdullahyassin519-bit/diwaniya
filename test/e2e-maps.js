@@ -24,7 +24,7 @@ const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++;
       for (let i = 0; i < 4; i++) { o.last = 0; o.rel = 0; o.ammo[o.slot] = 12; o.x = 13.3; o.y = 3.5; o.a = (i - 2) * .05; D.shoot(); await w8(60); }
       const F = D.fx(), live = P => { let n = 0; for (let i = 0; i < P.n; i++) if (P.life[i] > 0) n++; return n; };
       const fx = { spk: live(F.spk), deb: live(F.deb), shells: F.shells.filter(s => s.visible).length };
-      o.x = 6.5; o.y = 5.5; o.z = 0; await w8(400);
+      o.x = 8.5; o.y = 5.5; o.z = 0; await w8(400); /* داخل قاعة المستودع (6,5 صار درجاً) */
       return { outInd, inInd: D.au().ind, fx, audio: !!D.au().ac };
     });
     ok(r.outInd === 0 && r.inInd === 1, 'audio switches to indoor reverb inside the warehouse');

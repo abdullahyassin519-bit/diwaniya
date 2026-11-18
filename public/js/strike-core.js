@@ -34,6 +34,11 @@
       { x: 11, y: 18, rows: ['BBBBBBBB', 'BBBBBBBB'] }, { x: 13, y: 17, rows: ['iBBi'] }, { x: 10, y: 18, rows: ['O'] }, { x: 19, y: 19, rows: ['O'] }
     ],
   };
+  OV['الحارة'].push({ x: 9, y: 13, rows: ['yzw'] }); /* درج داخلي إلى سطح غرفة الفناء (بعد التراكبات حتى لا يُمحى) */
+  OV['القلعة'].push({ x: 12, y: 4, rows: ['yzw'] }, { x: 15, y: 18, rows: ['wzy'] }); /* درجان داخل القاعتين إلى السطح */
+  OV['السوق'] = [{ x: 9, y: 11, rows: ['yzw'] }]; /* درج داخل القاعة الكبيرة */
+  OV['الميناء'] = [{ x: 4, y: 5, rows: ['yzw'] }]; /* درج داخل المستودع إلى سطحه */
+  OV['المدرسة'] = [{ x: 9, y: 5, rows: ['yzw'] }, { x: 4, y: 17, rows: ['yzw'] }];
   const RAW = {
     'الحارة': { theme: 'hara', rows: [
       '################################',
@@ -237,20 +242,24 @@
     const a = dx * dx + dy * dy; if (a > 1e-9) { const fx = ox - px, fy = oy - py, bq = fx * dx + fy * dy, c = fx * fx + fy * fy - br * br, disc = bq * bq - a * c; if (disc > 0) { const t = (-bq - Math.sqrt(disc)) / a, z = oz + dz * t; if (t > 0 && z >= 0 && z <= b.top && t < best) { best = t; part = 0; } } }
     if (best > 1e29) return false; H3.t = best; H3.part = part; return true;
   }
+  /* المبنى طابقان في خلية واحدة: أرضية الغرفة (0) وسطحها (ROOF). من يصل من الأعلى (الدرج) يقف على السطح. ROOF_IN: أعلى قدم داخل الغرفة قبل أن يلامس الرأس السقف */
+  const ROOF_IN = CEIL - .95, fAt = (m, i, z) => m.ind[i] && z >= CEIL - .12 ? ROOF : m.fh[i];
   const solid = (m, x, y) => x < 0 || y < 0 || x >= m.w || y >= m.h || m.g[(y | 0) * m.w + (x | 0)] > 0;
   /* خلية صلبة لجسم عند ارتفاع قدم z: الجدار دائماً، والسواتر تُعبَر بالقفز فوقها، والأرضية المرتفعة تُدخَل إن لم تتجاوز STEP. */
-  const cellSolid = (m, x, y, z) => { if (x < 0 || y < 0 || x >= m.w || y >= m.h) return true; const i = (y | 0) * m.w + (x | 0), k = m.g[i]; if (k === 1) return true; if (k === 2 && z < m.hh[i]) return true; return m.fh[i] > z + STEP; };
+  const cellSolid = (m, x, y, z) => { if (x < 0 || y < 0 || x >= m.w || y >= m.h) return true; const i = (y | 0) * m.w + (x | 0), k = m.g[i]; if (k === 1) return true; if (k === 2 && z < m.hh[i]) return true; if (m.ind[i] && z > ROOF_IN + .02 && z < CEIL - .12) return true; /* من منتصف الدرج لا تدخل الغرفة برأسك في السقف */ return fAt(m, i, z) > z + STEP; };
   const blk = (m, x, y, z) => { z = z || 0; return cellSolid(m, x - RAD, y - RAD, z) || cellSolid(m, x + RAD, y - RAD, z) || cellSolid(m, x - RAD, y + RAD, z) || cellSolid(m, x + RAD, y + RAD, z); };
   function mv(m, P, dx, dy) { if (!blk(m, P.x + dx, P.y, P.z)) P.x += dx; if (!blk(m, P.x, P.y + dy, P.z)) P.y += dy; }
   /* أعلى أرضية تحت جسد اللاعب (الزوايا الأربع). */
-  function floorMax(m, x, y) { let f = 0; for (const [dx, dy] of [[-RAD, -RAD], [RAD, -RAD], [-RAD, RAD], [RAD, RAD]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= m.w || Y >= m.h) continue; const v = m.fh[(Y | 0) * m.w + (X | 0)]; if (v > f) f = v; } return f; }
+  function floorMax(m, x, y, z) { z = z || 0; let f = 0; for (const [dx, dy] of [[-RAD, -RAD], [RAD, -RAD], [-RAD, RAD], [RAD, RAD]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= m.w || Y >= m.h) continue; const v = fAt(m, (Y | 0) * m.w + (X | 0), z); if (v > f) f = v; } return f; }
+  const underCeil = (m, x, y) => { for (const [dx, dy] of [[-RAD, -RAD], [RAD, -RAD], [-RAD, RAD], [RAD, RAD]]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < m.w && Y < m.h && m.ind[(Y | 0) * m.w + (X | 0)]) return true; } return false; };
   /* فيزياء رأسية: قفزة إن كان على الأرض، وسقوط بالجاذبية عند ترك حافة. P.z ارتفاع القدم، P.vz السرعة الرأسية، P.gr يعني على الأرض. */
   function vert(m, P, dt, jump) {
-    if (P.z == null) P.z = 0; if (P.vz == null) P.vz = 0; const fl = floorMax(m, P.x, P.y);
+    if (P.z == null) P.z = 0; if (P.vz == null) P.vz = 0; const fl = floorMax(m, P.x, P.y, P.z);
     if (jump && P.gr && P.z <= fl + .01) { P.vz = JV; P.gr = 0; }
     if (P.vz <= 0 && P.z - fl <= STEP && P.z > fl) { P.z = fl; P.vz = 0; P.gr = 1; }
     else if (P.vz > 0 || P.z > fl + .001) { P.vz -= GRAV * dt; P.z += P.vz * dt; if (P.z <= fl && P.vz <= 0) { P.z = fl; P.vz = 0; P.gr = 1; } else P.gr = 0; }
     else { P.z = fl; P.vz = 0; P.gr = 1; }
+    if (P.z > ROOF_IN && P.z < CEIL - .12 && underCeil(m, P.x, P.y)) { P.z = ROOF_IN; if (P.vz > 0) P.vz = 0; } /* القفز داخل الغرفة يتوقف عند السقف */
     return P.z;
   }
   function field(m, gx, gy) {
@@ -298,7 +307,7 @@
       const VB = bots[vid]; if (VB) { VB.alert = now() + 5000; VB.ls = { x: A.x, y: A.y, t: now() }; }
       if (v.hp <= 0) { v.hp = 0; v.al = 0; v.d++; a.k++; if (part) a.hs++; a.$ = Math.min(12000, a.$ + 300); for (const o in dmgLog[vid]) if (o !== from && dmgLog[vid][o] >= 40 && S.pl[o]) S.pl[o].as++; emit(['k', from, vid, wn, part ? 1 : 0]); v.w = ''; v.ar = 0; }
     }
-    function plant(id) { const p = S.pl[id], P = pos[id]; if (!P || p.tm !== 0 || !p.al || S.ph !== 'live' || S.bomb || !m.st[(P.y | 0) * m.w + (P.x | 0)]) return; S.bomb = { x: r2(P.x), y: r2(P.y), r: BOMB }; bdl = now() + BOMB; p.$ = Math.min(12000, p.$ + 300); emit(['e', 'pl', S.bomb.x, S.bomb.y]); dirty = true; }
+    function plant(id) { const p = S.pl[id], P = pos[id]; if (!P || p.tm !== 0 || !p.al || S.ph !== 'live' || S.bomb || !m.st[(P.y | 0) * m.w + (P.x | 0)] || (P.z || 0) > 1) return; /* لا زرع فوق سطح الموقع */ S.bomb = { x: r2(P.x), y: r2(P.y), r: BOMB }; bdl = now() + BOMB; p.$ = Math.min(12000, p.$ + 300); emit(['e', 'pl', S.bomb.x, S.bomb.y]); dirty = true; }
     function defuse(id) { const p = S.pl[id], P = pos[id]; if (!P || p.tm !== 1 || !p.al || S.ph !== 'live' || !S.bomb || Math.hypot(P.x - S.bomb.x, P.y - S.bomb.y) > 1.3) return; emit(['e', 'df', S.bomb.x, S.bomb.y]); endRound(1, 'أُبطلت القنبلة'); }
     function msg(from, q) {
       const p = S.pl[from], t = now(); if (!p || !Array.isArray(q)) return;
@@ -306,7 +315,7 @@
         if (hold[from] > t) return; const x = +q[1], y = +q[2], z = q.length > 6 ? +q[6] : 0;
         if (!(x > 0 && y > 0 && x < m.w && y < m.h) || !(z === z) || cellSolid(m, x, y, z)) return;
         /* الارتفاع: لا يُسمح بأن يكون اللاعب داخل أرضية، ولا بقفزة أعلى من JMAX فوق أعلى ما كان عليه أو الأرضية. */
-        const fz = m.fh[(y | 0) * m.w + (x | 0)], pz = pos[from] ? pos[from].z || 0 : 0;
+        const fz = fAt(m, (y | 0) * m.w + (x | 0), z), pz = pos[from] ? pos[from].z || 0 : 0; /* على السطح تُحسب أرضيته لا أرضية الغرفة تحته */
         /* الصعود لا يتجاوز قفزة فوق الارتفاع السابق، والسقوط (هبوط تحت الارتفاع السابق) مسموح دائماً. */
         if (z < fz - .6 || (z > pz + .05 && (z > pz + JMAX || z > fz + JMAX))) return;
         const fl = q[5] | 0; pos[from] = { x, y, z, a: +q[3] || 0, pi: cl(+q[4] || 0, -1.5, 1.5), fl, cr: fl & 1 }; last[from] = t; taken[from] = 0; if (fl & 8) { if (!actT[from]) actT[from] = t; } else delete actT[from];
@@ -390,5 +399,5 @@
     startRound(true);
     return { S, pos, tick, msg, join, heard, isBot, get done() { return done; }, gk: cfg.gk };
   }
-  return { RAW, WP, BODY, RAD, HR, BR, ARMOR, PLANT, DEFUSE, FREEZE, STEP, GRAV, JV, JMAX, WALL_TOP, CEIL, ROOF, INMAP, WIN_LO, WIN_HI, FH, parseMap, ray3, R3, los3, hitPlayer, H3, mv, blk, cellSolid, floorMax, vert, field, nrm, r2, Sim };
+  return { ROOF_IN, fAt, RAW, WP, BODY, RAD, HR, BR, ARMOR, PLANT, DEFUSE, FREEZE, STEP, GRAV, JV, JMAX, WALL_TOP, CEIL, ROOF, INMAP, WIN_LO, WIN_HI, FH, parseMap, ray3, R3, los3, hitPlayer, H3, mv, blk, cellSolid, floorMax, vert, field, nrm, r2, Sim };
 });
