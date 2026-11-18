@@ -144,6 +144,7 @@
 @media (max-width:700px){.sk-ros i{width:22px;height:28px}.sk-ros{padding:0 3px;gap:2px}}
 .sk-feed{position:absolute;right:8px;top:84px;display:grid;gap:3px;justify-items:end;font-size:12px;direction:rtl}.sk-feed div{background:rgba(5,12,15,.6);padding:1px 8px;border-radius:4px}.sk-feed .me{outline:1px solid #f5b62e}
 .sk-ban{position:absolute;left:0;right:0;top:20%;text-align:center;direction:rtl}.sk-ban b{display:block;font:400 34px 'Lalezar','Readex Pro',sans-serif;letter-spacing:.5px}.sk-ban span{font-size:14px}
+.sk-qn{position:absolute;top:92px;left:50%;transform:translateX(-50%);background:rgba(6,10,13,.82);color:#f5c043;padding:6px 14px;border-radius:6px;font-size:13px;direction:rtl;z-index:12;pointer-events:none;white-space:nowrap}
 .sk-hint{position:absolute;left:0;right:0;top:62%;text-align:center;font-size:14px;color:#f5b62e;direction:rtl}
 .sk-prog{position:absolute;left:50%;top:57%;width:200px;margin-left:-100px;height:10px;background:rgba(0,0,0,.6);border-radius:6px;overflow:hidden}.sk-prog i{display:block;height:100%;background:#f5b62e;width:0}
 .sk-vit{position:absolute;left:10px;bottom:8px;display:flex;gap:8px;align-items:flex-end;font-weight:600}.sk-vit div{background:rgba(5,12,15,.6);padding:2px 10px;border-radius:6px;font-size:13px}.sk-vit b{font-size:24px;font-variant-numeric:tabular-nums}.sk-vit .low{color:#ff6b6b}
@@ -432,7 +433,7 @@
       if (vm) vm.visible = !tpv;
       const long = curW() !== 'pistol', swp = self.sw ? Math.max(0, (self.sw - now) / 320) : 0, relp = self.rel ? 1 - Math.max(0, (self.rel - now) / self.relD) : 0, rl = self.rel ? Math.sin(relp * Math.PI) : 0, k = self.kick, mvb = Math.min(1, self.mvS);
       vm.position.set((long ? .125 : .115) + Math.sin(self.bob) * .006 * mvb - self.swayX, (long ? -.118 : -.115) - Math.abs(Math.cos(self.bob)) * .006 * mvb - swp * .25 - rl * .1 + self.swayY, (long ? -.36 : -.4) + k * .04); /* السلاح الطويل أبعد وأصغر في الزاوية (مثل CS2) */
-      vm.scale.setScalar(long ? .8 : .9); vm.rotation.set(k * .1 - rl * .7 + swp * .8, (long ? .07 : .2) - self.swayX * 1.5 + rl * .25, (long ? 0 : .08) + rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12; if (vm.userData.tick) vm.userData.tick(now, vmCam);
+      vm.scale.setScalar(long ? .8 : .78); vm.rotation.set(k * .1 - rl * .7 + swp * .8, (long ? .07 : .2) - self.swayX * 1.5 + rl * .25, (long ? 0 : .08) + rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12; if (vm.userData.tick) vm.userData.tick(now, vmCam);
     }
     /* ---- الواجهة ---- */
     const fmt = ms => { const s = Math.ceil(Math.max(0, ms) / 1000); return (s / 60 | 0) + ':' + String(s % 60).padStart(2, '0'); };
@@ -519,7 +520,7 @@
         const ally = !!p && q.tm === p.tm; if (c.setSide) c.setSide(id === me ? 'self' : ally);
         if (ally && id !== me && q.al && !tpv && Math.hypot(P.x - vx, P.y - vy) < .85) { c.root.visible = false; c.tag.visible = false; continue; } /* زميل ملاصق للكاميرا لا يغطي الشاشة */
         let seen = false; if (q.al && id !== me && !ally && p) { const ez = (P.z || 0) + .55, dd = Math.hypot(P.x - vx, P.y - vy); if (dd < 30 && C.los3(m, vx, vy, vz, P.x, P.y, ez)) { seen = true; const da = C.nrm(Math.atan2(P.y - vy, P.x - vx) - va), dp = Math.atan2(ez - vz, dd) - vp, r = Math.atan2(.24, Math.max(dd, .5)); if (Math.abs(da) < r && Math.abs(dp) < r * 1.6) aimEn = true; } }
-        c.tag.visible = q.al && id !== me && (ally || seen); /* أسماء الأعداء فقط عند خط النظر، حتى أثناء المشاهدة */ if (c.tag.visible) c.tag.material.color.set(q.tm ? 0x8cc4ff : 0xffa070); /* لون الاسم = لون الفريق نفسه في الشريط العلوي */ c.tag.position.y = 1.05 - (c.cr || 0) * .28;
+        if (ally && q.al && id !== me) { const dd = Math.hypot(P.x - vx, P.y - vy); if (!P.losT || now - P.losT > 150) { P.losT = now; P.losV = dd < 6 || C.los3(m, vx, vy, vz, P.x, P.y, (P.z || 0) + .55); } seen = P.losV; } c.tag.visible = q.al && id !== me && seen; /* أسماء الزملاء أيضاً عند الرؤية أو القرب فقط: لا تتكدس خلف الجدران */ /* أسماء الأعداء فقط عند خط النظر، حتى أثناء المشاهدة */ if (c.tag.visible) c.tag.material.color.set(q.tm ? 0x8cc4ff : 0xffa070); /* لون الاسم = لون الفريق نفسه في الشريط العلوي */ c.tag.position.y = 1.05 - (c.cr || 0) * .28;
         if (q.al && id !== me && P.fl & 2 && !(P.fl & 1)) { P.st = (P.st || 0) - dt; if (P.st <= 0) { P.st = .34; AU.play('step_' + world.theme.step, P.x, P.y, .9); } }
       }
       if (aimEn !== cache.aimEn) { cache.aimEn = aimEn; const xh = wrap.querySelector('.sk-x'); if (xh) xh.classList.toggle('en', aimEn); }
@@ -541,7 +542,7 @@
       if (p && p.al && !watching && !zoomOn) { setVM(now); R.clearDepth(); R.render(vmScene, vmCam); }
       hud(now, p, watching);
       if (ldWait) { ldWait = false; requestAnimationFrame(hideLoad); } /* لا نُخفي شاشة التحميل قبل أول إطار مرسوم فعلاً (بدون شاشة سوداء) */
-      if (++fpsN, now - fpsT > 2000) { const fps = fpsN * 1000 / (now - fpsT); fpsN = 0; fpsT = now; self.fps = fps; if (fps < 26 && CFG.q > 0 && !CFG.lock && ++fpsLow >= 2) { fpsLow = 0; CFG.q--; applyQ(); } else if (fps >= 26) fpsLow = 0; }
+      if (++fpsN, now - fpsT > 2000) { const fps = fpsN * 1000 / (now - fpsT); fpsN = 0; fpsT = now; self.fps = fps; if (fps < 26 && CFG.q > 0 && !CFG.lock && ++fpsLow >= 2) { fpsLow = 0; CFG.q--; applyQ(); try { const n = document.createElement('div'); n.className = 'sk-qn'; n.textContent = 'خُفّضت جودة الرسم تلقائياً للحفاظ على السلاسة — يمكنك تغييرها من ⚙'; wrap.appendChild(n); setTimeout(() => n.remove(), 4000); } catch (e) { } } else if (fps >= 26) fpsLow = 0; }
     }
     function destroy() {
       if (dead) return; dead = true; clearInterval(simIv); AB.abort(); AU.stopAmb(); AU.heli(false); try { ws && ws.close(); } catch (e) { } try { if (document.pointerLockElement === wrap) document.exitPointerLock(); } catch (e) { }
