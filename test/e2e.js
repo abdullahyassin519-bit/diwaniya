@@ -65,7 +65,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const ids = await S.evaluate(() => G.list.map(g => g.id));
   for (const id of ids) {
     await S.evaluate(() => { if (DW.Room.R) document.querySelector('[data-act=leave]').click(); });
-    await S.click(`.card[data-act="game:${id}"]`); await S.click(`[data-act="solo:${id}"]`);
+    await S.evaluate(id => document.querySelector(`[data-act="solo:${id}"]`).click(), id);
     const started = await until(() => S.evaluate(() => DW.Room.R && DW.Room.R.ph === 'game' && document.querySelector('#gv').innerHTML.length > 20), 4000, id);
     await sleep(900); if (id === 'mafia') { await S.setViewportSize({ width: 390, height: 800 }); await S.evaluate(() => { document.documentElement.dataset.theme = 'dark'; }); await sleep(200); await S.screenshot({ path: 'test/shot-mafia-dark-mobile.png', fullPage: true }); await S.evaluate(() => { delete document.documentElement.dataset.theme; }); await S.setViewportSize({ width: 1100, height: 800 }); }
     if (['chess', 'ludo', 'tycoon', 'snakes', 'colors', 'mafia', 'island', 'caravan', 'letters', 'dama'].includes(id)) await S.screenshot({ path: `test/shot-${id}.png` });

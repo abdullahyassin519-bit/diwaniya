@@ -12,8 +12,8 @@ const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++;
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); await page.addInitScript(() => { if (!localStorage.getItem('dw_sk')) localStorage.setItem('dw_sk', JSON.stringify({ q: 1 })); }); /* جودة متوسطة: المتصفح الآلي يرسم بلا معالج رسوميات */
     page.on('pageerror', e => errors.push(String(e)));
     await page.goto(URL); await page.waitForFunction(() => window.DW);
-    await page.click('.card[data-act="game:strike"]'); await sleep(1500);
-    await page.click('[data-act="solo:strike"]');
+    await sleep(800);
+    await page.evaluate(() => document.querySelector('[data-act="solo:strike"]').click());
     await page.waitForFunction(() => window.SK && SK.dbg && SK.dbg.S && SK.dbg.S() && SK.dbg.S().ph === 'freeze', null, { timeout: 40000 });
     await page.evaluate(() => { const l = document.querySelector('.sk-lock'); if (l) l.style.display = 'none'; });
     await page.waitForFunction(() => SK.dbg.S().ph === 'live', null, { timeout: 30000 });
@@ -41,7 +41,7 @@ const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++;
     let map = await page.evaluate(() => SK.dbg.S().map);
     for (let tries = 0; tries < 8 && map !== 'المستودع'; tries++) {
       await page.reload(); await page.waitForFunction(() => window.DW);
-      await page.click('.card[data-act="game:strike"]'); await sleep(1500); await page.click('[data-act="solo:strike"]');
+      await sleep(800); await page.evaluate(() => document.querySelector('[data-act="solo:strike"]').click());
       await page.waitForFunction(() => window.SK && SK.dbg && SK.dbg.S && SK.dbg.S() && SK.dbg.S().ph === 'freeze', null, { timeout: 40000 });
       await page.evaluate(() => { const l = document.querySelector('.sk-lock'); if (l) l.style.display = 'none'; });
       await page.waitForFunction(() => SK.dbg.S().ph === 'live', null, { timeout: 30000 });

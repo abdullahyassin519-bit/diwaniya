@@ -13,10 +13,10 @@ const URL = 'http://localhost:3113/', sleep = ms => new Promise(r => setTimeout(
   const A = await mk('A'), B = await mk('B', { width: 780, height: 360 }, true);
   await A.goto(URL); await A.waitForFunction(() => window.DW && DW.Net.ok);
   await A.evaluate(async () => { const c = document.createElement('canvas'); c.width = c.height = 200; const x = c.getContext('2d'); x.fillStyle = '#2a7'; x.fillRect(0, 0, 200, 200); x.fillStyle = '#fff'; x.font = '120px sans-serif'; x.fillText('ع', 60, 140); const b = await new Promise(r => c.toBlob(r, 'image/png')); await DW.setFace(new File([b], 'f.png', { type: 'image/png' })); });
-  await A.click('[data-act=create]'); await until(() => A.evaluate(() => DW.Room.R && DW.Room.R.code !== 'LOCAL'));
+  await A.evaluate(() => document.querySelector('[data-act="play:strike"]').click()); await until(() => A.evaluate(() => DW.Room.R && DW.Room.R.code !== 'LOCAL'));
   const code = await A.evaluate(() => DW.Room.R.code); await B.goto(URL + '#r-' + code); await until(() => A.evaluate(() => DW.Room.R.ps.length === 2));
-  await A.click('[data-act="pick:strike"]'); ok(await A.evaluate(() => DW.Room.R.teams === 1), 'lobby: picking the shooter turns on team assignment');
-  await A.click('[data-act="rounds:3"]'); await sleep(200); await A.evaluate(() => { const C = window.SKC, n = Object.keys(C.RAW)[2]; document.querySelector('[data-act="map:' + n + '"]').click(); }); await sleep(200); await A.click('[data-act=start]');
+  ok(await A.evaluate(() => DW.Room.R.gid === 'strike' && DW.Room.R.teams === 1), 'lobby: the room opens on the shooter with team assignment');
+  await A.evaluate(() => document.querySelector('[data-act="rounds:3"]').click()); await sleep(200); await A.evaluate(() => { const C = window.SKC, n = Object.keys(C.RAW)[2]; document.querySelector('[data-act="map:' + n + '"]').click(); }); await sleep(200); await A.evaluate(() => document.querySelector('[data-act=start]').click());
   ok(await until(async () => (await SS(A)) && (await SS(B)) && (await SS(B)).rd === 1, 40000, 'snapshot'), 'both devices get round state from the server simulation');
   const idA = await A.evaluate(() => DW.P.id), idB = await B.evaluate(() => DW.P.id);
   ok(await until(() => B.evaluate(a => !!SK.dbg.faces[a], idA), 12000), 'face photo of A delivered to B');
@@ -54,7 +54,7 @@ const URL = 'http://localhost:3113/', sleep = ms => new Promise(r => setTimeout(
 
   /* تدريب بلا اتصال بالخادم (المحاكاة نفسها محلياً) + لقطات */
   const S = await mk('S', { width: 1280, height: 800 }, false, 1); await S.goto(URL); await S.waitForFunction(() => window.DW);
-  await S.click('.card[data-act="game:strike"]'); await sleep(2500); await S.screenshot({ path: 'test/sk-menu.png' }); await S.click('[data-act="solo:strike"]');
+  await sleep(2500); await S.screenshot({ path: 'test/sk-menu.png' }); await S.evaluate(() => document.querySelector('[data-act="solo:strike"]').click());
   ok(await until(async () => (await SS(S)) && (await SS(S)).ph === 'freeze', 40000), 'training: offline match vs bots starts (6 players)');
   await S.evaluate(() => { document.querySelector('.sk-lock').style.display = 'none'; }); await sleep(1500); await S.screenshot({ path: 'test/sk-buy.png' });
   await until(async () => (await SS(S)).ph === 'live', 14000); await sleep(4000);

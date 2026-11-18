@@ -157,8 +157,8 @@
     const attach = (bn, build) => { const g0 = G0[bn], bone = model.getObjectByName(bn); if (!g0 || !bone) return; const wrap = new T.Group(), c = g0.box.getCenter(new T.Vector3()), sz = g0.box.getSize(new T.Vector3());
       build(wrap, c, sz); const holder = new T.Group(); holder.add(wrap); /* من فضاء العالم (وضع القياس) إلى فضاء العظمة */ const mW = new T.Matrix4().makeTranslation(0, 0, 0); holder.applyMatrix4(g0.inv); bone.add(holder); };
     /* خوذة: قبة بحافة وحامل أمامي */
-    attach('Head', (w, c, sz) => { const r = Math.max(sz.x, sz.z) * .54, hm = mat(cols[0]);
-      const dome = new T.Mesh(new T.SphereGeometry(r, 20, 12, 0, Math.PI * 2, 0, Math.PI * .56), hm); dome.scale.set(1, .86, 1.04); dome.position.set(c.x, c.y + sz.y * .5 - r * .78, c.z - r * .04); w.add(dome);
+    attach('Head', (w, c, sz) => { const r = Math.max(sz.x, sz.z) * .5, hm = mat(cols[0]);
+      const dome = new T.Mesh(new T.SphereGeometry(r, 20, 12, 0, Math.PI * 2, 0, Math.PI * .56), hm); dome.scale.set(1, .78, 1.04); dome.position.set(c.x, c.y + sz.y * .5 - r * .66, c.z - r * .04); w.add(dome);
       const rim = new T.Mesh(new T.TorusGeometry(r * .99, r * .05, 6, 24), hm); rim.rotation.x = Math.PI / 2; rim.scale.set(1, 1.05, 1); rim.position.set(c.x, dome.position.y - r * .12, dome.position.z); w.add(rim);
       const nv = new T.Mesh(new T.BoxGeometry(r * .32, r * .22, r * .12), mat(0x15171a)); nv.position.set(c.x, dome.position.y + r * .38, dome.position.z + r * .93); w.add(nv);
       const strap = new T.Mesh(new T.BoxGeometry(r * 2.02, r * .1, r * .1), mat(0x2a2a2a)); strap.position.set(c.x, dome.position.y + r * .05, dome.position.z); w.add(strap); });
@@ -311,7 +311,19 @@
 
   /* ذراعا الشخص الأول: من نموذج الشخصية نفسها (الجلد والأكمام)، تمسكان السلاح باليدين عبر IK.
      المجموعة الناتجة تُوضع أمام كاميرا العرض كما كان النموذج الإجرائي (السلاح في الأصل، فوهته نحو -z). */
-  function viewArms(name, outfit, AS) {
+  /* قفازات وأكمام تكتيكية لذراعي المنظور الأول: الرؤوس المرتبطة بعظام الأصابع تصير قفازاً داكناً،
+     وباقي الذراع كمّاً بلون الفريق، مع الإبقاء على تفاصيل الخامة كتظليل */
+  function tactical(mat, mesh, team) {
+    const bones = mesh.skeleton.bones, mask = new Float32Array(64); bones.forEach((b, i) => { if (i < 64 && /Index|Middle|Pinky|Ring|Thumb/.test(b.name)) mask[i] = 1; });
+    const uM = { value: mask }, glove = new T.Color(0x1d1f22), sleeve = new T.Color(team ? 0x4a5640 : 0x7d6d50);
+    mat.onBeforeCompile = sh => {
+      sh.uniforms.uFing = uM; sh.uniforms.uGlove = { value: glove }; sh.uniforms.uSleeve = { value: sleeve };
+      sh.vertexShader = 'uniform float uFing[64];\nvarying float vGl;\n' + sh.vertexShader.replace('#include <skinning_vertex>', '#include <skinning_vertex>\n  vGl = uFing[int(skinIndex.x)] * skinWeight.x + uFing[int(skinIndex.y)] * skinWeight.y + uFing[int(skinIndex.z)] * skinWeight.z + uFing[int(skinIndex.w)] * skinWeight.w;');
+      sh.fragmentShader = 'uniform vec3 uGlove;\nuniform vec3 uSleeve;\nvarying float vGl;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n  { float lum = dot(diffuseColor.rgb, vec3(.3, .59, .11)); vec3 tac = mix(uSleeve, uGlove, smoothstep(.25, .6, vGl)); diffuseColor.rgb = tac * (.62 + lum * .75); }');
+    };
+    mat.customProgramCacheKey = () => 'tac' + team; if ('roughness' in mat) mat.roughness = .85;
+  }
+  function viewArms(name, outfit, AS, team) {
     if (!ready) return null;
     const def = CHARS[(outfit | 0) % CHARS.length], src = cache.ch[def.k];
     const g = new T.Group(), gn = weapon(name, false); if (!gn) return null;
@@ -319,9 +331,11 @@
     gn.rotation.y = Math.PI; gn.position.z = zo; g.add(gn);
     const model = window.GLX.SkeletonUtils.clone(src.scene), mats = [];
     const junk = []; model.traverse(o => { if (o.isMesh && !o.isSkinnedMesh) junk.push(o); }); junk.forEach(o => o.parent && o.parent.remove(o));
-    model.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.castShadow = false; o.material = o.material.clone(); mats.push(o.material); } });
+    model.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.castShadow = false; o.material = o.material.clone(); if (o.isSkinnedMesh) tactical(o.material, o, team | 0); mats.push(o.material); } });
     const B = n => model.getObjectByName(n);
     ['Head', 'UpperLegL', 'UpperLegR', 'FootL', 'FootR', 'Neck'].forEach(n => { const b = B(n); if (b) b.scale.setScalar(.001); });
+    /* الكف الكرتونية كبيرة: نصغّر الأصابع قليلاً */
+    const fingers = []; model.traverse(o => { if (o.isBone && /^(Index1|Middle1|Pinky1|Ring1|Thumb1)/.test(o.name)) fingers.push(o); });
     const sc = AS || .4; model.scale.setScalar(sc); model.rotation.y = Math.PI;
     const holder = new T.Group(); holder.add(model); g.add(holder);
     const mixer = new T.AnimationMixer(model), clip = src.clips.find(c => c.name === 'Idle_Gun') || src.clips[0];
@@ -333,7 +347,7 @@
       /* يُستدعى بعد تحديد موضع المجموعة أمام الكاميرا */
       tick(now, cam) {
         if (!act) return;
-        mixer.setTime(((now || 0) / 1000) % clip.duration);
+        mixer.setTime(((now || 0) / 1000) % clip.duration); for (const b of fingers) b.scale.setScalar(.84);
         /* الصدر خلف المقبض وأسفله، خارج مجال الرؤية، فتصل الذراعان إلى السلاح */
         g.updateMatrixWorld(true); holder.position.set(0, 0, 0); holder.updateMatrixWorld(true);
         chest.getWorldPosition(cw); g.worldToLocal(cw);
@@ -391,5 +405,18 @@
     } catch (e) { return ''; }
   }
 
-  window.SKM = { load, ready: () => ready, character, weapon, viewArms, vehicle, thumb, CHARS };
+  /* أيقونة سلاح جانبية مرسومة من النموذج نفسه (للمتجر) */
+  const GI = {};
+  function gunIcon(name) {
+    if (GI[name]) return GI[name]; if (!ready) return '';
+    try { if (!TR) thumb(0, 0, 40, 40);
+      const g = weapon(name, false), sc = new T.Scene(); sc.add(new T.HemisphereLight(0xffffff, 0x445566, 2.2)); const d = new T.DirectionalLight(0xffffff, 2.6); d.position.set(1, 2, 2); sc.add(d); const bk = new T.DirectionalLight(0xbfd8ff, 2); bk.position.set(-1, .5, -2); sc.add(bk); sc.add(g);
+      /* أيقونة المتجر: صورة ظلية فاتحة مع الحفاظ على التظليل (السلاح الحقيقي أسود فلا يظهر على خلفية داكنة) */
+      const own = []; const wt = new T.Color(0xe8edf3); g.traverse(o => { if (o.material && !Array.isArray(o.material)) { const k = o.material.clone(); k.metalness = Math.min(.25, k.metalness); k.roughness = Math.max(.5, k.roughness); if (k.color) k.color.lerp(wt, .62); if (k.map) k.map = null; k.emissive && k.emissive.setRGB(0, 0, 0); o.material = k; own.push(k); } });
+      g.rotation.y = -Math.PI / 2; g.updateMatrixWorld(true); const box = new T.Box3().setFromObject(g), c = box.getCenter(new T.Vector3()), sz = box.getSize(new T.Vector3());
+      const hh = Math.max(sz.x * .22, sz.y * .6), hw = hh * 2.5, cam = new T.OrthographicCamera(-hw, hw, hh, -hh, -5, 5); cam.position.set(c.x, c.y, c.z + 1); cam.lookAt(c);
+      TR.r.setSize(240, 96, false); TR.r.render(sc, cam); GI[name] = TR.cv.toDataURL('image/png'); own.forEach(k => k.dispose()); return GI[name];
+    } catch (e) { return ''; }
+  }
+  window.SKM = { load, ready: () => ready, character, weapon, viewArms, vehicle, thumb, gunIcon, CHARS };
 })();

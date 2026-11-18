@@ -11,13 +11,13 @@
   const okAv = a => AV0.includes(a) || a in AV1 ? a : '🦊';
 
   /* ---------- الملف الشخصي ---------- */
-  const P = Object.assign({ id: 'u' + rid(10), n: '', av: U.pick(AV0), fr: 0, xp: 0, coins: 50, own: [], ach: {}, played: 0, won: 0, streak: 0, hosted: 0, games: {}, hist: [], day: {}, week: {}, snd: 1, theme: '' }, LS.get('dw_p', {}));
+  const P = Object.assign({ id: 'u' + rid(10), n: '', av: U.pick(AV0), fr: 0, xp: 0, coins: 50, own: [], ach: {}, played: 0, won: 0, streak: 0, hosted: 0, games: {}, hist: [], day: {}, week: {}, snd: 1, theme: '', k: 0, d: 0, as: 0, hs: 0, mvp: 0 }, LS.get('dw_p', {}));
   if (!P.n) P.n = 'ضيف ' + (100 + U.rnd(900));
   if (!P.tok) P.tok = rid(28);
   const save = () => LS.set('dw_p', P); save();
   const ACH = [['first', '☕ أول فنجان', 'العب أول مباراة', () => P.played >= 1], ['win1', '🏅 أول فوز', 'افز بمباراة', () => P.won >= 1], ['win5', '🏆 خمسة انتصارات', 'افز بخمس مباريات', () => P.won >= 5], ['play10', '🎮 مدمن ديوانية', 'العب 10 مباريات', () => P.played >= 10],
   ['var5', '🎯 مقاتل الديوانية', 'العب 5 مباريات طخطخة', () => (P.games.strike || 0) >= 5], ['orig', '🏆 فريق الحسم', 'اربح 3 مباريات', () => P.won >= 3], ['host', '🛋️ راعي المجلس', 'افتح غرفة', () => P.hosted >= 1],
-  ['streak3', '🔥 سلسلة ثلاثية', 'افز 3 مرات متتالية', () => P.streak >= 3], ['daily', '📅 ملتزم', 'أنجز تحدي اليوم', () => P.day.done], ['rich', '🪙 تاجر', 'اجمع 500 عملة', () => P.coins >= 500]];
+  ['streak3', '🔥 سلسلة ثلاثية', 'افز 3 مرات متتالية', () => P.streak >= 3], ['k50', '💀 خمسون قتيلاً', 'اقضِ على 50 خصماً', () => P.k >= 50], ['hs25', '🎯 قنّاص الرؤوس', '25 إصابة رأس قاتلة', () => P.hs >= 25], ['mvp1', '⭐ أفضل لاعب', 'كن أفضل لاعب في مباراة', () => P.mvp >= 1], ['daily', '📅 ملتزم', 'أنجز تحدي اليوم', () => P.day.done], ['rich', '🪙 تاجر', 'اجمع 500 عملة', () => P.coins >= 500]];
   function checkAch() { for (const a of ACH) if (!P.ach[a[0]] && a[3]()) { P.ach[a[0]] = 1; toast('إنجاز جديد: ' + a[1]); } }
   const today = () => new Date().toISOString().slice(0, 10), weekNo = () => Math.floor(Date.now() / 6048e5);
   const dailyGame = () => { let h = 0; for (const c of today()) h = (h * 31 + c.charCodeAt(0)) % 9973; return G.list[h % G.list.length]; };
@@ -102,7 +102,7 @@
     if (offline || !Net.ok) { Room.offline = true; Room.R = newR('LOCAL'); }
     else { try { const r = await fetch(`api/create?t=${P.tok}`, { method: 'POST' }); if (!r.ok) throw 0; const j = await r.json(); Room.hk = j.hk; LS.set('dw_hk_' + j.code, j.hk); Room.R = newR(j.code); Net.open(j.code, NH); try { location.hash = 'r-' + j.code; } catch (e) { } } catch (e) { toast('تعذر فتح غرفة مباشرة، فتحنا لك غرفة على هذا الجهاز'); Room.offline = true; Room.R = newR('LOCAL'); } }
     Room.host = true; view = 'room'; modal = null; handle(P.id, mine());
-    if (gid) { Room.R.gid = gid; Room.R.o = defOpts(G.by[gid]); }
+    if (gid) { Room.R.gid = gid; Room.R.o = defOpts(G.by[gid]); if (G.by[gid].teams) Room.R.teams = 1; }
     push(); window.scrollTo(0, 0);
   }
   const ERR = { none: 'لا توجد غرفة بهذا الرمز. تأكد منه أو اطلب رابطاً جديداً', slow: 'محاولات كثيرة. انتظر دقيقة ثم حاول', net: 'تعذر الاتصال بالخادم', banned: 'أزالك قائد هذه الغرفة ولا يمكنك العودة إليها', locked: 'الغرفة مقفلة. اطلب من القائد فتحها', full: 'الغرفة مكتملة العدد' };
@@ -141,12 +141,16 @@
   }, 200);
 
   function award() {
-    const R = Room.R, g = G.by[R.gid], won = R.res.win.includes(P.id); let xp = 20 + (won ? 40 : 0), co = 10 + (won ? 25 : 0);
+    const R = Room.R, g = G.by[R.gid], won = R.res.win.includes(P.id), f = (R.st && R.st.fin && R.st.fin[P.id]) || [0, 0, 0, 0], mvp = R.st && R.st.mvp === P.id;
+    /* خبرة حقيقية من أداء المباراة: مشاركة + فوز + قتل + رؤوس + مساعدات + أفضل لاعب */
+    const parts = [['المشاركة', 20], ['الفوز', won ? 40 : 0], ['القتل ×' + f[0], f[0] * 5], ['إصابات الرأس ×' + f[3], f[3] * 3], ['المساعدات ×' + f[2], f[2] * 2], ['أفضل لاعب', mvp ? 25 : 0]].filter(x => x[1]);
+    const xp0 = P.xp; let xp = parts.reduce((a, x) => a + x[1], 0), co = 10 + (won ? 25 : 0) + f[0] * 2;
+    P.k += f[0]; P.d += f[1]; P.as += f[2]; P.hs += f[3]; if (mvp) P.mvp++;
     P.played++; P.games[g.id] = (P.games[g.id] || 0) + 1; if (won) { P.won++; P.streak++; } else P.streak = 0;
     if (!P.day.done && g.id === dailyGame().id) { P.day.done = 1; co += 50; toast('أنجزت تحدي اليوم! +50 عملة'); }
     P.week.g.push(g.id); if (!P.week.done && P.week.g.length >= 5) { P.week.done = 1; co += 150; toast('أنجزت تحدي الأسبوع! +150 عملة'); }
     P.xp += xp; P.coins += co; P.hist.unshift({ g: g.id, t: Date.now(), w: won ? 1 : 0, s: (R.st.sc || {})[P.id] || 0, n: R.gps.length }); P.hist = P.hist.slice(0, 20);
-    Room.gain = { xp, co }; checkAch(); save(); if (won) { beep(660, .12); setTimeout(() => beep(880, .2), 130); } else beep(300, .25, 'triangle');
+    Room.gain = { xp, co, parts, xp0 }; checkAch(); save(); if (won) { beep(660, .12); setTimeout(() => beep(880, .2), 130); } else beep(300, .25, 'triangle');
   }
 
   /* ---------- الواجهة ---------- */
@@ -162,27 +166,32 @@
   const art = (g, tag = 'div') => `<${tag} class="art" style="--h:${g.hue}">${g.em}</${tag}>`;
   const meta = g => `<div class="meta"><span>👥 ${g.min === g.max ? g.min : g.min + '–' + g.max} لاعبين</span><span>⏱ ${g.t} د</span>${g.cat === 'orig' ? '<span class="new">حصرية</span>' : ''}</div>`;
   function topHTML() {
-    return `<div class="wrap"><button class="logo" data-act="home" aria-label="ديوانية — الرئيسية"><i></i>ديوانية</button><span class="sp"></span>
-      <span class="pill">🪙 ${P.coins}</span><span class="pill lvl">مستوى ${level()}</span>
-      <button class="ib" data-act="snd" aria-label="الصوت">${P.snd ? '🔔' : '🔕'}</button><button class="ib" data-act="theme" aria-label="الوضع الليلي أو النهاري">🌗</button>
+    return `<div class="wrap"><button class="logo" data-act="home" aria-label="طخطخة — القائمة الرئيسية"><i></i>طخطخة</button><span class="sp"></span>
+      <span class="pill" style="color:var(--gold)">🪙 ${P.coins}</span><span class="pill lvl">مستوى ${level()}</span>
+      <button class="ib" data-act="snd" aria-label="الصوت">${P.snd ? '🔊' : '🔇'}</button>
       <button class="ib av f${P.fr}" data-act="profile" aria-label="ملفي">${P.av}</button></div>`;
   }
+  const CHARS = [['فهد', 'قائد هادئ الأعصاب'], ['صقر', 'خفيف وسريع'], ['زياد', 'مهاجم جريء'], ['أبو سعد', 'خبير ميداني']];
+  /* القائمة الرئيسية: مشهد ثلاثي الأبعاد حيّ خلف القائمة، وشخصيتك المختارة في المقدمة */
   function homeHTML() {
-    const d = dailyGame(), q = U.norm(filt.q), list = G.list.filter(g => (filt.cat === 'all' || g.cat === filt.cat) && (filt.mode === 'all' || g.modes.includes(filt.mode)) && (!q || U.norm(g.n + ' ' + g.d).includes(q)));
-    const fan = ['strike'].map(id => G.by[id]).filter(Boolean);
-    let h = `<section class="hero"><div class="wrap"><div><h1>طخطخة<br><em>تصويب جماعي مباشر</em></h1>
-      <p>افتح غرفة، أرسل الرمز أو الرابط، والعبوا كلٌّ من جهازه: فريقان من 1 إلى 6 لاعبين في كل فريق، بخرائط فيها أبنية وأسطح ودرج.</p>
-      <div class="cta"><button class="btn pri lg" data-act="create">افتح غرفة جديدة</button><input class="inp" id="join_in" maxlength="4" placeholder="الرمز" aria-label="رمز الغرفة" autocomplete="off"><button class="btn ghost" data-act="join">ادخل برمز</button></div>
-      <p class="net">${Net.ok ? '<b>●</b> الغرف المباشرة تعمل: شارك الرابط والعبوا من أي مكان.' : '<b>●</b> أنت في وضع المعاينة: العب الآن ضد لاعبين آليين أو مع من بجانبك على الجهاز نفسه. اللعب عن بُعد يتفعّل عند تشغيل خادم ديوانية.'}</p></div>
-      <div class="fan" aria-hidden="true">${fan.map(g => `<button tabindex="-1" style="--h:${g.hue}" data-act="game:${g.id}">${g.em}</button>`).join('')}</div></div></section><div class="sadu"></div>
-      <div class="wrap"><div class="pn daily"><div><small class="mut">تحدي اليوم ${P.day.done ? '· أُنجز ✅' : '· +50 عملة'}</small><br><b>${d.em} العب مباراة «${d.n}»</b></div>
-      <div><small class="mut">تحدي الأسبوع ${P.week.done ? '· أُنجز ✅' : '· +150 عملة'}</small><br>العب 5 مباريات طخطخة (${Math.min(5, P.week.g.length)}/5)</div><button class="btn" data-act="game:${d.id}">العب تحدي اليوم</button></div>
-      <div class="filters"><input class="inp" id="q" placeholder="ابحث عن لعبة…" aria-label="بحث" style="max-width:240px">
-      ${[['all', 'الكل']].concat(Object.entries(CATS).filter(([k]) => G.list.some(g => g.cat === k)).map(([k, v]) => [k, v[0]])).map(([k, n]) => `<button class="tab ${filt.cat === k ? 'on' : ''}" data-act="cat:${k}">${n}</button>`).join('')}<span class="sp"></span>
-      ${[['all', 'كل الأعمار']].concat(Object.entries(MODES)).map(([k, n]) => `<button class="tab ${filt.mode === k ? 'on' : ''}" data-act="mode:${k}">${n}</button>`).join('')}</div>`;
-    for (const c in CATS) { const gs = list.filter(g => g.cat === c); if (gs.length) h += `<section class="cat"><h2>${CATS[c][0]} <small>${CATS[c][1]}</small></h2><div class="grid">${gs.map(g => `<button class="card" data-act="game:${g.id}">${art(g)}<div class="bd"><h3>${g.n}</h3><p>${g.d}</p>${meta(g)}</div></button>`).join('')}</div></section>`; }
-    if (!list.length) h += '<p class="ctr mut" style="padding:40px 0">لا توجد لعبة بهذه المواصفات. جرّب بحثاً آخر.</p>';
-    return h + `<footer>كل الألعاب المعروضة هنا تعمل فعلاً. العملات والنقاط افتراضية للتسلية فقط، ولا توجد أي معاملات مالية حقيقية.</footer></div>`;
+    const d = dailyGame(), sk = mySkin(), ch = CHARS[sk], kd = P.d ? (P.k / P.d).toFixed(2) : P.k ? P.k.toFixed(2) : '0.00', hsr = P.k ? Math.round(P.hs / P.k * 100) : 0;
+    return `<section class="mm"><div class="mm-bg" id="m3d"></div><div class="mm-grad"></div><div class="mm-ui">
+      <div class="mm-top"><button class="mm-logo" data-act="home"><i></i>طخطخة</button><span class="sp"></span>
+        <span class="mm-coin">🪙 ${P.coins}</span><button class="mm-ib" data-act="snd" aria-label="الصوت">${P.snd ? '🔊' : '🔇'}</button>
+        <button class="mm-me" data-act="profile"><span class="av">${P.av}</span><span><b>${esc(P.n)}</b><small>المستوى ${level()} · ${P.xp % 100}/100</small><span class="xpb"><i style="--w:${P.xp % 100}%"></i></span></span></button></div>
+      <nav class="mm-nav"><div class="mm-title"><span class="tag">تكتيكي · فريق ضد فريق</span><h1>طخطخة</h1><p>ازرع القنبلة أو أبطلها. جولات، اقتصاد، وأصدقاؤك عبر رابط واحد.</p></div>
+        <button class="mm-b pri" data-act="solo:strike"><span class="ic">▶</span><span><b>العب الآن</b><small>مباراة فورية ضد لاعبين آليين</small></span></button>
+        <button class="mm-b" data-act="play:strike"><span class="ic">👥</span><span><b>العب مع أصدقائك</b><small>افتح غرفة وأرسل الرابط</small></span></button>
+        <div class="mm-join"><input class="inp" id="join_in" maxlength="4" placeholder="رمز الغرفة" aria-label="رمز الغرفة" autocomplete="off"><button class="btn pri" data-act="join">انضم</button></div>
+        <button class="mm-b" data-act="chars"><span class="ic">🪖</span><span><b>الشخصيات</b><small>اختر مقاتلك</small></span></button>
+        <button class="mm-b" data-act="profile"><span class="ic">📊</span><span><b>المسيرة والإنجازات</b><small>${Object.keys(P.ach).length}/${ACH.length} إنجاز · ${P.played} مباراة</small></span></button>
+        <p class="mm-net">${Net.ok ? '<b>●</b> الخوادم متصلة: الغرف المباشرة تعمل من أي مكان.' : '<b style="color:var(--gold)">●</b> وضع بلا خادم: العب ضد الآليين على هذا الجهاز.'}</p></nav>
+      <div class="mm-hero"><div><div class="ds">مقاتلك</div><div class="nm">${ch[0]}</div><div class="ds">${ch[1]}</div></div><button class="btn" data-act="chars">تغيير</button></div>
+      <div class="mm-side">
+        <div class="mm-card"><small>تحدي اليوم · ${P.day.done ? 'أُنجز ✅' : '+50 عملة'}</small><b>العب مباراة كاملة</b><div class="bar"><i style="--w:${P.day.done ? 100 : 0}%"></i></div></div>
+        <div class="mm-card"><small>تحدي الأسبوع · ${P.week.done ? 'أُنجز ✅' : '+150 عملة'}</small><b>5 مباريات (${Math.min(5, P.week.g.length)}/5)</b><div class="bar"><i style="--w:${Math.min(5, P.week.g.length) * 20}%"></i></div></div>
+        <div class="mm-card mm-stats"><div><b>${P.played}</b><small>مباراة</small></div><div><b>${P.played ? Math.round(P.won / P.played * 100) : 0}%</b><small>فوز</small></div><div><b>${kd}</b><small>K/D</small></div><div><b>${hsr}%</b><small>رأس</small></div></div>
+      </div></div></section>`;
   }
   function chatHTML() {
     const R = Room.R;
@@ -248,56 +257,51 @@
   function ensureModels() {
     if (MODELS_P) return MODELS_P;
     const add = src => new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
-    MODELS_P = (window.THREE ? Promise.resolve() : add('js/vendor/three.min.js'))
+    MODELS_P = (window.MENU3D ? MENU3D.boot() : (window.THREE ? Promise.resolve() : add('js/vendor/three.min.js'))
       .then(() => (window.GLX ? 0 : add('js/vendor/gltf-loader.js')))
-      .then(() => (window.SKM ? SKM.load(window.THREE) : false))
-      .then(ok => { if (ok && Room.R && Room.R.gid === 'strike' && Room.R.ph !== 'game') render(); }, () => { });
+      .then(() => (window.SKM ? SKM.load(window.THREE) : false)))
+      .then(ok => { if (ok && ((Room.R && Room.R.gid === 'strike' && Room.R.ph !== 'game') || modal)) render(); }, () => { });
     return MODELS_P;
   }
   const mySkin = () => { const c = LS.get('dw_sk', {}); return Math.max(0, Math.min(3, (c && c.skin) | 0)); };
   const seatSkin = x => x.id === P.id ? mySkin() : x.sk != null ? x.sk | 0 : [...String(x.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 4;
+  /* صورة الخريطة: لقطة جوية ثلاثية الأبعاد حقيقية (تُرسم مرة وتُخزّن)، والمخطط احتياطاً حتى تجهز */
+  const mapImg = (name, w) => { const shot = window.MENU3D ? MENU3D.mapShot(name, () => render()) : ''; return shot || mapThumb(name, w || 320); };
   function strikeLobbyHTML() {
     const R = Room.R, host = Room.host, C = window.SKC, ps = R.ps, n = ps.length;
     const side = t => ps.filter(x => (x.team || 1) === t), A = side(1), D = side(2);
     const chosen = R.o.map && R.o.map !== 'عشوائي' && C && C.RAW[R.o.map] ? R.o.map : null, rounds = R.o.w || 5;
     const canStart = host && n >= 2 && A.length > 0 && D.length > 0;
-    const why = n < 2 ? 'تحتاج لاعبين اثنين على الأقل.' : !A.length ? 'فريق المهاجمين فارغ. انقل لاعباً إليه.' : !D.length ? 'فريق المدافعين فارغ. انقل لاعباً إليه.' : '';
+    const why = n < 2 ? 'تحتاج لاعبين اثنين على الأقل' : !A.length ? 'فريق المهاجمين فارغ' : !D.length ? 'فريق المدافعين فارغ' : '';
     const me = ps.find(x => x.id === P.id) || {};
     const ready3 = !!(window.SKM && SKM.ready()); if (!ready3) ensureModels();
     if (me.id && me.sk !== mySkin() && SKIN_SENT !== R.code + mySkin()) { SKIN_SENT = R.code + mySkin(); setTimeout(() => act({ t: 'sk', s: mySkin() }), 0); }
     const seat = x => {
-      const mine = x.id === P.id, canMove = host || mine, off = isOff(x);
-      const sub = x.id === R.host ? '👑 قائد الغرفة' : x.bot ? 'لاعب آلي' : x.loc ? 'على جهاز القائد' : off ? 'غير متصل' : x.rdy ? 'جاهز ✓' : 'غير جاهز';
-      const mv = canMove ? '<button class="btn sm ghost" data-act="team:' + x.id + '" title="انقل إلى الفريق الآخر">⇄</button>' : '';
-      const kk = host && (x.bot || x.loc || !mine) ? '<button class="btn sm ghost" data-act="kick:' + x.id + '" title="أزِل">✕</button>' : '';
-      const outfit = seatSkin(x), team = (x.team || 1) - 1, img = ready3 ? SKM.thumb(outfit, team, 116, 160) : soldierThumb(outfit, team);
-      const pic = img ? '<img class="sl-3d" src="' + img + '" alt="">' : '<span class="av f' + (x.fr | 0) + '">' + okAv(x.av) + '</span>';
-      return '<div class="sl-seat ' + (x.rdy || x.bot || x.loc || x.id === R.host ? 'rdy' : '') + ' ' + (off ? 'off' : '') + '">' + pic + '<span class="nm">' + esc(x.n) + '<small>' + sub + '</small></span><span class="sl-acts">' + mv + kk + '</span></div>';
+      const mine = x.id === P.id, off = isOff(x), team = (x.team || 1) - 1, img = ready3 ? SKM.thumb(seatSkin(x), team, 150, 200) : '';
+      const st = x.id === R.host ? ['قائد الغرفة', 'host'] : x.bot ? ['لاعب آلي', 'bot'] : x.loc ? ['على جهاز القائد', 'bot'] : off ? ['غير متصل', 'off'] : x.rdy ? ['جاهز', 'rdy'] : ['غير جاهز', 'wait'];
+      const acts = (host || mine ? '<button data-act="team:' + x.id + '" title="انقل إلى الفريق الآخر" aria-label="بدّل الفريق">⇄</button>' : '') + (host && (x.bot || x.loc || !mine) ? '<button data-act="kick:' + x.id + '" title="أزِل" aria-label="أزل اللاعب">✕</button>' : '');
+      return '<div class="lb-p ' + (mine ? 'me ' : '') + st[1] + '"><div class="pic">' + (img ? '<img src="' + img + '" alt="">' : '<span>' + okAv(x.av) + '</span>') + '</div><div class="inf"><b>' + esc(x.n) + (mine ? ' <i>أنت</i>' : '') + '</b><span class="st">' + st[0] + '</span></div><div class="ac">' + acts + '</div></div>';
     };
-    const empty = () => '<div class="sl-seat empty">' + (host ? 'مكان فارغ — انقل لاعباً هنا' : 'بانتظار لاعبين') + '</div>';
-    const maps = (C ? Object.keys(C.RAW) : []).map(name => '<button class="sl-map ' + (chosen === name ? 'on' : '') + '" data-act="' + (host ? 'map' : 'noop') + ':' + name + '"' + (host ? '' : ' disabled') + '><img src="' + mapThumb(name, 220) + '" alt="معاينة ' + name + '"><b>' + name + '</b><small>' + (MAP_TAG[name] || '') + '</small></button>').join('');
-    const big = chosen ? mapThumb(chosen, 520) : '';
+    const slots = (list, t) => list.map(seat).join('') + (list.length < 5 ? '<div class="lb-p empty">' + (host ? '<button data-act="bot2:' + t + '">+ لاعب آلي</button>' : 'مكان شاغر') + '</div>' : '');
+    const names = C ? Object.keys(C.RAW) : [];
+    const maps = ['عشوائي'].concat(names).map(name => { const on = name === 'عشوائي' ? !chosen : chosen === name; return '<button class="lb-map ' + (on ? 'on' : '') + '" data-act="' + (host ? 'map' : 'noop') + ':' + name + '"' + (host ? '' : ' disabled') + '>' + (name === 'عشوائي' ? '<span class="rnd">?</span>' : '<img src="' + mapImg(name) + '" alt="">') + '<b>' + name + '</b></button>'; }).join('');
     const link = Room.offline ? '' : location.origin + location.pathname + '#r-' + R.code;
-    const roundBtns = [3, 5, 8].map(v => '<button class="btn sm ' + (rounds === v ? 'pri' : 'ghost') + '" data-act="rounds:' + v + '">' + v + '</button>').join('');
-    const goBlock = host
-      ? '<button class="btn pri lg" data-act="start" ' + (canStart ? '' : 'disabled') + '>ابدأ المباراة</button>' + (why ? '<span class="mut">' + why + '</span>' : '')
-      : '<button class="btn ' + (me.rdy ? '' : 'pri') + ' lg" data-act="rdy">' + (me.rdy ? 'ألغِ الجاهزية' : 'أنا جاهز') + '</button><span class="mut">بانتظار قائد الغرفة لبدء المباراة.</span>';
-    return '<div class="wrap room sl">'
-      + '<div class="sl-top"><div><h2 class="big">🔫 طخطخة — غرفة الانتظار</h2><small class="mut">' + n + '/' + (R.max || 12) + ' لاعب · ' + (R.lock ? '🔒 مقفلة' : 'مفتوحة للدعوات') + '</small></div>'
-      + '<div class="sl-code">' + (Room.offline ? '<span class="mut">غرفة على هذا الجهاز</span>' : '<span class="mut">الرمز</span><b>' + R.code + '</b><button class="btn sm pri" data-act="share">📋 نسخ رابط الدعوة</button>') + '</div></div>'
-      + '<div class="sl-teams">'
-      + '<div class="sl-side red"><h3>🔴 المهاجمون <small>(' + A.length + ')</small></h3>' + (A.map(seat).join('') || empty()) + '</div>'
-      + '<div class="sl-mid"><div class="sl-big">' + (big ? '<img src="' + big + '" alt="معاينة الخريطة">' : '<span class="mut">اختر خريطة</span>') + '</div>'
-      + '<b class="big">' + (chosen || 'خريطة عشوائية') + '</b>'
-      + '<div class="row ctr">' + (host ? '<span class="mut">الجولات</span>' + roundBtns : '<span class="chip">الجولات: ' + rounds + '</span>') + '</div>'
-      + '<div class="row ctr">' + (host ? '<button class="btn sm" data-act="bot">+ لاعب آلي</button><button class="btn sm" data-act="loc">+ لاعب على هذا الجهاز</button>' : '') + '</div></div>'
-      + '<div class="sl-side blue"><h3>🔵 المدافعون <small>(' + D.length + ')</small></h3>' + (D.map(seat).join('') || empty()) + '</div>'
-      + '</div>'
-      + '<div class="sl-pick"><h3>اختر شخصيتك</h3><div class="sl-chars">' + (ready3 ? SKM.CHARS.map((c, i) => '<button class="sl-char ' + (mySkin() === i ? 'on' : '') + '" data-act="char:' + i + '"><img src="' + SKM.thumb(i, ((me.team || 1) - 1), 180, 240) + '" alt="' + c.n + '"><b>' + c.n + '</b><small>' + c.d + '</small></button>').join('') : '<span class="mut">جارٍ تحميل الشخصيات…</span>') + '</div></div>'
-      + '<div class="sl-maps">' + maps + '</div>'
-      + '<div class="row ctr sl-go">' + goBlock + '</div>'
-      + (link ? '<p class="mut sl-link">رابط الدعوة: <span>' + link + '</span></p>' : '')
-      + chatHTML() + '</div>';
+    const bg = chosen ? mapImg(chosen, 640) : '';
+    const roundBtns = [3, 5, 8].map(v => '<button class="' + (rounds === v ? 'on' : '') + '" data-act="rounds:' + v + '"' + (host ? '' : ' disabled') + '>' + v + '</button>').join('');
+    const chars = ready3 ? SKM.CHARS.map((c, i) => '<button class="lb-ch ' + (mySkin() === i ? 'on' : '') + '" data-act="char:' + i + '" title="' + c.n + '"><img src="' + SKM.thumb(i, (me.team || 1) - 1, 120, 160) + '" alt="' + c.n + '"></button>').join('') : '';
+    const go = host ? '<button class="lb-go" data-act="start" ' + (canStart ? '' : 'disabled') + '><b>ابدأ المباراة</b><small>' + (why || (A.length + ' ضد ' + D.length + ' · ' + rounds + ' جولات للفوز')) + '</small></button>'
+      : '<button class="lb-go ' + (me.rdy ? 'done' : '') + '" data-act="rdy"><b>' + (me.rdy ? 'جاهز ✓' : 'أنا جاهز') + '</b><small>' + (me.rdy ? 'اضغط للإلغاء · بانتظار القائد' : 'القائد يبدأ عندما يجهز الجميع') + '</small></button>';
+    return '<div class="lb">' + (bg ? '<div class="lb-bg" style="background-image:url(' + bg + ')"></div>' : '<div class="lb-bg"></div>') + '<div class="lb-shade"></div><div class="lb-in">'
+      + '<div class="lb-head"><div><small>غرفة الانتظار · ' + n + '/' + (R.max || 12) + ' لاعب</small><h2>' + (chosen || 'خريطة عشوائية') + '</h2><p>' + (chosen ? MAP_TAG[chosen] || '' : 'تُختار الخريطة عند البدء') + '</p></div><span class="sp"></span>'
+      + (Room.offline ? '<span class="lb-code"><small>غرفة على هذا الجهاز</small></span>' : '<div class="lb-code"><small>رمز الغرفة</small><b>' + R.code + '</b></div><div class="lb-inv"><button data-act="copy">📋 نسخ الرابط</button>' + (navigator.share ? '<button data-act="share">📤 مشاركة</button>' : '') + '<a target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('تعال العب معي طخطخة 🎯 ' + link) + '">واتساب</a></div>')
+      + (host && !Room.offline ? '<div class="lb-host"><button data-act="lock" class="' + (R.lock ? 'on' : '') + '">' + (R.lock ? '🔒 مقفلة' : '🔓 مفتوحة') + '</button><span>الحد <button data-act="max:-1" aria-label="أنقص">−</button><b>' + (R.max || 12) + '</b><button data-act="max:1" aria-label="زد">+</button></span><button data-act="closeroom">إغلاق الغرفة</button></div>' : '')
+      + '<button class="lb-x" data-act="leave">مغادرة</button></div>'
+      + '<div class="lb-main"><section class="lb-team att"><h3><span>المهاجمون</span><em>' + A.length + '</em></h3>' + slots(A, 1) + '</section>'
+      + '<section class="lb-mid"><div class="lb-rounds"><span>جولات الفوز</span>' + roundBtns + '</div><div class="lb-maps">' + maps + '</div>' + (host ? '<button class="lb-loc" data-act="loc">+ لاعب يشاركك هذا الجهاز</button>' : '') + '</section>'
+      + '<section class="lb-team def"><h3><span>المدافعون</span><em>' + D.length + '</em></h3>' + slots(D, 2) + '</section></div>'
+      + '<div class="lb-bot"><div class="lb-chs"><small>مقاتلك</small><div>' + (chars || '<span class="mut">جارٍ تحميل الشخصيات…</span>') + '</div></div>' + go + '</div>'
+      + '<details class="lb-chat"><summary>💬 الدردشة (' + R.chat.length + ')</summary>' + chatHTML() + '</details>'
+      + '</div></div>';
   }
   function lobbyHTML() {
     const R = Room.R; if (R && R.gid === 'strike') return strikeLobbyHTML();
@@ -324,7 +328,22 @@
       <div class="tbar" id="tb"><i></i></div><div class="sb">${R.gps.map(id => { const pl = R.ps.find(x => x.id === id) || {}, off = isOff(pl); return `<span class="chip ${id === P.id ? 'me' : ''}">${h.av(id)} ${esc(h.nm(id))} <b>${sc[id] ?? 0}</b>${R.auto[id] ? ' 🤖' : off ? ' 📴' : ''}${Room.host && (off || R.auto[id]) && !pl.bot ? `<button class="x" data-act="auto:${id}">${R.auto[id] ? 'أوقف الآلي' : 'لاعب آلي بدلاً منه'}</button>` : ''}</span>`; }).join('')}</div>
       ${loc}<div id="gv">${body}</div>${chatHTML()}</div>`;
   }
+  /* نتيجة طخطخة: نصر/هزيمة، أفضل لاعب، جدول الفريقين، والخبرة المكتسبة من الأداء الفعلي */
+  function strikeResHTML() {
+    const R = Room.R, r = R.res, st = R.st, h = H(), gn = Room.gain, fin = st.fin || {}, tm = st.tm || {}, rs = st.rs || [0, 0], mineT = tm[P.id];
+    const won = r.win.includes(P.id), winT = r.win.length ? tm[r.win[0]] : -1, played = R.gps.includes(P.id);
+    const ready3 = !!(window.SKM && SKM.ready()), mvp = st.mvp, mvpSeat = R.ps.find(x => x.id === mvp) || { id: mvp }, mf = fin[mvp] || [0, 0, 0, 0];
+    const rows = t => R.gps.filter(id => tm[id] === t).sort((a, b) => (fin[b] || [0])[0] - (fin[a] || [0])[0]).map(id => { const f = fin[id] || [0, 0, 0, 0]; return '<tr class="' + (id === P.id ? 'me' : '') + '"><td>' + (id === mvp ? '⭐ ' : '') + esc(h.nm(id)) + '</td><td>' + f[0] + '</td><td>' + f[1] + '</td><td>' + f[2] + '</td><td>' + (f[0] ? Math.round(f[3] / f[0] * 100) : 0) + '%</td></tr>'; }).join('');
+    const tbl = t => '<div class="rs-t t' + t + '"><h4>' + (t ? 'المدافعون' : 'المهاجمون') + ' <b>' + rs[t] + '</b>' + (winT === t ? ' <em>فائز</em>' : '') + '</h4><table><thead><tr><th>اللاعب</th><th>قتل</th><th>سقوط</th><th>مساعدة</th><th>رأس</th></tr></thead><tbody>' + rows(t) + '</tbody></table></div>';
+    const lv0 = gn ? Math.floor(gn.xp0 / 100) + 1 : level(), lv1 = level(), a = gn && lv1 === lv0 ? gn.xp0 % 100 : 0, b = P.xp % 100;
+    const xp = gn && played ? '<div class="rs-xp"><div class="rs-xph"><b>+' + gn.xp + ' خبرة</b><span>🪙 +' + gn.co + '</span></div><ul>' + gn.parts.map(p => '<li><span>' + p[0] + '</span><b>+' + p[1] + '</b></li>').join('') + '</ul><div class="rs-lv"><span>المستوى ' + lv1 + (lv1 > lv0 ? ' <em>جديد!</em>' : '') + '</span><div class="rs-bar"><i style="--a:' + a + '%;--b:' + b + '%"></i></div><small>' + b + '/100</small></div></div>' : '';
+    return '<div class="ov rs-ov"><div class="rs ' + (won ? 'win' : 'loss') + '"><div class="rs-ban"><small>انتهت المباراة · ' + esc(st.map || '') + '</small><h1>' + (!played ? 'انتهت المباراة' : won ? 'نصر' : 'هزيمة') + '</h1><div class="rs-sc"><b class="a">' + rs[0] + '</b><span>—</span><b class="d">' + rs[1] + '</b></div></div>'
+      + '<div class="rs-body"><div class="rs-mvp">' + (ready3 && mvp ? '<img src="' + SKM.thumb(seatSkin(mvpSeat), tm[mvp] || 0, 300, 400) + '" alt="">' : '') + '<small>أفضل لاعب</small><b>' + esc(mvp ? h.nm(mvp) : '—') + '</b><span>' + mf[0] + ' قتل · ' + mf[3] + ' رأس · ' + mf[2] + ' مساعدة</span></div>'
+      + '<div class="rs-tables">' + tbl(0) + tbl(1) + '</div>' + xp + '</div>'
+      + '<div class="rs-act">' + (Room.host ? '<button class="lb-go" data-act="again"><b>العب مرة أخرى</b><small>الفرق نفسها والخريطة نفسها</small></button><button class="btn" data-act="end">غرفة الانتظار</button>' : '<span class="mut">بانتظار قرار قائد الغرفة…</span>') + '<button class="btn ghost" data-act="leave">القائمة الرئيسية</button></div></div></div>';
+  }
   function resHTML() {
+    if (Room.R && Room.R.gid === 'strike' && Room.R.st && Room.R.st.fin) return strikeResHTML();
     const R = Room.R, r = R.res, h = H(), w = r.win, gn = Room.gain;
     const title = r.coop ? (w.length ? 'نجا الفريق! 🎉' : 'خسر الفريق 😵') : !w.length ? 'تعادل 🤝' : w.length === 1 ? `🏆 الفائز: ${esc(h.nm(w[0]))}` : '🏆 فوز مشترك';
     const teams = R.teams ? `<p>🔴 ${r.rank.filter(x => (R.ps.find(p => p.id === x.id) || {}).team !== 2).reduce((s, x) => s + x.s, 0)} — ${r.rank.filter(x => (R.ps.find(p => p.id === x.id) || {}).team === 2).reduce((s, x) => s + x.s, 0)} 🔵</p>` : '';
@@ -347,6 +366,14 @@
         <h3 style="margin-top:10px">اسمك</h3><div class="row"><input class="inp" id="gate_in" maxlength="16" value="${esc(P.n)}" aria-label="اسمك"></div>
         <h3 style="margin-top:12px">صورتك</h3><div class="avs">${AV0.concat(P.own.filter(a => a in AV1)).map(a => `<button class="avb ${P.av === a ? 'on' : ''}" data-act="gav:${a}" aria-label="صورة رمزية">${a}</button>`).join('')}</div>
         <div class="row" style="margin-top:14px"><button class="btn pri lg" data-act="enter">ادخل الغرفة</button><button class="btn ghost" data-act="nogate">ليس الآن</button></div></div></div></div>`;
+    }
+    if (m.t === 'chars') {
+      const sk = mySkin(), ready = !!(window.SKM && SKM.ready()); if (!ready) ensureModels();
+      return `<div class="ov" data-act="close"><div class="mod chs" data-stop><div class="chs-big">${ready ? `<img src="${SKM.thumb(sk, 0, 420, 560)}" alt="">` : '<span class="mut">جارٍ تحميل الشخصيات…</span>'}</div>
+        <div class="chs-side"><small class="mut">اختر مقاتلك</small><h2>${CHARS[sk][0]}</h2><p class="mut">${CHARS[sk][1]}</p>
+        <div class="chs-grid">${CHARS.map((c, i) => `<button class="chs-p ${sk === i ? 'on' : ''}" data-act="char:${i}">${ready ? `<img src="${SKM.thumb(i, 0, 180, 240)}" alt="">` : ''}<b>${c[0]}</b></button>`).join('')}</div>
+        <p class="mut" style="font-size:.82rem">يظهر مقاتلك لزملائك وخصومك في كل الغرف، مع خوذة وصدرية بلون فريقك.</p>
+        <button class="btn pri lg" data-act="close">تأكيد</button></div></div></div>`;
     }
     if (m.t === 'profile') {
       const rate = P.played ? Math.round(P.won / P.played * 100) : 0;
@@ -372,6 +399,8 @@
     else if (R.ph === 'game' && R.st) { const st = R.st; key = ['g', R.gk, st.ph, st.i, st.rd, st.k, st.day].join('|'); html = gameHTML(); }
     else html = lobbyHTML();
     swap(main, html, key);
+    document.body.classList.toggle('mm-on', view === 'home');
+    if (window.MENU3D) { const host = view === 'home' && document.getElementById('m3d'); if (host) { MENU3D.mount(host, { skin: mySkin() }); MENU3D.pause(!!modal); } else MENU3D.unmount(); }
     if (R && R.ph === 'game' && R.st) {
       const g = G.by[R.gid]; if (g.bind) g.bind(main, R.st, vid(), a => act({ t: 'g', a }, vid()), H());
       if (R.res) { const ak = (Room.offline ? Room.sess : R.code) + '|' + R.gk; if (Room.awarded !== ak && LS.get('dw_aw', '') !== ak) { Room.awarded = ak; LS.set('dw_aw', ak); Room.gain = null; if (R.gps.includes(P.id)) award(); $('#top').innerHTML = topHTML(); } if (!Room.hideRes) over = resHTML(); }
@@ -392,6 +421,7 @@
       case 'theme': { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches; P.theme = dark ? 'light' : 'dark'; document.documentElement.dataset.theme = P.theme; save(); break; }
       case 'snd': P.snd = P.snd ? 0 : 1; save(); break;
       case 'profile': modal = { t: 'profile' }; break;
+      case 'chars': modal = { t: 'chars' }; break;
       case 'gav': P.av = x; save(); break;
       case 'enter': { const n = txt(($('#gate_in') || {}).value, 16); if (n) P.n = n; P.named = 1; save(); joinRoom(modal.code, true); return; }
       case 'nogate': modal = null; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } break;
@@ -415,7 +445,8 @@
       case 'chat': { const i = $('#chat_in'), m = txt(i && i.value, 120); if (m) { i.value = ''; act({ t: 'chat', m }); } return; }
       case 'react': act({ t: 'chat', m: x }); return;
       case 'rdy': act({ t: 'rdy' }); return;
-      case 'char': { const c = LS.get('dw_sk', {}) || {}; c.skin = Math.max(0, Math.min(3, +x | 0)); LS.set('dw_sk', c); SKIN_SENT = R ? R.code + c.skin : ''; if (R) act({ t: 'sk', s: c.skin }); render(); return; }
+      case 'bot2': { if (!host || !R) return; const before = R.ps.length; cmd('bot'); const nb = R.ps[R.ps.length - 1]; if (R.ps.length > before && nb && nb.bot && (nb.team || 1) !== +x) { nb.team = +x; push(); } return; }
+      case 'char': { const c = LS.get('dw_sk', {}) || {}; c.skin = Math.max(0, Math.min(3, +x | 0)); LS.set('dw_sk', c); SKIN_SENT = R ? R.code + c.skin : ''; if (R) act({ t: 'sk', s: c.skin }); if (window.MENU3D) MENU3D.setSkin(c.skin); render(); return; }
       case 'gv': act({ t: 'gv', g: x }); return;
       case 'team': if (host) { const pl = R.ps.find(p => p.id === x); if (pl) pl.team = pl.team === 1 ? 2 : 1; push(); } else act({ t: 'team' }); return;
       case 'hideres': Room.hideRes = 1; break;
@@ -460,7 +491,7 @@
   document.addEventListener('change', e => { if (e.target.id === 'face_in' && e.target.files[0]) { setFace(e.target.files[0]).then(() => { toast('تم حفظ صورة وجهك ✅'); render(); }, () => toast('تعذر قراءة الصورة')); return; } const k = e.target.dataset && e.target.dataset.opt, R = Room.R; if (k && R && Room.host) { const o = G.by[R.gid].opts.find(o => o.k === k); R.o[k] = o.v[+e.target.value]; push(); } });
 
   /* ---------- الإقلاع ---------- */
-  if (P.theme) document.documentElement.dataset.theme = P.theme;
+  document.documentElement.dataset.theme = 'dark';
   $('#app').innerHTML = '<header class="top" id="top"></header><main id="main"></main><div id="modal"></div>';
   render();
   Net.ping().then(() => { render(); const m = location.hash.match(/^#r-([A-Za-z0-9]{4})$/); if (m) { if (Net.ok) joinRoom(m[1], !!LS.get('dw_hk_' + m[1].toUpperCase(), null)); else toast('رابط غرفة مباشرة: يعمل عند فتحه من خادم ديوانية'); } });
