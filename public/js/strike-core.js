@@ -273,7 +273,10 @@
     const spos = p => ({ x: p.sp[0], y: p.sp[1], a: p.sp[2], pi: 0, fl: 0, cr: 0 });
     const nb = () => ({ site: 'a', seen: 0, sid: null, next: 0, act: 0, str: 1, strT: 0, swT: 0, crT: 0, hunt: rnd() < .25, ammo: 0, rel: 0, burst: 4, alert: 0, ls: null, gc: null, gk: '' });
     function startRound(first) {
-      for (const tm of [0, 1]) { const tiles = shuf(m.sp[tm]); ids().filter(i => S.pl[i].tm === tm).forEach((id, i) => { const t = tiles[i % tiles.length]; S.pl[id].sp = [t[0], t[1], r2(Math.atan2(m.h / 2 - t[1], m.w / 2 - t[0]))]; }); }
+      for (const tm of [0, 1]) { const all = shuf(m.sp[tm]), mates = ids().filter(i => S.pl[i].tm === tm), tiles = [];
+        /* نقاط ظهور متباعدة (مترين على الأقل إن أمكن) حتى لا يقف زميل أمام وجهك */
+        for (const gap of [2.2, 1.5, 0]) for (const t of all) { if (tiles.length >= mates.length) break; if (!tiles.includes(t) && tiles.every(u => Math.hypot(u[0] - t[0], u[1] - t[1]) >= gap)) tiles.push(t); }
+        mates.forEach((id, i) => { const t = tiles[i % tiles.length]; S.pl[id].sp = [t[0], t[1], r2(Math.atan2(m.h / 2 - t[1], m.w / 2 - t[0]))]; }); }
       plan = rnd() < .5 ? 'a' : 'b'; let ci = 0, ti = 0;
       for (const id of ids()) {
         const p = S.pl[id]; if (!first && !p.al) { p.w = ''; p.ar = 0; } p.hp = 100; p.al = 1; dmgLog[id] = {}; delete actT[id];

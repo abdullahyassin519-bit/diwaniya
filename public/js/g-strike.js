@@ -136,13 +136,13 @@
 .sk-mm{position:absolute;left:8px;top:8px;width:132px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.55))}
 .sk-team{position:absolute;left:8px;top:112px;font-size:11px;display:grid;gap:3px;direction:rtl;min-width:118px}.sk-team div{background:rgba(5,12,15,.55);border-inline-start:3px solid var(--c);padding:1px 6px;display:flex;justify-content:space-between;gap:8px}.sk-team .dead{opacity:.45;text-decoration:line-through}
 .sk-score{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;font-weight:600;border-radius:8px;overflow:hidden;background:rgba(5,12,15,.7)}.sk-score span{padding:2px 14px;font-size:24px;min-width:52px;text-align:center}.sk-score span small{display:block;font-size:9px;font-weight:400;opacity:.9;margin-top:-4px}
-.sk-score div{padding:2px 14px;text-align:center;border-inline:1px solid rgba(255,255,255,.15)}.sk-score div b{font-size:18px;font-variant-numeric:tabular-nums;display:block}.sk-score div small{font-size:9px;opacity:.75;display:block;margin-top:-3px}.sk-score .bomb b{color:#ff5a5a}
+.sk-score div{padding:2px 14px;text-align:center;border-inline:1px solid rgba(255,255,255,.15)}.sk-score div b{font-size:18px;font-variant-numeric:tabular-nums;display:block;white-space:nowrap}.sk-score div small{font-size:9px;opacity:.75;display:block;margin-top:-3px;white-space:nowrap}.sk-score .bomb b{color:#ff5a5a}
 .sk-ros{display:flex;align-items:center;gap:3px;padding:0 6px;background:rgba(5,12,15,.35)}.sk-ros i{width:30px;height:36px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);position:relative;border-bottom:2px solid var(--c)}
 .sk-ros.r0 i{--c:#ff7a3d}.sk-ros.r1 i{--c:#3d9bff}.sk-ros i.me{box-shadow:0 0 0 1.5px #f5c043}
 .sk-ros img{width:100%;height:100%;object-fit:cover;object-position:50% 8%;transform:scale(1.6);transform-origin:50% 12%}
 .sk-ros i.dead{filter:grayscale(1) brightness(.45);border-bottom-color:#444}.sk-ros i.dead::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:#ff5a5a;font-weight:700;font-size:16px}
 @media (max-width:700px){.sk-ros i{width:22px;height:28px}.sk-ros{padding:0 3px;gap:2px}}
-.sk-feed{position:absolute;right:8px;top:48px;display:grid;gap:3px;justify-items:end;font-size:12px;direction:rtl}.sk-feed div{background:rgba(5,12,15,.6);padding:1px 8px;border-radius:4px}.sk-feed .me{outline:1px solid #f5b62e}
+.sk-feed{position:absolute;right:8px;top:84px;display:grid;gap:3px;justify-items:end;font-size:12px;direction:rtl}.sk-feed div{background:rgba(5,12,15,.6);padding:1px 8px;border-radius:4px}.sk-feed .me{outline:1px solid #f5b62e}
 .sk-ban{position:absolute;left:0;right:0;top:20%;text-align:center;direction:rtl}.sk-ban b{display:block;font:400 34px 'Lalezar','Readex Pro',sans-serif;letter-spacing:.5px}.sk-ban span{font-size:14px}
 .sk-hint{position:absolute;left:0;right:0;top:62%;text-align:center;font-size:14px;color:#f5b62e;direction:rtl}
 .sk-prog{position:absolute;left:50%;top:57%;width:200px;margin-left:-100px;height:10px;background:rgba(0,0,0,.6);border-radius:6px;overflow:hidden}.sk-prog i{display:block;height:100%;background:#f5b62e;width:0}
@@ -156,7 +156,7 @@
 .sk-feed div{background:linear-gradient(90deg,rgba(6,10,13,.35),rgba(6,10,13,.78));border-inline-end:3px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:6px;font-size:12.5px;backdrop-filter:blur(4px)}
 .sk-feed .me{outline:none;border-inline-end-color:#f5b62e;background:linear-gradient(90deg,rgba(60,40,5,.35),rgba(60,40,5,.8))}
 .sk-score{filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}.sk-vit .cash{color:#9be28f;font-size:14px;align-self:center}
-.sk-ammo{position:absolute;right:10px;bottom:8px;text-align:right;background:rgba(5,12,15,.6);padding:2px 12px;border-radius:6px}.sk-ammo b{font-size:28px;font-variant-numeric:tabular-nums}.sk-ammo small{opacity:.7;font-size:14px}.sk-ammo em{display:block;font-style:normal;font-size:11px;opacity:.85;direction:rtl;margin-top:-4px}.sk.touch .sk-ammo{bottom:12px;top:auto;right:240px;left:auto}
+.sk-ammo{position:absolute;right:10px;bottom:8px;text-align:right;background:rgba(5,12,15,.6);padding:2px 12px;border-radius:6px}.sk-ammo b{font-size:28px;font-variant-numeric:tabular-nums}.sk-ammo small{opacity:.7;font-size:14px}.sk-ammo em{display:block;font-style:normal;font-size:11px;opacity:.85;direction:rtl;margin-top:-4px}.sk.touch .sk-ammo{bottom:10px;top:auto;right:auto;left:calc(var(--bs,1)*0px + 210px);transform:none;padding:1px 12px}.touch .sk-ammo b{font-size:22px}.touch .sk-ammo small{font-size:11px}
 .sk-spec{position:absolute;left:0;right:0;bottom:16%;text-align:center;font-size:14px;direction:rtl}
 .sk-z{position:absolute;top:0;bottom:0;display:none}.sk.touch .sk-z{display:block}.sk-joy{left:0;width:40%}.sk-look{right:0;width:60%}.sk.lefty .sk-joy{left:auto;right:0}.sk.lefty .sk-look{right:auto;left:0}
 .sk-stick{position:absolute;width:96px;height:96px;margin:-48px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:none;pointer-events:none}.sk-stick i{position:absolute;left:28px;top:28px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.4)}
@@ -299,7 +299,7 @@
     }
     function applyQ() {
       wrap.style.setProperty('--bs', CFG.btn); wrap.classList.toggle('lefty', !!CFG.lefty); AU.setVol(); if (!R) return;
-      R.setPixelRatio(Math.min(window.devicePixelRatio || 1, [1, 1.5, 2, 2][CFG.q] || 2) * (CFG.q ? 1 : .8)); world.sun.castShadow = CFG.q > 0; R.shadowMap.autoUpdate = CFG.q > 1; shadowKick = 3; cache.size = null;
+      R.setPixelRatio(Math.min(window.devicePixelRatio || 1, [1.5, 1.75, 2, 2][CFG.q] || 2)); /* لا نهبط تحت دقة الشاشة الأساسية: كان 0.8 فتظهر الصورة مبكسلة على الجوال */ world.sun.castShadow = CFG.q > 0; R.shadowMap.autoUpdate = CFG.q > 1; shadowKick = 3; cache.size = null;
       const ms = CFG.q > 2 ? 4096 : CFG.q > 1 ? 2048 : 1024; if (world.sun.shadow.mapSize.x !== ms) { world.sun.shadow.mapSize.set(ms, ms); if (world.sun.shadow.map) { world.sun.shadow.map.dispose(); world.sun.shadow.map = null; } }
       if (CFG.q >= 2) loadPost().then(() => { compKey = ''; }); else compKey = '';
     }
@@ -386,14 +386,23 @@
     function init3() {
       T = window.THREE; R = new T.WebGLRenderer({ canvas: cv, antialias: CFG.q > 0, powerPreference: 'high-performance' }); R.autoClear = false; R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.0; R.shadowMap.enabled = true; R.shadowMap.type = T.PCFSoftShadowMap;
       cam = new T.PerspectiveCamera(CFG.fov, 16 / 9, .03, 140); cam.rotation.order = 'YXZ'; world = SKW.build(T, m, CFG.q); AU.m = m; world.scene.add(cam); if (SKW.envMap && CFG.q > 0) { try { world.scene.environment = SKW.envMap(T, R, m.theme); } catch (e) { } }
-      vmScene = new T.Scene(); vmScene.add(new T.HemisphereLight(0xffffff, 0x77705f, 1.6)); const dl = new T.DirectionalLight(0xfff4e0, 2.2); dl.position.set(-1, 2, 1); vmScene.add(dl); const rim = new T.DirectionalLight(0xa8c8ff, 1.4); rim.position.set(1.5, .6, -1); vmScene.add(rim); try { vmEnv = world.scene.environment || SKW.envMap(T, R, m.theme); } catch (e) { } /* إضاءة محيطة للسلاح: المعدن يعكس السماء فلا يظهر كتلة سوداء */ vmCam = new T.PerspectiveCamera(58, 16 / 9, .01, 4);
+      vmScene = new T.Scene(); vmScene.add(new T.HemisphereLight(0xffffff, 0x77705f, 1.6)); const dl = new T.DirectionalLight(0xfff4e0, 2.2); dl.position.set(-1, 2, 1); vmScene.add(dl); const rim = new T.DirectionalLight(0xa8c8ff, 1.4); rim.position.set(1.5, .6, -1); vmScene.add(rim); const fill = new T.DirectionalLight(0xffffff, 1.3); fill.position.set(1.2, .4, 2); vmScene.add(fill); /* إضاءة أمامية تُظهر جانب السلاح */ try { vmEnv = world.scene.environment || SKW.envMap(T, R, m.theme); } catch (e) { } /* إضاءة محيطة للسلاح: المعدن يعكس السماء فلا يظهر كتلة سوداء */ vmCam = new T.PerspectiveCamera(58, 16 / 9, .01, 4);
       flashL = new T.PointLight(0xffc56a, 0, 7, 1.5); world.scene.add(flashL);
       const ht = SKW.tex('hole', 32, 32, (x) => { const g = x.createRadialGradient(16, 16, 1, 16, 16, 15); g.addColorStop(0, 'rgba(10,8,6,1)'); g.addColorStop(.4, 'rgba(30,25,20,.8)'); g.addColorStop(1, 'rgba(30,25,20,0)'); x.fillStyle = g; x.fillRect(0, 0, 32, 32); }, true), pt = SKW.tex('puff', 32, 32, (x) => { const g = x.createRadialGradient(16, 16, 1, 16, 16, 15); g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, 32, 32); }, true), hg = new T.PlaneGeometry(.075, .075);
       for (let i = 0; i < 70; i++) { const h = new T.Mesh(hg, new T.MeshBasicMaterial({ map: ht, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3 })); h.visible = false; world.scene.add(h); holes.push(h); }
       for (let i = 0; i < 48; i++) { const s = new T.Sprite(new T.SpriteMaterial({ map: pt, transparent: true, depthWrite: false })); s.visible = false; world.scene.add(s); puffs.push(s); }
       FX.spk = mkPts(220, true, .075, pt); FX.deb = mkPts(260, false, .035, pt); FX.shellM = [new T.MeshStandardMaterial({ color: 0xc9a13b, metalness: .8, roughness: .35 }), new T.MeshStandardMaterial({ color: 0xa3261f, roughness: .6 })]; const sg = new T.CylinderGeometry(.009, .009, .034, 6); for (let i = 0; i < 18; i++) { const sh = new T.Mesh(sg, FX.shellM[0]); sh.visible = false; world.scene.add(sh); FX.shells.push(sh); }
       for (let i = 0; i < 20; i++) { const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute([0, 0, 0, 0, 0, 0], 3)); const l = new T.Line(g, new T.LineBasicMaterial({ color: 0xfff0b0, transparent: true })); l.visible = false; l.frustumCulled = false; world.scene.add(l); tracers.push(l); }
-      bombMesh = new T.Group(); const bb = new T.Mesh(new T.BoxGeometry(.2, .1, .14), new T.MeshLambertMaterial({ color: 0x2a2d31 })); bb.position.y = .05; bombMesh.add(bb); for (const s of [-.05, 0, .05]) { const c = new T.Mesh(new T.CylinderGeometry(.02, .02, .19, 8), new T.MeshLambertMaterial({ color: 0xb23a2a })); c.rotation.z = Math.PI / 2; c.position.set(0, .12, s); bombMesh.add(c); } const led = new T.Mesh(new T.SphereGeometry(.018, 8, 6), new T.MeshBasicMaterial({ color: 0xff2020 })); led.position.set(.06, .11, .075); bombMesh.add(led); bombMesh.userData.led = led; bombMesh.visible = false; world.scene.add(bombMesh);
+      { /* القنبلة: حزمة C4 (ثلاث قوالب مغلفة بشريط، وحدة تحكم بشاشة ولوحة أزرار، وأسلاك) بدل صندوق أحمر */
+        bombMesh = new T.Group(); const L = (c, o) => new T.MeshStandardMaterial(Object.assign({ color: c, roughness: .8, metalness: .05 }, o)), box = (w, h, d, mt, x, y, z) => { const me = new T.Mesh(new T.BoxGeometry(w, h, d), mt); me.position.set(x, y, z); me.castShadow = true; bombMesh.add(me); return me; };
+        const clay = L(0xc2a878), tape = L(0x1a1b1d, { roughness: .55 }), case_ = L(0x2b2f33, { roughness: .45, metalness: .3 });
+        for (const z of [-.052, 0, .052]) box(.2, .05, .048, clay, 0, .025, z);
+        for (const x of [-.06, .06]) box(.012, .054, .158, tape, x, .026, 0);
+        box(.09, .03, .11, case_, -.005, .065, 0);
+        const scr = box(.05, .004, .03, new T.MeshBasicMaterial({ color: 0x7dff9a }), -.02, .082, -.022); scr.material.color.multiplyScalar(.75);
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) box(.011, .004, .011, L(0x9aa0a6, { roughness: .4 }), .012 + c * .015, .082, .012 + r * .015 - .015);
+        [[0xd23b2b, -.02], [0x2b6fd2, 0], [0xe0c22b, .02]].forEach(([c, z]) => { const w = new T.Mesh(new T.TorusGeometry(.035, .0035, 5, 12, Math.PI), L(c, { roughness: .5 })); w.position.set(.05, .06, z); w.rotation.y = Math.PI / 2; bombMesh.add(w); });
+        const led = new T.Mesh(new T.SphereGeometry(.009, 8, 6), new T.MeshBasicMaterial({ color: 0xff2020 })); led.position.set(-.04, .084, .03); bombMesh.add(led); bombMesh.userData.led = led; bombMesh.visible = false; world.scene.add(bombMesh); }
       boomMesh = new T.Mesh(new T.SphereGeometry(1, 16, 12), new T.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: .8, fog: false })); boomMesh.visible = false; world.scene.add(boomMesh);
       applyQ(); AU.init(); AU.ambient(world.theme.amb); started = true;
     }
@@ -418,12 +427,12 @@
       const vTm = (S && S.pl[me] && S.pl[me].tm) | 0, key = curW() + '|' + CFG.skin + '|' + vTm + '|' + (CFG.q >= 2 ? 'e' : ''); if (key !== vmKey) { SKW.viewModel.team = vTm; if (vm) { vmScene.remove(vm); (vm.userData.own || []).forEach(k => k.dispose()); if (vm.userData.dispose) vm.userData.dispose(); else vm.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); } vmKey = key; vm = SKW.viewModel(T, curW(), CFG.skin); vmScene.add(vm);
         /* انعكاسات البيئة على السلاح في الجودة العالية فقط؛ في الأدنى نخفف المعدنية. وفي منظور الشخص الأول نرفع لون السلاح قليلاً لتظهر حوافه بدل كتلة سوداء */
         vmScene.environment = CFG.q >= 2 ? vmEnv : null;
-        const gm = new T.Color(0x6a7079); vm.traverse(c => { if (c.isSkinnedMesh) return; const ms = c.material && (Array.isArray(c.material) ? c.material : [c.material]); if (!ms) return; ms.forEach((mt, i) => { if (mt.isMeshStandardMaterial && !(vm.userData.own || []).includes(mt)) { const k = mt.clone(); if (CFG.q < 2 && k.metalness > .35) { k.metalness = .35; k.roughness = Math.max(.42, mt.roughness * .9); } k.color.lerp(gm, .22); if (Array.isArray(c.material)) c.material[i] = k; else c.material = k; (vm.userData.own || (vm.userData.own = [])).push(k); } }); });
+        const gm = new T.Color(0x6a7079); vm.traverse(c => { if (c.isSkinnedMesh) return; const ms = c.material && (Array.isArray(c.material) ? c.material : [c.material]); if (!ms) return; ms.forEach((mt, i) => { if (mt.isMeshStandardMaterial && !(vm.userData.own || []).includes(mt)) { const k = mt.clone(); if (CFG.q < 2 && k.metalness > .35) { k.metalness = .35; k.roughness = Math.max(.42, mt.roughness * .9); } k.color.lerp(gm, .45); k.roughness = Math.min(k.roughness, .5); if (Array.isArray(c.material)) c.material[i] = k; else c.material = k; (vm.userData.own || (vm.userData.own = [])).push(k); } }); });
       }
       if (vm) vm.visible = !tpv;
       const long = curW() !== 'pistol', swp = self.sw ? Math.max(0, (self.sw - now) / 320) : 0, relp = self.rel ? 1 - Math.max(0, (self.rel - now) / self.relD) : 0, rl = self.rel ? Math.sin(relp * Math.PI) : 0, k = self.kick, mvb = Math.min(1, self.mvS);
-      vm.position.set((long ? .1 : .115) + Math.sin(self.bob) * .006 * mvb - self.swayX, (long ? -.105 : -.115) - Math.abs(Math.cos(self.bob)) * .006 * mvb - swp * .25 - rl * .1 + self.swayY, (long ? -.3 : -.4) + k * .04);
-      vm.rotation.set(k * .1 - rl * .7 + swp * .8, (long ? .07 : .2) - self.swayX * 1.5 + rl * .25, (long ? 0 : .08) + rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12; if (vm.userData.tick) vm.userData.tick(now, vmCam);
+      vm.position.set((long ? .125 : .115) + Math.sin(self.bob) * .006 * mvb - self.swayX, (long ? -.118 : -.115) - Math.abs(Math.cos(self.bob)) * .006 * mvb - swp * .25 - rl * .1 + self.swayY, (long ? -.36 : -.4) + k * .04); /* السلاح الطويل أبعد وأصغر في الزاوية (مثل CS2) */
+      vm.scale.setScalar(long ? .8 : .9); vm.rotation.set(k * .1 - rl * .7 + swp * .8, (long ? .07 : .2) - self.swayX * 1.5 + rl * .25, (long ? 0 : .08) + rl * .35); if (vm.userData.left) vm.userData.left.position.y = (long ? 0 : -.04) - rl * .12; if (vm.userData.tick) vm.userData.tick(now, vmCam);
     }
     /* ---- الواجهة ---- */
     const fmt = ms => { const s = Math.ceil(Math.max(0, ms) / 1000); return (s / 60 | 0) + ':' + String(s % 60).padStart(2, '0'); };
@@ -475,7 +484,7 @@
       const p = S.pl[me], K = inp.k;
       if (p) {
         if (self.rd !== S.rd) { self.rd = S.rd; self.x = p.sp[0]; self.y = p.sp[1]; self.a = p.sp[2]; self.pi = 0; self.z = 0; self.vz = 0; self.gr = 1; for (const h of holes) h.visible = false; }
-        if (cache.ph !== S.ph) { if (S.ph === 'freeze') { self.rel = 0; self.zoom = 0; self.act = 0; self.w = p.w; self.slot = p.w ? 1 : 0; self.ammo = [WP.pistol.mag, p.w ? WP[p.w].mag : 0]; buyOpen = true; inp.cr = 0; el.crB.classList.remove('on'); } else if (S.ph === 'live') liveBan = now + 1300; else if (S.ph === 'end' || S.ph === 'over') AU.play(S.lw === p.tm ? 'win' : 'lose'); cache.ph = S.ph; }
+        if (cache.ph !== S.ph) { if (S.ph === 'freeze') { self.rel = 0; self.zoom = 0; self.act = 0; self.w = p.w; self.slot = p.w ? 1 : 0; self.ammo = [WP.pistol.mag, p.w ? WP[p.w].mag : 0]; buyOpen = !wrap.classList.contains('touch') || S.rd === 1; inp.cr = 0; /* على الجوال لا يغطي المتجر الشاشة كل جولة؛ زر المتجر متاح */ el.crB.classList.remove('on'); } else if (S.ph === 'live') liveBan = now + 1300; else if (S.ph === 'end' || S.ph === 'over') AU.play(S.lw === p.tm ? 'win' : 'lose'); cache.ph = S.ph; }
         if (self.w !== p.w) { self.w = p.w; if (p.w) { self.ammo[1] = WP[p.w].mag; self.slot = 1; self.sw = now + 320; } else self.slot = 0; self.rel = 0; self.zoom = 0; }
         self.hp = p.hp; const f = inp.f + (K.KeyW || K.ArrowUp ? 1 : 0) - (K.KeyS || K.ArrowDown ? 1 : 0), s = inp.s + (K.KeyD ? 1 : 0) - (K.KeyA ? 1 : 0), l = Math.hypot(f, s), tile = m.st[(self.y | 0) * m.w + (self.x | 0)], crouch = !!(inp.cr || K.KeyC || K.ControlLeft), walk = !!K.ShiftLeft;
         if (K.ArrowLeft) self.a = C.nrm(self.a - 2.4 * dt); if (K.ArrowRight) self.a = C.nrm(self.a + 2.4 * dt);
@@ -508,8 +517,9 @@
         const c = getChar(id), hide = id === me ? !(tpv && p && p.al && !watching) : id === viewId; c.root.visible = !hide; if (hide) continue;
         if (q.al || !c.dead) c.root.position.set(P.x, P.z || 0, P.y); c.root.rotation.y = Math.PI / 2 - P.a; const moving = id === me ? false : (P.spd || 0) > .35; c.setGun(P.fl & 4 && q.w ? q.w : 'pistol'); c.update(dt, { dead: !q.al, cr: P.fl & 1, moving, spd: P.spd || 0, pitch: P.pi || 0, acting: P.fl & 8 }); if (c.blob) c.blob.visible = q.al && CFG.q < 2;
         const ally = !!p && q.tm === p.tm; if (c.setSide) c.setSide(id === me ? 'self' : ally);
+        if (ally && id !== me && q.al && !tpv && Math.hypot(P.x - vx, P.y - vy) < .85) { c.root.visible = false; c.tag.visible = false; continue; } /* زميل ملاصق للكاميرا لا يغطي الشاشة */
         let seen = false; if (q.al && id !== me && !ally && p) { const ez = (P.z || 0) + .55, dd = Math.hypot(P.x - vx, P.y - vy); if (dd < 30 && C.los3(m, vx, vy, vz, P.x, P.y, ez)) { seen = true; const da = C.nrm(Math.atan2(P.y - vy, P.x - vx) - va), dp = Math.atan2(ez - vz, dd) - vp, r = Math.atan2(.24, Math.max(dd, .5)); if (Math.abs(da) < r && Math.abs(dp) < r * 1.6) aimEn = true; } }
-        c.tag.visible = q.al && id !== me && (ally || seen || (p && !p.al)); if (c.tag.visible) c.tag.material.color.set(ally ? 0x8fd0ff : 0xff6060); c.tag.position.y = 1.05 - (c.cr || 0) * .28;
+        c.tag.visible = q.al && id !== me && (ally || seen); /* أسماء الأعداء فقط عند خط النظر، حتى أثناء المشاهدة */ if (c.tag.visible) c.tag.material.color.set(q.tm ? 0x8cc4ff : 0xffa070); /* لون الاسم = لون الفريق نفسه في الشريط العلوي */ c.tag.position.y = 1.05 - (c.cr || 0) * .28;
         if (q.al && id !== me && P.fl & 2 && !(P.fl & 1)) { P.st = (P.st || 0) - dt; if (P.st <= 0) { P.st = .34; AU.play('step_' + world.theme.step, P.x, P.y, .9); } }
       }
       if (aimEn !== cache.aimEn) { cache.aimEn = aimEn; const xh = wrap.querySelector('.sk-x'); if (xh) xh.classList.toggle('en', aimEn); }
@@ -556,7 +566,7 @@
         stage(4); await paint(); try { R.compile(world.scene, cam); R.compile(vmScene, vmCam); } catch (e) { } stage(5);
         connect(); lastF = performance.now(); ldWait = true; setTimeout(hideLoad, 20000); requestAnimationFrame(frame); }, () => { el.load.textContent = 'تعذر تحميل محرك الرسم. تحقق من الاتصال'; });
     }
-    return { wrap, set, destroy, dbg: { S: () => S, over: () => { const fin = {}; for (const id in S.pl) { const q = S.pl[id]; fin[id] = [q.k | 0, q.d | 0, q.as | 0, q.hs | 0]; } X.send({ t: 'over', win: 0, fin, rs: [5, 3], mvp: me }); }, self, Ppos, toHost, faces, chars, cfg: CFG, shoot: () => shoot(performance.now()), fx: () => FX, au: () => AU, info: () => R && R.info.render, started: () => started, cam: () => cam } };
+    return { wrap, set, destroy, dbg: { sim: () => sim, S: () => S, over: () => { const fin = {}; for (const id in S.pl) { const q = S.pl[id]; fin[id] = [q.k | 0, q.d | 0, q.as | 0, q.hs | 0]; } X.send({ t: 'over', win: 0, fin, rs: [5, 3], mvp: me }); }, self, Ppos, toHost, faces, chars, cfg: CFG, shoot: () => shoot(performance.now()), fx: () => FX, au: () => AU, info: () => R && R.info.render, started: () => started, cam: () => cam } };
   }
 
   /* معاينة الجندي الدوّارة في قائمة اللعبة */

@@ -31,10 +31,10 @@ const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++;
     // 2) منظور الكتف: الشخصية تظهر والكاميرا خلفها
     const fpBefore = await page.evaluate(() => SK.dbg.chars[DW.P.id] ? SK.dbg.chars[DW.P.id].root.visible : null);
     await page.keyboard.press('KeyV'); await sleep(400);
-    const tpv = await page.evaluate(() => { const c = SK.dbg.chars[DW.P.id]; const me = SK.dbg.self; const cam = SK.dbg.cam(); return { vis: c ? c.root.visible : null, camDist: Math.hypot(cam.position.x - me.x, cam.position.z - me.y) }; });
+    const tpv = await page.evaluate(() => { const c = SK.dbg.chars[DW.P.id]; const me = SK.dbg.self; const cam = SK.dbg.cam(); const D = 2.6, dx = -Math.cos(me.a) * D, dy = -Math.sin(me.a) * D, dz = .55, L = Math.hypot(dx, dy, dz), m = SKC.parseMap(SK.dbg.S().map), free = SKC.ray3(m, me.x, me.y, (me.z || 0) + me.eye, dx / L, dy / L, dz / L, L); return { vis: c ? c.root.visible : null, camDist: Math.hypot(cam.position.x - me.x, cam.position.z - me.y), free: Math.hypot(free * dx / L, free * dy / L), solid: SKC.cellSolid(m, cam.position.x, cam.position.z, cam.position.y) }; });
     ok(fpBefore === false || fpBefore === null, 'first person hides own model');
     ok(tpv.vis === true, 'third person shows own model');
-    ok(tpv.camDist > 1.5, 'third-person camera sits behind the player, dist=' + tpv.camDist.toFixed(2));
+    ok(!tpv.solid && (tpv.camDist > 1.5 || tpv.camDist <= tpv.free + .05), 'third-person camera sits behind the player and never inside a wall, dist=' + tpv.camDist.toFixed(2) + ' free=' + tpv.free.toFixed(2));
     await page.keyboard.press('KeyV'); await sleep(200);
 
     // 3) الدرج إلى السطح: يُختبر فقط إن كانت الخريطة المستودع

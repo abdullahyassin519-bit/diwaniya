@@ -25,15 +25,15 @@
   /* أطوال منظور الشخص الأول (تطابق مقاس النموذج الإجرائي السابق) */
   const VLEN = { pistol: .2, smg: .44, shotgun: .64, rifle: .64, sniper: .72 };
   const TWOH = { smg: 1, shotgun: 1, rifle: 1, sniper: 1 };
-  const SCALE = .64;
+  const SCALE = .64, HEADK = .8;
   const TEAMC = [0xff6a2a, 0x2f86ff], ALLY = 0x35a8ff, ENEMY = 0xff2a2a;
   /* إضاءة حافة (Fresnel) بلون الجانب: تُظهر الحليف والعدو بوضوح من بعيد */
   function addRim(m, uRim) {
     m.onBeforeCompile = sh => {
       sh.uniforms.uRim = uRim;
-      sh.fragmentShader = 'uniform vec3 uRim;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += uRim * (pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), 2.4) * 1.25 + .04);');
+      sh.fragmentShader = 'uniform vec3 uRim;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += uRim * pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), 4.0) * .6;');
     };
-    m.customProgramCacheKey = () => 'rim1';
+    m.customProgramCacheKey = () => 'rim2';
   }
   const cache = { ch: {}, w: {}, v: {} };
   let T = null, ready = false, loading = null;
@@ -218,7 +218,7 @@
       setFace() { },
       side: null,
       /* ally=true حليف (أزرق)، false عدو (أحمر)، null لون الفريق */
-      setSide(ally) { if (S.side === ally) return; S.side = ally; const c = new T.Color(ally === 'self' ? 0 : ally == null ? TEAMC[team] : ally ? ALLY : ENEMY); uRim.value.copy(c); ring.material.color.copy(c); ring.material.opacity = ally === false || ally === 'self' ? 0 : .55; },
+      setSide(ally) { if (S.side === ally) return; S.side = ally; const c = new T.Color(ally === 'self' ? 0 : TEAMC[team]); /* لون الفريق في العالم مطابق للشريط العلوي (مهاجمون برتقالي، مدافعون أزرق) */ S.rimC = c.clone(); uRim.value.copy(S.dead ? new T.Color(0) : c); ring.material.color.copy(c); ring.material.opacity = ally === false || ally === 'self' ? 0 : .55; },
       hit() { st0.hitT = .32; },
       play(name, fade, ts) {
         const a = acts[name] || acts.Idle_Gun; if (!a) return;
@@ -250,9 +250,9 @@
         st0.yaw += (yawT - st0.yaw) * Math.min(1, dt * 9);
         const air = Math.abs(st0.vy) > 1.4 && !st.dead; if (air) st0.air = .12; else st0.air = Math.max(0, st0.air - dt);
         if (st0.hitT > 0) st0.hitT -= dt;
-        if (st.dead) { S.dead = Math.min(1, S.dead + dt * 3); S.play('Death', .12); }
+        if (st.dead) { if (!S.dead) { uRim.value.setRGB(0, 0, 0); ring.visible = false; } S.dead = Math.min(1, S.dead + dt * 3); S.play('Death', .12); } /* الجثة بلا توهج ولا حلقة */
         else {
-          S.dead = 0;
+          if (S.dead) { if (S.rimC) uRim.value.copy(S.rimC); ring.visible = true; } S.dead = 0;
           if (st0.air > 0) S.play('Jump_Idle', .12);
           else if (st0.hitT > 0 && acts.HitReact) S.play('HitReact', .06);
           /* سرعة المقطع = السرعة الفعلية ÷ خطوة المقطع المقاسة (مشي 0.8، جري 1.16 وحدة/ث عند هذا المقاس) فلا تنزلق القدمان */
@@ -261,7 +261,7 @@
           else if (spd > .3) S.play('Walk_Gun', .2, dir * Math.max(.5, Math.min(2.2, spd / WALK_V)));
           else S.play('Idle_Gun', .25);
         }
-        mixer.update(dt);
+        mixer.update(dt); if (bone.head) bone.head.scale.setScalar(opt.headK || HEADK); /* رأس أصغر: نسب أقرب لجندي بالغ بدل طفل كرتوني */
 
         /* الساقان باتجاه الحركة، الجذع باتجاه التصويب */
         body.rotation.y = st.dead ? 0 : st0.yaw;
@@ -391,7 +391,7 @@
         TR = { cv, r, sc, cam: new T.PerspectiveCamera(26, 1, .05, 30) };
       }
       TR.r.setSize(w, h, false); TR.cam.aspect = w / h; TR.cam.updateProjectionMatrix();
-      const c = character({ outfit: i, team, gun: 'rifle' });
+      const c = character({ outfit: i, team, gun: 'rifle', headK: w <= 100 ? 1 : 0 }); /* صور الواجهة الصغيرة مقصوصة على الوجه فتبقى بالرأس الأصلي؛ الصور الكاملة بالنسب الجديدة */
       c.root.rotation.y = .5; TR.sc.add(c.root);
       for (let k = 0; k < 6; k++) c.update(.12, { pitch: 0 });
       c.root.updateMatrixWorld(true);
