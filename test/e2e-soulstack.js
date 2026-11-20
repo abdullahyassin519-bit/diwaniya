@@ -14,6 +14,16 @@ const AIM = () => {
   }
   return null;
 };
+/* in-page: a launch from where the player stands that lands on row ty (surface ty+1) near x */
+const AIMTO = ([tx, ty]) => {
+  const { S, C } = SS_DEBUG, P = S.P, w = S.world;
+  for (let a = 0; a < 120; a++) for (const pw of [.5, .6, .7, .8, .9, 1]) {
+    const ang = Math.PI / 2 + (a / 119 - .5) * Math.PI * .95, dx = Math.cos(ang) * pw, dy = Math.sin(ang) * pw, Q = { ...P, gr: 1 }; C.launch(Q, dx, dy);
+    let d = null; for (let k = 0; k < 300; k++) { d = C.step(w, S.blocks, Q, 1 / 60, k / 60); if (d || Q.gr) break; }
+    if (!d && Q.gr && Math.round(Q.y) - 1 === ty && Math.abs(Q.x - tx - .5) < 1.2) return { dx, dy };
+  }
+  return null;
+};
 (async () => {
   const srv = spawn('node', ['server.js'], { cwd: path.join(__dirname, '..'), env: { ...process.env, PORT, SS_DATA: DATA }, stdio: 'ignore' }); await sleep(1500);
   const br = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -23,20 +33,36 @@ const AIM = () => {
     const A = await (await br.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); watch(A);
     await A.addInitScript(() => { localStorage.setItem('ss_lang', '"en"'); localStorage.setItem('ss_name', '"Layla"'); localStorage.setItem('ss_hue', '30'); });
     await A.goto(BASE + '/soulstack/'); await A.waitForFunction(() => window.SS_DEBUG && SS_DEBUG.S.online, null, { timeout: 15000 });
-    ok(await A.isVisible('#how'), 'first visit shows how-to-play'); await A.screenshot({ path: OUT + '/a0-how.png' });
-    await A.click('#bHowGo'); await sleep(600); ok(await A.isVisible('#bPlay'), 'menu shows play'); await A.screenshot({ path: OUT + '/a1-menu.png' });
+    await sleep(600); ok(await A.isVisible('#bPlay'), 'menu shows play'); await A.screenshot({ path: OUT + '/a1-menu.png' });
     ok((await A.textContent('#chips')).includes('25'), 'menu shows 25 souls');
+    /* first press of Play runs the 30-second interactive tutorial */
     await A.click('#bPlay'); await sleep(500);
+    ok(await A.evaluate(() => SS_DEBUG.S.tut === 1 && !document.getElementById('hand').classList.contains('hide')), 'first play starts the interactive tutorial with a drag gesture'); await A.screenshot({ path: OUT + '/t1-tutorial.png' });
+    let ta = await A.evaluate(AIMTO, [6, 3]); await A.evaluate(a => SS_DEBUG.launch(a.dx, a.dy), ta); await sleep(1500);
+    ok(await A.evaluate(() => SS_DEBUG.S.tut === 2 && document.getElementById('bSac').classList.contains('pulse')), 'tutorial step 2: chasm, sacrifice button pulses'); await A.screenshot({ path: OUT + '/t2-tutorial.png' });
+    await A.evaluate(() => SS_DEBUG.launch(0, 1)); await A.waitForFunction(() => SS_DEBUG.S.P.vy <= 0, null, { timeout: 3000 }); await A.click('#bSac'); await sleep(450); await A.screenshot({ path: OUT + '/t3-soul.png' });
+    await A.waitForFunction(() => SS_DEBUG.S.tut === 3, null, { timeout: 6000 }); const own = await A.evaluate(() => { const b = [...SS_DEBUG.S.blocks.values()][0]; return [b.x, b.y]; });
+    ok(own[1] >= 6, 'the sacrifice left your body high above the ledge at row ' + own[1]);
+    ta = await A.evaluate(AIMTO, own); ok(!!ta, 'you can jump onto your own body'); await A.evaluate(a => SS_DEBUG.launch(a.dx, a.dy), ta); await sleep(1500);
+    ok(await A.evaluate(() => SS_DEBUG.S.tut === 4), 'tutorial step 4: standing on yourself'); await A.screenshot({ path: OUT + '/t4-tutorial.png' });
+    ta = await A.evaluate(AIMTO, [6, 10]); ok(!!ta, 'from your body the gate is reachable'); await A.evaluate(a => SS_DEBUG.launch(a.dx, a.dy), ta); await sleep(1300);
+    ok(await A.evaluate(() => SS_DEBUG.S.tut === 5), 'tutorial complete at the gate'); await A.screenshot({ path: OUT + '/t5-tutorial.png' });
+    await A.waitForFunction(() => SS_DEBUG.S.tut === 0 && SS_DEBUG.S.mode === 'play' && !SS_DEBUG.S.practice, null, { timeout: 6000 });
+    ok(await A.evaluate(() => SS_DEBUG.S.souls === 25 && SS_DEBUG.S.blocks.size === 0), 'tutorial spent no souls and left no bodies in the real tower');
     ok(await A.evaluate(() => SS_DEBUG.S.mode === 'play' && !document.getElementById('hud').classList.contains('hide')), 'play starts with HUD');
-    ok(await A.isVisible('#hint'), 'first-time drag hint shown');
+    ok(!(await A.isVisible('#hint')), 'no drag hint in the real tower: the tutorial already taught it');
     // first jump with a real mouse drag: aim, then pull the opposite way
     const aim = await A.evaluate(AIM); ok(!!aim, 'a jump to the next platform exists');
     const k = await A.evaluate(() => SS_DEBUG.dragK());
     await A.mouse.move(640, 400); await A.mouse.down(); await A.mouse.move(640 - aim.dx * k, 400 + aim.dy * k, { steps: 6 }); await sleep(150);
-    await A.screenshot({ path: OUT + '/a2-aim.png' }); ok(await A.evaluate(() => !!SS_DEBUG.S.aim), 'dragging shows the aim arc');
+    await A.screenshot({ path: OUT + '/a2-aim.png' }); ok(await A.evaluate(() => !!SS_DEBUG.S.aim && !!SS_DEBUG.pred() && !!SS_DEBUG.pred().land), 'dragging shows the predicted path and the exact landing spot');
     await A.mouse.up(); await sleep(1600);
     let h = await A.evaluate(() => Math.round(SS_DEBUG.S.P.y) - 1); ok(h === aim.to, `a real drag-and-release jump lands on the next platform (${h} vs ${aim.to})`);
     ok(await A.evaluate(() => document.getElementById('hint').classList.contains('hide')), 'hint disappears after the first leap');
+    /* keyboard: aim with arrows, leap with Space */
+    await A.waitForFunction(() => SS_DEBUG.S.P.gr, null, { timeout: 5000 }); const y0 = await A.evaluate(() => SS_DEBUG.S.P.y);
+    await A.keyboard.press('ArrowUp'); await sleep(200); ok(await A.evaluate(() => !!SS_DEBUG.S.aim), 'arrow keys aim'); await A.keyboard.press('Space'); await sleep(150);
+    ok(await A.evaluate(y => !SS_DEBUG.S.P.gr || SS_DEBUG.S.P.y !== y, y0), 'Space leaps'); await A.waitForFunction(() => SS_DEBUG.S.P.gr || SS_DEBUG.S.mode !== 'play', null, { timeout: 6000 }); await sleep(1800);
     // climb a few more platforms
     let climbed = 0; for (let i = 0; i < 6; i++) { const a = await A.evaluate(AIM); if (!a) break; await A.evaluate(a => SS_DEBUG.launch(a.dx, a.dy), a); await A.waitForFunction(() => SS_DEBUG.S.P.gr || SS_DEBUG.S.mode !== 'play', null, { timeout: 6000 }).catch(() => { }); await sleep(250); const hh = await A.evaluate(() => Math.round(SS_DEBUG.S.P.y) - 1); if (hh > h) climbed++; h = hh; }
     ok(climbed >= 4, `climbed ${climbed} platforms in a row, now at ${h} m`); await A.screenshot({ path: OUT + '/a3-climb.png' });
@@ -53,10 +79,11 @@ const AIM = () => {
     await A.waitForFunction(() => [...SS_DEBUG.S.blocks.values()].some(b => typeof b.i === 'number'), null, { timeout: 5000 });
     const body = await A.evaluate(() => { const b = [...SS_DEBUG.S.blocks.values()].find(b => typeof b.i === 'number'); return { i: b.i, x: b.x, y: b.y }; });
     ok(body.i > 0, `server registered the body #${body.i} at (${body.x},${body.y})`);
-    await sleep(1600); ok(await A.evaluate(() => SS_DEBUG.S.mode === 'play'), 'respawns at camp after the sacrifice');
+    ok(await A.evaluate(() => !!SS_DEBUG.S.soul), 'after death your soul travels back to camp');
+    await A.waitForFunction(() => SS_DEBUG.S.mode === 'play', null, { timeout: 4000 }).catch(() => { }); ok(await A.evaluate(() => SS_DEBUG.S.mode === 'play'), 'respawns at camp when the soul arrives');
     /* ---------- player B on a phone: sees A's body and stands on it ---------- */
     const B = await (await br.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })).newPage(); watch(B);
-    await B.addInitScript(() => { localStorage.setItem('ss_lang', '"en"'); localStorage.setItem('ss_name', '"Omar"'); localStorage.setItem('ss_seen', '1'); });
+    await B.addInitScript(() => { localStorage.setItem('ss_lang', '"en"'); localStorage.setItem('ss_name', '"Omar"'); localStorage.setItem('ss_tut', '1'); });
     await B.goto(BASE + '/soulstack/'); await B.waitForFunction(() => window.SS_DEBUG && SS_DEBUG.S.online, null, { timeout: 15000 }); await sleep(500);
     ok(await B.evaluate(b => { const x = SS_DEBUG.S.byId.get(b.i); return !!x && x.n === 'Layla'; }, body), 'another player sees Layla\'s body');
     ok((await B.textContent('#chips')).includes('1 bodies') || (await B.textContent('#chips')).includes('1'), 'menu counts bodies in today\'s tower');
@@ -87,11 +114,11 @@ const AIM = () => {
     ok(await A.evaluate(() => document.documentElement.dir === 'rtl' && document.querySelector('[data-i=play]').textContent.includes('اصعد')), 'Arabic interface, right-to-left'); await A.screenshot({ path: OUT + '/a5-arabic.png' });
     await A.click('#bBoard'); await sleep(700); ok((await A.textContent('#lb')).includes('Layla') || (await A.textContent('#lb')).includes('Omar'), 'leaderboard lists today\'s climbers'); await A.screenshot({ path: OUT + '/a6-board.png' });
     // practice spends no souls
-    await A.click('#bBoardX'); const sv = await A.evaluate(() => SS_DEBUG.S.souls); await A.click('#bPractice'); await sleep(300); const s0 = await A.evaluate(() => document.getElementById('hSn').textContent); await A.evaluate(() => SS_DEBUG.die()); await sleep(1700);
+    await A.click('#bBoardX'); const sv = await A.evaluate(() => SS_DEBUG.S.souls); await A.click('#bPractice'); await sleep(300); const s0 = await A.evaluate(() => document.getElementById('hSn').textContent); await A.evaluate(() => SS_DEBUG.die()); await sleep(3000);
     ok(s0 === '∞' && await A.evaluate(() => SS_DEBUG.S.souls) === sv, 'practice tower costs no souls');
     // landscape phone
     const L = await (await br.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })).newPage(); watch(L);
-    await L.addInitScript(() => { localStorage.setItem('ss_seen', '1'); localStorage.setItem('ss_lang', '"en"'); }); await L.goto(BASE + '/soulstack/'); await L.waitForFunction(() => window.SS_DEBUG && SS_DEBUG.S.online); await sleep(600);
+    await L.addInitScript(() => { localStorage.setItem('ss_tut', '1'); localStorage.setItem('ss_lang', '"en"'); }); await L.goto(BASE + '/soulstack/'); await L.waitForFunction(() => window.SS_DEBUG && SS_DEBUG.S.online); await sleep(600);
     await L.screenshot({ path: OUT + '/l1-landscape-menu.png' }); await L.tap('#bPlay'); await sleep(800); await L.screenshot({ path: OUT + '/l2-landscape-play.png' });
     ok(await L.evaluate(() => { const r = document.getElementById('bSac').getBoundingClientRect(); return r.bottom <= innerHeight && r.right <= innerWidth; }), 'landscape layout keeps the sacrifice button on screen');
     ok(!errs.length, 'no page errors: ' + errs.slice(0, 3).join(' | '));

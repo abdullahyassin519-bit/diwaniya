@@ -50,18 +50,27 @@ h2{margin:0 0 6px;font-size:24px}
 .h-btns{display:flex;gap:6px;pointer-events:auto}.h-btns button{width:38px;height:38px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:16px}
 .sac{position:absolute;inset-inline-end:max(16px,env(safe-area-inset-right));bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px));width:84px;height:84px;border-radius:50%;pointer-events:auto;background:radial-gradient(circle at 50% 35%,#5a2a52,#2a1030 70%);border:2px solid rgba(255,140,170,.55);box-shadow:0 0 24px rgba(255,90,140,.35),inset 0 0 18px rgba(255,120,170,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:800;font-size:11px;letter-spacing:.03em}
 .sac svg{width:34px;height:34px}.sac:active{transform:scale(.94)}.sac[disabled]{opacity:.35}
-.toast{position:absolute;top:22%;left:50%;transform:translateX(-50%);text-align:center;font-weight:800;font-size:18px;text-shadow:0 2px 14px rgba(0,0,0,.8);white-space:nowrap;transition:opacity .4s;opacity:0}.toast.on{opacity:1}.toast small{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-top:4px}
-.hint{position:absolute;left:50%;bottom:28%;transform:translateX(-50%);font-weight:700;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px;transition:opacity .4s;white-space:nowrap}
+.toast{position:absolute;top:26%;left:50%;transform:translateX(-50%);text-align:center;font-weight:800;font-size:18px;text-shadow:0 2px 14px rgba(0,0,0,.8);white-space:nowrap;transition:opacity .4s;opacity:0}.toast.on{opacity:1}.toast small{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-top:4px}
+.hint{position:absolute;left:50%;top:max(66px,calc(env(safe-area-inset-top) + 58px));transform:translateX(-50%);max-width:calc(100% - 24px);white-space:normal!important;text-align:center;font-weight:700;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px;transition:opacity .4s;white-space:nowrap}
 .feed{position:absolute;inset-inline-start:12px;bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut);max-width:60%}
 .feed div{background:rgba(11,10,26,.6);padding:4px 9px;border-radius:8px;animation:fd 6s forwards}.feed div b{color:var(--ink)}
 @keyframes fd{0%{opacity:0;transform:translateY(6px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+@keyframes pulse{0%,100%{box-shadow:0 0 24px rgba(255,90,140,.35),0 0 0 0 rgba(255,140,180,.7),inset 0 0 18px rgba(255,120,170,.3)}50%{box-shadow:0 0 50px rgba(255,120,170,.95),0 0 0 14px rgba(255,140,180,0),inset 0 0 22px rgba(255,160,200,.6)}}
+.sac.pulse{animation:pulse 1.1s ease-in-out infinite}
+.hand{position:absolute;left:50%;top:52%;font-size:44px;transform:translate(-50%,0);animation:drag 2s ease-in-out infinite;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+@keyframes drag{0%{transform:translate(-50%,-30px);opacity:0}15%{opacity:1}55%{transform:translate(-50%,70px);opacity:1}70%{transform:translate(-50%,70px);opacity:0}100%{opacity:0}}
+.skip{position:absolute;top:max(58px,calc(env(safe-area-inset-top) + 50px));inset-inline-end:12px;pointer-events:auto;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--soul);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.hand,.sac.pulse{animation:none}.btn{transition:none}}
 [dir=rtl] .h-ht,[dir=rtl] .big,[dir=rtl] .stats b{direction:ltr;unicode-bidi:isolate}
 @media (min-aspect-ratio:1/1){.sac{width:96px;height:96px}}
 @media (max-height:520px){.logo{font-size:38px}.tag{margin:4px 0 8px;font-size:13px}.chips{margin-bottom:6px}.chip{padding:4px 9px;font-size:11.5px}.btn{padding:9px 14px;margin:5px 0;font-size:15px}.btn.main{padding:10px;font-size:16px}.me{margin:6px 0 0}.foot{display:none}.panel{width:min(560px,100%)}#menu .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}#menu .row #bPractice{margin:5px 0}.sac{width:72px;height:72px}}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c" tabindex="0" aria-label="SOULSTACK tower"></canvas>
+<div id="live" class="sr" aria-live="polite"></div>
 <button class="lang" id="lang">العربية</button>
 
 <div id="hud" class="hide">
@@ -72,6 +81,8 @@ h2{margin:0 0 6px;font-size:24px}
   </div>
   <div class="toast" id="toast"></div>
   <div class="hint hide" id="hint"></div>
+  <div class="hand hide" id="hand" aria-hidden="true">☝️</div>
+  <button class="skip hide" id="bSkip" data-i="skip">Skip</button>
   <div class="feed" id="feed"></div>
   <button class="sac" id="bSac"><svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.5 5 3.5 6v3h9v-3c2-1 3.5-3 3.5-6a8 8 0 0 0-8-8zm-3 11a1.6 1.6 0 1 1 0-3.2A1.6 1.6 0 0 1 9 13zm6 0a1.6 1.6 0 1 1 0-3.2A1.6 1.6 0 0 1 15 13zM9.5 19.5h1.5V22H9.5zm3.5 0h1.5V22H13z" fill="#ffb3c8"/></svg><span id="sacL">SACRIFICE</span></button>
 </div>
@@ -81,7 +92,7 @@ h2{margin:0 0 6px;font-size:24px}
   <p class="tag" data-i="tag">Every fall builds the way up.</p>
   <div class="chips" id="chips"></div>
   <button class="btn main" id="bPlay"><span data-i="play">Climb today's tower</span><small id="playSub"></small></button>
-  <div class="row"><button class="btn" id="bHow" data-i="how">How it works</button><button class="btn" id="bBoard" data-i="board">Leaderboard</button><button class="btn" id="bPractice" data-i="practice">Practice tower (no souls spent)</button></div>
+  <div class="row"><button class="btn" id="bHow" data-i="learn">Learn in 30 seconds</button><button class="btn" id="bBoard" data-i="board">Leaderboard</button><button class="btn" id="bPractice" data-i="practice">Practice tower (no souls spent)</button></div>
   <div class="me"><button class="sw" id="sw" aria-label="colour"></button><input id="name" maxlength="16" autocomplete="off" spellcheck="false"></div>
   <p class="foot" data-i="foot">A new tower rises for the whole world every day at 00:00 UTC.</p>
 </div></div>
