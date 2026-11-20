@@ -4,10 +4,11 @@
    قائد الغرفة يشغّل منطق اللعبة، وإذا انقطع ينقل الخادم القيادة تلقائياً للاعب متصل. */
 const { WebSocketServer } = require('ws');
 const SKC = require('./public/js/strike-core.js');
+const SS = require('./soulstack-server.js'); /* SOULSTACK: البرج اليومي المشترك */
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, PUB = path.join(__dirname, 'public');
 const MAX_BODY = 400 * 1024, MAX_ROOMS = 3000, IDLE_MS = 3 * 3600e3, HOST_GRACE = 12000;
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.json': 'application/json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const rooms = new Map();
 const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const newCode = () => { for (;;) { let c = ''; for (const b of crypto.randomBytes(4)) c += ABC[b % ABC.length]; if (!rooms.has(c)) return c; } };
@@ -45,6 +46,8 @@ const server = http.createServer(async (req, res) => {
   try {
     const ip = ipOf(req);
     if (p === '/healthz') return json(res, 200, { ok: 1, up: Math.round(process.uptime()) });
+    if (p.startsWith('/ss/api/')) return SS.handle(req, res, p, q, ip, { json, body, over });
+    if (p === '/soulstack') { res.writeHead(301, { Location: '/soulstack/' + u.search }); return res.end(); }
     if (p === '/api/ping') return json(res, 200, { ok: 1, rooms: rooms.size, id: pidOf(q), q: u.search.length });
     if (p === '/api/create' && req.method === 'POST') {
       const pid = pidOf(q); if (!pid) return json(res, 400, { err: 'bad id' });
@@ -96,7 +99,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 404, { err: 'unknown' });
     }
     /* ملفات الواجهة */
-    let f = path.normalize(path.join(PUB, decodeURIComponent(p === '/' ? '/index.html' : p)));
+    let f = path.normalize(path.join(PUB, decodeURIComponent(p.endsWith('/') ? p + 'index.html' : p)));
     if (!f.startsWith(PUB)) return json(res, 403, {});
     fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end('not found'); } res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }); res.end(d); });
   } catch (e) { if (!res.headersSent) json(res, typeof e === 'number' ? e : 400, { err: 'bad request' }); }

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>SOULSTACK — every fall builds the way up</title>
+<meta name="description" content="One tower a day for the whole world. When you fall, your body becomes a step for everyone after you.">
+<meta property="og:title" content="SOULSTACK — every fall builds the way up">
+<meta property="og:description" content="One tower a day for the whole world. Your fall becomes someone else's step.">
+<meta name="theme-color" content="#0b0a1a">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#0b0a1a;--ink:#f3f0ff;--mut:#a79fc9;--gold:#ffcf6b;--soul:#7ee8ff;--blood:#ff5a6e;--card:rgba(20,17,44,.82);--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.hide{display:none!important}
+.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));z-index:10;background:radial-gradient(ellipse 60% 55% at 50% 45%,rgba(11,10,26,.55),rgba(11,10,26,.12) 75%)}
+.panel{width:min(440px,100%);max-height:100%;overflow:auto;text-align:center;scrollbar-width:none}
+.logo{font-size:clamp(40px,11vw,62px);font-weight:900;letter-spacing:.06em;margin:0;line-height:1;background:linear-gradient(180deg,#fff 20%,var(--soul) 60%,#7f6bff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(126,232,255,.35))}
+.tag{margin:8px 0 18px;color:var(--mut);font-size:15px;letter-spacing:.02em}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12.5px;color:var(--mut);backdrop-filter:blur(6px)}
+.chip b{color:var(--ink);font-variant-numeric:tabular-nums}
+.btn{display:block;width:100%;padding:15px 18px;border-radius:14px;font-weight:800;font-size:17px;letter-spacing:.02em;margin:8px 0;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(6px);transition:transform .08s}
+.btn:active{transform:scale(.98)}
+.btn.main{background:linear-gradient(180deg,#9df0ff,#5bb8ff 55%,#6f5bff);color:#0b0a1a;border:0;box-shadow:0 8px 30px rgba(91,184,255,.35),inset 0 1px 0 rgba(255,255,255,.6);font-size:19px;padding:17px}
+.btn.main small{display:block;font-weight:700;font-size:12px;opacity:.75;margin-top:2px}
+.btn.main[disabled]{filter:grayscale(1);opacity:.55}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1 1 40%}.row #bPractice{flex-basis:100%;margin-top:0}
+.me{display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0 4px}
+.me input{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 12px;font:inherit;font-weight:700;width:170px;text-align:center}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px currentColor}
+.lang{position:fixed;top:max(12px,env(safe-area-inset-top));inset-inline-end:12px;z-index:11;font-size:13px;padding:7px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.foot{margin-top:12px;font-size:11.5px;color:var(--mut);opacity:.8}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:10px 0;text-align:start;backdrop-filter:blur(6px)}
+.how{display:flex;gap:12px;align-items:flex-start}.how i{font-style:normal;font-size:28px;line-height:1;width:40px;text-align:center;flex:none}.how b{display:block;margin-bottom:3px}.how span{color:var(--mut);font-size:14px;line-height:1.45}
+h2{margin:0 0 6px;font-size:24px}
+.tabs{display:flex;gap:6px;margin:8px 0}.tabs button{flex:1;padding:9px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:14px}.tabs button.on{background:#2b2560;border-color:var(--soul)}
+.lb{list-style:none;margin:0;padding:0;text-align:start}.lb li{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid var(--line);font-size:15px}.lb li i{width:12px;height:12px;border-radius:50%;flex:none}.lb li b{margin-inline-start:auto;font-variant-numeric:tabular-nums}.lb li small{color:var(--mut);width:22px;text-align:center}.lb .empty{justify-content:center;color:var(--mut)}
+.big{font-size:44px;font-weight:900;margin:2px 0;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}.stats div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 4px}.stats b{display:block;font-size:22px;font-variant-numeric:tabular-nums}.stats span{font-size:11.5px;color:var(--mut)}
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+.h-top{position:absolute;top:max(10px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.h-ht{font-weight:900;font-size:30px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 2px 12px rgba(0,0,0,.6)}.h-ht small{display:block;font-size:12px;font-weight:700;color:var(--mut);margin-top:3px}
+.h-souls{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);padding:7px 12px;border-radius:999px;font-weight:800;font-variant-numeric:tabular-nums}.h-souls svg{width:18px;height:18px}
+.h-btns{display:flex;gap:6px;pointer-events:auto}.h-btns button{width:38px;height:38px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:16px}
+.sac{position:absolute;inset-inline-end:max(16px,env(safe-area-inset-right));bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px));width:84px;height:84px;border-radius:50%;pointer-events:auto;background:radial-gradient(circle at 50% 35%,#5a2a52,#2a1030 70%);border:2px solid rgba(255,140,170,.55);box-shadow:0 0 24px rgba(255,90,140,.35),inset 0 0 18px rgba(255,120,170,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:800;font-size:11px;letter-spacing:.03em}
+.sac svg{width:34px;height:34px}.sac:active{transform:scale(.94)}.sac[disabled]{opacity:.35}
+.toast{position:absolute;top:22%;left:50%;transform:translateX(-50%);text-align:center;font-weight:800;font-size:18px;text-shadow:0 2px 14px rgba(0,0,0,.8);white-space:nowrap;transition:opacity .4s;opacity:0}.toast.on{opacity:1}.toast small{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-top:4px}
+.hint{position:absolute;left:50%;bottom:28%;transform:translateX(-50%);font-weight:700;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px;transition:opacity .4s;white-space:nowrap}
+.feed{position:absolute;inset-inline-start:12px;bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut);max-width:60%}
+.feed div{background:rgba(11,10,26,.6);padding:4px 9px;border-radius:8px;animation:fd 6s forwards}.feed div b{color:var(--ink)}
+@keyframes fd{0%{opacity:0;transform:translateY(6px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+[dir=rtl] .h-ht,[dir=rtl] .big,[dir=rtl] .stats b{direction:ltr;unicode-bidi:isolate}
+@media (min-aspect-ratio:1/1){.sac{width:96px;height:96px}}
+@media (max-height:520px){.logo{font-size:38px}.tag{margin:4px 0 8px;font-size:13px}.chips{margin-bottom:6px}.chip{padding:4px 9px;font-size:11.5px}.btn{padding:9px 14px;margin:5px 0;font-size:15px}.btn.main{padding:10px;font-size:16px}.me{margin:6px 0 0}.foot{display:none}.panel{width:min(560px,100%)}#menu .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}#menu .row #bPractice{margin:5px 0}.sac{width:72px;height:72px}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button class="lang" id="lang">العربية</button>
+
+<div id="hud" class="hide">
+  <div class="h-top">
+    <div class="h-ht"><span id="hH">0</span> <span id="hU">m</span><small id="hB"></small></div>
+    <div class="h-souls" id="hS"><svg viewBox="0 0 24 24"><path d="M12 2c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 1 4 2 4 0-3 0-5 1-8z" fill="#7ee8ff"/></svg><span id="hSn">25</span></div>
+    <div class="h-btns"><button id="bMute" aria-label="sound">🔊</button><button id="bMenu" aria-label="menu">☰</button></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="hint hide" id="hint"></div>
+  <div class="feed" id="feed"></div>
+  <button class="sac" id="bSac"><svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.5 5 3.5 6v3h9v-3c2-1 3.5-3 3.5-6a8 8 0 0 0-8-8zm-3 11a1.6 1.6 0 1 1 0-3.2A1.6 1.6 0 0 1 9 13zm6 0a1.6 1.6 0 1 1 0-3.2A1.6 1.6 0 0 1 15 13zM9.5 19.5h1.5V22H9.5zm3.5 0h1.5V22H13z" fill="#ffb3c8"/></svg><span id="sacL">SACRIFICE</span></button>
+</div>
+
+<div class="ov" id="menu"><div class="panel">
+  <h1 class="logo">SOULSTACK</h1>
+  <p class="tag" data-i="tag">Every fall builds the way up.</p>
+  <div class="chips" id="chips"></div>
+  <button class="btn main" id="bPlay"><span data-i="play">Climb today's tower</span><small id="playSub"></small></button>
+  <div class="row"><button class="btn" id="bHow" data-i="how">How it works</button><button class="btn" id="bBoard" data-i="board">Leaderboard</button><button class="btn" id="bPractice" data-i="practice">Practice tower (no souls spent)</button></div>
+  <div class="me"><button class="sw" id="sw" aria-label="colour"></button><input id="name" maxlength="16" autocomplete="off" spellcheck="false"></div>
+  <p class="foot" data-i="foot">A new tower rises for the whole world every day at 00:00 UTC.</p>
+</div></div>
+
+<div class="ov hide" id="how"><div class="panel">
+  <h2 data-i="how">How it works</h2>
+  <div class="card how"><i>🫳</i><div><b data-i="h1t">Drag back, release to leap</b><span data-i="h1">Pull anywhere on the screen like a slingshot. The dotted arc shows where you'll land.</span></div></div>
+  <div class="card how"><i>💎</i><div><b data-i="h2t">Your body becomes a step — for everyone</b><span data-i="h2">When you die, you crystallise where you fell, with your name on it. Every player in the world can stand on you for the rest of the day. Fall on spikes and your body covers them.</span></div></div>
+  <div class="card how"><i>☠️</i><div><b data-i="h3t">Sacrifice to build</b><span data-i="h3">Some gaps are too high for anyone. Leap, then press Sacrifice at the top of the jump: you become the step you need, and respawn at the last camp.</span></div></div>
+  <div class="card how"><i>🔥</i><div><b data-i="h4t">25 souls a day</b><span data-i="h4">Each death spends a soul. Climb as high as you can — and see how many strangers your body lifted.</span></div></div>
+  <button class="btn main" id="bHowGo" data-i="go">Got it</button>
+</div></div>
+
+<div class="ov hide" id="board"><div class="panel">
+  <h2 data-i="board">Leaderboard</h2>
+  <div class="tabs"><button id="tH" class="on" data-i="tH">Highest</button><button id="tHelp" data-i="tHelp">Most helpful</button></div>
+  <ul class="lb" id="lb"></ul>
+  <button class="btn" id="bBoardX" data-i="back">Back</button>
+</div></div>
+
+<div class="ov hide" id="over"><div class="panel">
+  <h2 data-i="overT">Your souls are spent</h2>
+  <p class="tag" data-i="overS">Your bodies stay in the tower until tomorrow, lifting everyone who comes after you.</p>
+  <div class="big"><span id="oBest">0</span> <span id="oU">m</span></div>
+  <div class="stats"><div><b id="oBodies">0</b><span data-i="bodies">bodies left</span></div><div><b id="oHelped">0</b><span data-i="lifted">climbers lifted</span></div><div><b id="oNext">--:--</b><span data-i="next">next tower</span></div></div>
+  <button class="btn main" id="bShare" data-i="share">Share my tower</button>
+  <button class="btn" id="bPractice2" data-i="practice">Practice tower (no souls spent)</button>
+  <button class="btn" id="bOverX" data-i="back">Back</button>
+</div></div>
+
+<script src="core.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
