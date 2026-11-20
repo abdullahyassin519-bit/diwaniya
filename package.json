@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test/perft.js && node test/fuzz.js && node test/strike.js && node test/api.js && node test/vertical.js && node test/roofs.js && node test/maps.js && node test/soulstack-core.js && node test/soulstack-api.js"
+    "test": "node test/perft.js && node test/fuzz.js && node test/strike.js && node test/api.js && node test/vertical.js && node test/roofs.js && node test/maps.js && node test/soulstack-core.js && node test/soulstack-api.js && node test/soulstack-levels.js && node test/soulstack-race.js"
   },
   "engines": {
     "node": ">=18"

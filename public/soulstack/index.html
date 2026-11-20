@@ -63,6 +63,32 @@ h2{margin:0 0 6px;font-size:24px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 :focus-visible{outline:2px solid var(--soul);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.hand,.sac.pulse{animation:none}.btn{transition:none}}
+#menu .row .btn small{display:block;font-size:11.5px;font-weight:600;opacity:.75;margin-top:2px}.btn.hot{background:linear-gradient(180deg,#ffd27a,#ff9a4a);color:#2a1300;border:0;box-shadow:0 6px 22px rgba(255,160,70,.3)}
+.row.mini .btn{font-size:13px;padding:10px 8px;font-weight:700}.panel.wide{width:min(560px,100%)}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.tcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;position:relative}
+.tcard b{display:block;font-size:22px;font-weight:900}.tcard span{display:block;font-size:11.5px;color:var(--mut);margin-top:2px;min-height:15px}.tcard em{font-style:normal;color:var(--gold);letter-spacing:1px;font-size:14px}
+.tcard.lock{opacity:.4}.tcard.next{border-color:var(--gold);box-shadow:0 0 18px rgba(255,207,107,.25)}.tcard i{position:absolute;top:6px;inset-inline-end:8px;font-style:normal;font-size:12px}
+.lvnum{display:inline-flex;width:54px;height:54px;border-radius:50%;align-items:center;justify-content:center;font-size:26px;font-weight:900;background:linear-gradient(180deg,#ffd27a,#ff9a4a);color:#2a1300;margin-bottom:6px}
+.goal{font-size:18px;font-weight:800;margin:6px 0 10px;color:var(--gold)}.starsrow{display:flex;justify-content:center;gap:14px;font-size:13px;color:var(--mut);margin:6px 0 10px}
+.bigstars{font-size:52px;letter-spacing:6px;margin:6px 0;color:#3a3560}.bigstars .on{color:var(--gold);text-shadow:0 0 18px rgba(255,207,107,.6);display:inline-block;animation:pop .5s backwards}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+.up{display:flex;align-items:center;gap:10px;text-align:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:8px 0}.up div{flex:1}.up b{display:block}.up span{font-size:12.5px;color:var(--mut)}.up small{color:var(--gold);font-weight:700}
+.up button{padding:9px 12px;border-radius:10px;background:linear-gradient(180deg,#ffd27a,#ff9a4a);color:#2a1300;font-weight:800;white-space:nowrap}.up button[disabled]{filter:grayscale(1);opacity:.45}
+.code{font-size:44px;font-weight:900;letter-spacing:.18em;color:var(--gold);margin:4px 0;direction:ltr}.btn.wa{background:#1fa855;border:0;color:#fff}
+.lvpick{display:flex;align-items:center;gap:8px;margin:8px 0}.lvpick .btn{width:52px;flex:none;margin:0}.lvpick div{flex:1;font-weight:800}.lvpick div small{display:block;color:var(--mut);font-weight:600;font-size:12px}
+.lb li.me{background:rgba(126,232,255,.08)}.crown{color:var(--gold)}
+.h-mid{position:absolute;top:max(48px,calc(env(safe-area-inset-top) + 42px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px}
+.h-time{font-weight:900;font-size:22px;font-variant-numeric:tabular-nums;background:var(--card);border:1px solid var(--line);padding:4px 12px;border-radius:999px;direction:ltr}.h-time.warn{color:#ff6b80;border-color:#ff6b80;animation:pulse 1s infinite}
+.h-pow{display:flex;gap:4px;font-size:18px}.h-pow span{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:2px 6px}
+.h-goal{position:absolute;inset-inline-end:max(8px,env(safe-area-inset-right));top:24%;height:42%;width:10px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid var(--line)}
+.h-goal i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,#7ee8ff,#ffcf6b);border-radius:6px;height:0%}.h-goal b{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--gold);white-space:nowrap}
+.h-goal #hGr span{position:absolute;left:-5px;width:20px;height:4px;border-radius:2px}
+.cd{position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);font-size:96px;font-weight:900;color:#fff;text-shadow:0 0 30px rgba(126,232,255,.8)}
+.fire{position:absolute;inset-inline-end:max(16px,env(safe-area-inset-right));bottom:max(116px,calc(env(safe-area-inset-bottom) + 108px));width:68px;height:68px;border-radius:50%;pointer-events:auto;background:radial-gradient(circle at 50% 35%,#ffe28a,#ff9a2e 70%);color:#2a1300;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(255,190,80,.5)}
+.fire span{font-size:24px;line-height:1}.fire b{font-size:12px}
+.emo{position:absolute;inset-inline-start:12px;top:max(92px,calc(env(safe-area-inset-top) + 84px));display:flex;flex-direction:column;gap:6px;pointer-events:auto}.emo button{width:38px;height:38px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:18px}
+.emof{position:absolute;inset:0;pointer-events:none;overflow:hidden}.emof div{position:absolute;bottom:20%;font-size:30px;animation:rise 2.4s forwards;text-align:center}.emof div small{display:block;font-size:11px;font-weight:700}
+@keyframes rise{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(-55vh);opacity:0}}
 [dir=rtl] .h-ht,[dir=rtl] .big,[dir=rtl] .stats b{direction:ltr;unicode-bidi:isolate}
 @media (min-aspect-ratio:1/1){.sac{width:96px;height:96px}}
 @media (max-height:520px){.logo{font-size:38px}.tag{margin:4px 0 8px;font-size:13px}.chips{margin-bottom:6px}.chip{padding:4px 9px;font-size:11.5px}.btn{padding:9px 14px;margin:5px 0;font-size:15px}.btn.main{padding:10px;font-size:16px}.me{margin:6px 0 0}.foot{display:none}.panel{width:min(560px,100%)}#menu .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}#menu .row #bPractice{margin:5px 0}.sac{width:72px;height:72px}}
@@ -79,6 +105,12 @@ h2{margin:0 0 6px;font-size:24px}
     <div class="h-souls" id="hS"><svg viewBox="0 0 24 24"><path d="M12 2c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 1 4 2 4 0-3 0-5 1-8z" fill="#7ee8ff"/></svg><span id="hSn">25</span></div>
     <div class="h-btns"><button id="bMute" aria-label="sound">🔊</button><button id="bMenu" aria-label="menu">☰</button></div>
   </div>
+  <div class="h-mid hide" id="hMid"><div class="h-time" id="hT">0:00</div><div class="h-pow" id="hPow"></div></div>
+  <div class="h-goal hide" id="hGoal"><i id="hGf"></i><b id="hGl">20 m</b><div id="hGr"></div></div>
+  <div class="cd hide" id="cd"></div>
+  <div class="emo hide" id="emo"><button>👋</button><button>😂</button><button>🔥</button><button>😱</button></div>
+  <div class="emof" id="emof"></div>
+  <button class="fire hide" id="bFire" aria-label="fire"><span>⚡</span><b id="hBolts">0</b></button>
   <div class="toast" id="toast"></div>
   <div class="hint hide" id="hint"></div>
   <div class="hand hide" id="hand" aria-hidden="true">☝️</div>
@@ -91,11 +123,72 @@ h2{margin:0 0 6px;font-size:24px}
   <h1 class="logo">SOULSTACK</h1>
   <p class="tag" data-i="tag">Every fall builds the way up.</p>
   <div class="chips" id="chips"></div>
-  <button class="btn main" id="bPlay"><span data-i="play">Climb today's tower</span><small id="playSub"></small></button>
-  <div class="row"><button class="btn" id="bHow" data-i="learn">Learn in 30 seconds</button><button class="btn" id="bBoard" data-i="board">Leaderboard</button><button class="btn" id="bPractice" data-i="practice">Practice tower (no souls spent)</button></div>
+  <button class="btn main" id="bTrials"><span data-i="trials">Trials</span><small id="trSub"></small></button>
+  <div class="row"><button class="btn hot" id="bRace"><span data-i="race">Race friends</span><small data-i="raceS">send a link · first to the top wins</small></button><button class="btn" id="bPlay"><span data-i="play">Climb today's tower</span><small id="playSub"></small></button></div>
+  <div class="row"><button class="btn" id="bShrine"><span data-i="shrine">Shrine</span><small id="shSub"></small></button><button class="btn" id="bBoard" data-i="board">Leaderboard</button></div>
+  <div class="row mini"><button class="btn" id="bHow" data-i="learn">Learn in 30 seconds</button><button class="btn" id="bPractice" data-i="practice">Practice tower (no souls spent)</button></div>
   <div class="me"><button class="sw" id="sw" aria-label="colour"></button><input id="name" maxlength="16" autocomplete="off" spellcheck="false"></div>
   <p class="foot" data-i="foot">A new tower rises for the whole world every day at 00:00 UTC.</p>
 </div></div>
+
+<div class="ov hide" id="trials"><div class="panel wide">
+  <h2 data-i="trials">Trials</h2><p class="tag" id="trHead"></p>
+  <div class="tgrid" id="tgrid"></div>
+  <button class="btn" id="bTrialsX" data-i="back">Back</button>
+</div></div>
+
+<div class="ov hide" id="intro"><div class="panel">
+  <div class="lvnum" id="iNum">1</div><h2 id="iName"></h2>
+  <div class="goal" id="iGoal"></div>
+  <div class="card how"><i id="iIcon">✨</i><div><b data-i="newHere">New here</b><span id="iText"></span></div></div>
+  <div class="starsrow" id="iStars"></div>
+  <button class="btn main" id="bGo" data-i="go2">Climb</button>
+  <button class="btn" id="bIntroX" data-i="back">Back</button>
+</div></div>
+
+<div class="ov hide" id="done"><div class="panel">
+  <h2 data-i="cleared">Trial cleared!</h2>
+  <div class="bigstars" id="dStars"></div>
+  <div class="stats"><div><b id="dTime">0</b><span data-i="time">time</span></div><div><b id="dEmb">0</b><span data-i="embers">embers</span></div><div><b id="dKills">0</b><span data-i="kills">monsters</span></div></div>
+  <p class="tag" id="dNote"></p>
+  <button class="btn main" id="bNext" data-i="nextLv">Next trial</button>
+  <div class="row"><button class="btn" id="bRetry" data-i="retry">Retry</button><button class="btn" id="bDoneX" data-i="trials">Trials</button></div>
+</div></div>
+
+<div class="ov hide" id="fail"><div class="panel">
+  <h2 data-i="timeUp">Time's up</h2>
+  <div class="big"><span id="fH">0</span> / <span id="fGoal">0</span></div>
+  <p class="tag" data-i="failS">So close. Every attempt teaches the tower.</p>
+  <button class="btn main" id="bRetry2" data-i="retry">Retry</button>
+  <button class="btn" id="bFailX" data-i="trials">Trials</button>
+</div></div>
+
+<div class="ov hide" id="shrine"><div class="panel">
+  <h2 data-i="shrine">Shrine</h2><p class="tag" id="shEmb"></p>
+  <div id="shList"></div>
+  <button class="btn" id="bShrineX" data-i="back">Back</button>
+</div></div>
+
+<div class="ov hide" id="lobby"><div class="panel">
+  <h2 data-i="lobbyT">Race lobby</h2>
+  <div class="code" id="lbCode">·····</div>
+  <p class="tag" data-i="lobbyS">Send this link to your friends. Everyone climbs the same trial; first to the top wins.</p>
+  <div class="row"><button class="btn" id="bShareRoom" data-i="invite">Invite</button><button class="btn wa" id="bWa">WhatsApp</button><button class="btn" id="bCopy" data-i="copy">Copy link</button></div>
+  <ul class="lb" id="lbPlayers"></ul>
+  <div class="lvpick"><button class="btn" id="lvPrev">‹</button><div id="lbLevel"></div><button class="btn" id="lvNext">›</button></div>
+  <button class="btn main" id="bStart" data-i="startRace">Start race</button>
+  <p class="tag" id="lbWait"></p>
+  <button class="btn" id="bLeave" data-i="leave">Leave</button>
+</div></div>
+
+<div class="ov hide" id="rres"><div class="panel">
+  <h2 id="rrT"></h2>
+  <ul class="lb" id="rrList"></ul>
+  <button class="btn main" id="bAgain" data-i="again">Rematch</button>
+  <p class="tag" id="rrWait"></p>
+  <button class="btn" id="bRLeave" data-i="leave">Leave</button>
+</div></div>
+<div class="ov hide" id="join"></div>
 
 <div class="ov hide" id="how"><div class="panel">
   <h2 data-i="how">How it works</h2>
@@ -124,6 +217,8 @@ h2{margin:0 0 6px;font-size:24px}
 </div></div>
 
 <script src="core.js"></script>
+<script src="levels.js"></script>
 <script src="game.js"></script>
+<script src="modes.js"></script>
 </body>
 </html>

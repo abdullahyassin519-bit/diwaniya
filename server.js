@@ -118,6 +118,7 @@ setInterval(() => { const t = Date.now(); for (const r of rooms.values()) { if (
 const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
 server.on('upgrade', (req, sock, head) => {
   let u; try { u = new URL(req.url, 'http://x'); } catch (e) { return sock.destroy(); }
+  if (u.pathname === '/ss/ws') return SS.upgrade(req, sock, head, u); /* SOULSTACK races */
   const room = rooms.get(String(u.searchParams.get('c') || '').toUpperCase()), pid = pidOf(u.searchParams);
   if (u.pathname !== '/ws' || !room || !pid || admit(room, pid) || !(room.members && room.members.has(pid))) return sock.destroy();
   wss.handleUpgrade(req, sock, head, ws => {
