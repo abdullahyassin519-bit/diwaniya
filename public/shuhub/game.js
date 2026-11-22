@@ -74,7 +74,7 @@
     setInterval(() => { if (!AC || MUTE || document.hidden) return; const n = pat[i++ % pat.length]; if (n < 0) return; const f = HIJAZ[n] * (i % 32 < 16 ? 1 : 2) / 2; const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(), fl = AC.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.setValueAtTime(2400, t); fl.frequency.exponentialRampToValueAtTime(400, t + .4); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .005); g.gain.exponentialRampToValueAtTime(.001, t + .9); o.connect(fl).connect(g).connect(musicG); o.start(t); o.stop(t + 1); }, 330);
   }
   const buzz = p => { try { if (navigator.vibrate && !RM()) navigator.vibrate(p); } catch (e) { } };
-  function setMute(m) { MUTE = m; LS.set('sh_mute', m); if (master) master.gain.value = m ? 0 : .8; $('bMute').textContent = $('bMute2').textContent = m ? '🔇' : '🔊'; }
+  function setMute(m) { MUTE = m; LS.set('sh_mute', m); if (master) master.gain.value = m ? 0 : .8; $('bMute').textContent = $('bMute2').textContent = m ? '🔇' : '🔊'; const wm = $('wMute'); if (wm) wm.textContent = m ? '🔇' : '🔊'; }
 
   /* ---------------- canvas and view ---------------- */
   const cv = $('cv'), cx = cv.getContext('2d'); let VW = 0, VH = 0, DPR = 1, K = 1, OX = 0, OY = 0, BG = null, DARK = null;
@@ -145,6 +145,7 @@
   /* ---------------- loop ---------------- */
   function frame(ts) {
     requestAnimationFrame(frame); const dtr = Math.min(.05, (ts - (last || ts)) / 1000); last = ts;
+    if (window.SHW && SHW.on) { SHW.frame(dtr); return; } /* Mountain War draws itself */
     if (R) {
       const pre = R.t0 > performance.now(); if (pre) { const n = Math.ceil((R.t0 - performance.now()) / 1000); if (n !== R.cdN) { R.cdN = n; $('cd').textContent = n; if (n <= 3) SFX.beep(0); } }
       else if (R.mode === 'duel' && !R.goSaid) { R.goSaid = 1; $('cd').textContent = AR() ? 'انطلق!' : 'GO!'; SFX.beep(1); setTimeout(() => $('cd').classList.add('hide'), 700); }
@@ -276,9 +277,9 @@
   function useFalcon() { if (R && C.falcon(R.st)) events(); }
   $('bFalcon').addEventListener('pointerdown', e => { e.stopPropagation(); useFalcon(); });
   /* ---------------- screens ---------------- */
-  const OVS = ['menu', 'levels', 'intro', 'win', 'lose', 'shop', 'lobby', 'res']; let prevScreen = 'menu', curScreen = 'menu';
+  const OVS = ['menu', 'levels', 'intro', 'win', 'lose', 'shop', 'lobby', 'res', 'war', 'wlobby', 'wres']; let prevScreen = 'menu', curScreen = 'menu';
   function show(id) { if (id && curScreen && curScreen !== id && ['menu', 'win', 'lose', 'res'].includes(curScreen)) prevScreen = curScreen; curScreen = id; for (const k of OVS) $(k).classList.toggle('hide', k !== id); }
-  function toMenu() { if (NET.ws) leaveDuel(); if (R) endRun(); show('menu'); refreshMenu(); }
+  function toMenu() { if (window.SHW) SHW.leave(); if (NET.ws) leaveDuel(); if (R) endRun(); show('menu'); refreshMenu(); }
   function refreshMenu() { $('playSub').textContent = tr('playSub', PG.un, starsTotal()); $('shopSub').textContent = tr('shopSub', PG.coins); }
   const ICON = ['✨', '✖️', '🪤', '💃', '🔥', '🪨', '🦵', '💎', '🪭', '🏰', '🌀', '🌙', '🌪️', '⚔️', '👑'];
   function levels() { show('levels'); $('lvHead').textContent = tr('lvHead', starsTotal(), PG.coins);
@@ -339,6 +340,7 @@
   document.querySelectorAll('#emo button').forEach(b => b.addEventListener('pointerdown', e => { e.stopPropagation(); netSend({ t: 'emo', e: b.textContent }); }));
   /* ---------------- boot ---------------- */
   addEventListener('resize', resize); resize(); setMute(MUTE); applyLang(); show('menu'); requestAnimationFrame(frame);
+  window.SHG = { $, LS, tr, TXT, esc, SFX, tone, noise, audio, buzz, show, toast, RM, applyLang, refreshMenu, toMenu, setMute, hsh, get NAME() { return NAME; }, get HUE() { return HUE; }, get TOK() { return TOK; }, get LANG() { return LANG; }, get MUTE() { return MUTE; } };
   const qr = new URLSearchParams(location.search).get('r'); if (qr) setTimeout(() => connect(qr.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5)), 60);
   window.SH_DEBUG = { C, PG, run: () => R, NET, startRun, levels, intro, shop, connect, input, toMenu, finishRun };
 })();
