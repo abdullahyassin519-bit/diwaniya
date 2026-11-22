@@ -25,6 +25,16 @@ const SHARP = () => { const b = SHW_DEBUG.b(); if (!b || b.st.done) return 'x'; 
     await A.waitForFunction(() => !document.getElementById('wres').classList.contains('hide'), null, { timeout: 15000 }).catch(() => {});
     ok(await A.isVisible('#wres') && (await A.textContent('#wrT')).includes('انتصرت'), 'beat the Shepherd: ' + await A.textContent('#wrT')); await A.screenshot({ path: OUT + '/6-win.png' });
     ok(await A.evaluate(() => SHW_DEBUG.PG.un === 2), 'the next lord unlocks'); ok(gotGate, 'volleys multiplied through the mountain gate');
+    /* ---------- quick battle vs the computer ---------- */
+    await A.evaluate(() => { SHG.toMenu(); }); await A.click('#bWar'); await sleep(200);
+    ok(await A.evaluate(() => document.querySelectorAll('#diffChips button').length === 4 && document.querySelectorAll('#mapChips button').length === 5), 'vs-computer picker: 4 difficulties, 4 maps + random'); await A.screenshot({ path: OUT + '/q1-picker.png' });
+    await A.click('#diffChips button[data-d="hard"]'); await A.click('#mapChips button[data-m="1"]'); await sleep(100); ok(await A.evaluate(() => SHW_DEBUG.PG.diff === 'hard' && SHW_DEBUG.PG.map === 1), 'choices remembered');
+    await A.click('#bAIgo'); await A.waitForFunction(() => SHW_DEBUG.b() && performance.now() > SHW_DEBUG.b().localAt + 100, null, { timeout: 6000 });
+    ok(await A.evaluate(() => SHW_DEBUG.b().st.map === 1 && SHW_DEBUG.b().bot.err === SHW_DEBUG.C.DIFF.hard.err), 'battle on the chosen map at the chosen difficulty');
+    await A.waitForFunction(() => !!SHW_DEBUG.b().botAimAt, null, { timeout: 8000 }); ok(true, 'the computer visibly aims before it fires'); await A.screenshot({ path: OUT + '/q2-aiming.png' });
+    await A.evaluate(SHARP); await sleep(4200); await A.evaluate(SHARP); await sleep(700);
+    ok(await A.evaluate(() => !!SHW_DEBUG.b().ghost && SHW_DEBUG.b().ghost.pts.length > 5), 'your last shot leaves a ghost path'); await A.screenshot({ path: OUT + '/q3-ghost.png' });
+    ok(await A.evaluate(() => SHW_DEBUG.b().st.castles[0].coreHp < SHW_DEBUG.b().st.castles[0].core0 || SHW_DEBUG.b().st.R.some(p => p.o === 1) || SHW_DEBUG.b().botMem.last), 'the computer fights back');
     /* ---------- online war ---------- */
     await A.evaluate(() => { SHG.toMenu(); document.getElementById('wrT').textContent = ''; }); await A.click('#bWar'); await sleep(200); await A.click('#bWarFriend'); await A.waitForFunction(() => SHW_DEBUG.NET.room, null, { timeout: 6000 });
     const code = await A.evaluate(() => SHW_DEBUG.NET.code); ok(/^[A-Z0-9]{5}$/.test(code) && A.url().includes('?w=' + code), 'war room link ' + code);

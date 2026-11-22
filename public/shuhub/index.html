@@ -75,6 +75,9 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 .emo{position:absolute;right:8px;top:max(126px,calc(env(safe-area-inset-top) + 120px));display:flex;flex-direction:column;gap:6px;pointer-events:auto}.emo button{width:38px;height:38px;border-radius:12px;background:rgba(20,15,43,.6);border:1px solid var(--line);font-size:18px}
 .emof{position:absolute;inset:0;overflow:hidden}.emof div{position:absolute;bottom:30%;font-size:32px;animation:rise 2.4s forwards;text-align:center}.emof div small{display:block;font-size:11px;font-weight:800}
 @keyframes rise{0%{opacity:0;transform:translateY(0)}10%{opacity:1}100%{opacity:0;transform:translateY(-50vh)}}
+.aibox{background:linear-gradient(180deg,rgba(255,138,92,.12),rgba(214,60,60,.08));border:1px solid rgba(255,138,92,.35);border-radius:18px;padding:12px;margin:10px 0}.aih{display:block;font-size:18px;margin-bottom:6px}
+.chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:6px 0}.chips button{padding:8px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:13px}.chips button.on{background:var(--sand);color:#2b1300;border-color:var(--sand)}
+.stats b{font-size:20px}
 .btn.war{background:linear-gradient(180deg,#ff8a5c,#d63c3c);color:#fff;border:0;font-size:21px;box-shadow:0 8px 30px rgba(230,70,60,.4)}
 .bot{display:flex;align-items:center;gap:10px;width:100%;text-align:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0;font-weight:800}.bot i{font-style:normal;font-size:24px}.bot div{flex:1}.bot small{display:block;color:var(--mut);font-weight:600;font-size:12px}.bot b{color:var(--sand)}.bot.lock{opacity:.4}.bot.next{border-color:var(--sand);box-shadow:0 0 18px rgba(242,196,109,.25)}
 #whud{position:fixed;inset:0;pointer-events:none;z-index:3}
@@ -107,6 +110,12 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 <div class="ov hide" id="war"><div class="panel">
   <h2 data-i="warT">حرب الجبل</h2>
   <p class="tag" data-i="warHow">اسحب للخلف ثم أفلت: الاتجاه يحدد الزاوية، والمسافة تحدد القوة. مرّر قذائفك عبر بوابات المضاعفة فوق الجبل، واهدم قلب قلعة خصمك قبل أن يهدم قلبك.</p>
+  <div class="aibox">
+    <b class="aih" data-i="vsAI">🤖 ضد الآلي</b>
+    <div class="chips" id="diffChips"></div>
+    <div class="chips" id="mapChips"></div>
+    <button class="btn main" id="bAIgo" data-i="aiGo">ابدأ المعركة</button>
+  </div>
   <button class="btn duel" id="bWarFriend"><span data-i="warFriend">⚔️ ضد صديق</span><small data-i="warFriendS">أرسل له رابطاً على واتساب</small></button>
   <p class="tag" data-i="warBots" style="margin-top:12px;font-weight:800;color:var(--sand2)">أو تحدَّ قادة الجبل واحداً تلو الآخر</p>
   <div id="botList"></div>
@@ -127,7 +136,7 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 
 <div class="ov hide" id="wres"><div class="panel">
   <h2 id="wrT"></h2><p class="tag" id="wrSub"></p>
-  <div class="stats"><div><b id="wrPeak">0</b><span data-i="peak">أكبر سرب</span></div><div><b id="wrDmg">0</b><span data-i="dmg">ضرر</span></div><div><b id="wrTime">0</b><span data-i="time">الوقت</span></div></div>
+  <div class="stats"><div><b id="wrPeak">0</b><span data-i="peak">أكبر سرب</span></div><div><b id="wrAcc">0%</b><span data-i="acc">الدقة</span></div><div><b id="wrDmg">0</b><span data-i="dmg">ضرر</span></div><div><b id="wrTime">0</b><span data-i="time">الوقت</span></div></div>
   <button class="btn main" id="wrMain"></button>
   <p class="tag" id="wrWait"></p>
   <button class="btn" id="wrBack" data-i="back">رجوع</button>
