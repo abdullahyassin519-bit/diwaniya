@@ -48,6 +48,7 @@ const server = http.createServer(async (req, res) => {
     const ip = ipOf(req);
     if (p === '/healthz') return json(res, 200, { ok: 1, up: Math.round(process.uptime()) });
     if (p.startsWith('/ss/api/')) return SS.handle(req, res, p, q, ip, { json, body, over });
+    if (p.startsWith('/sh/api/')) return SH.handle(req, res, u); /* ranked leaderboard */
     if (p === '/shuhub') { res.writeHead(301, { Location: '/shuhub/' + u.search }); return res.end(); }
     if (p === '/soulstack') { res.writeHead(301, { Location: '/soulstack/' + u.search }); return res.end(); }
     if (p === '/api/ping') return json(res, 200, { ok: 1, rooms: rooms.size, id: pidOf(q), q: u.search.length });

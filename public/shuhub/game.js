@@ -39,7 +39,7 @@
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
     master = AC.createGain(); master.gain.value = MUTE ? 0 : .8; master.connect(AC.destination);
-    sfxG = AC.createGain(); sfxG.gain.value = .9; sfxG.connect(master); musicG = AC.createGain(); musicG.gain.value = .22; musicG.connect(master);
+    sfxG = AC.createGain(); sfxG.gain.value = VOL[0]; sfxG.connect(master); musicG = AC.createGain(); musicG.gain.value = VOL[1]; musicG.connect(master);
     noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     music();
   }
@@ -73,7 +73,8 @@
     const pat = [0, 1, 2, 1, 3, 2, 1, 0, 4, 3, 2, 1, 2, 1, 0, -1]; let i = 0;
     setInterval(() => { if (!AC || MUTE || document.hidden) return; const n = pat[i++ % pat.length]; if (n < 0) return; const f = HIJAZ[n] * (i % 32 < 16 ? 1 : 2) / 2; const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(), fl = AC.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.setValueAtTime(2400, t); fl.frequency.exponentialRampToValueAtTime(400, t + .4); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .005); g.gain.exponentialRampToValueAtTime(.001, t + .9); o.connect(fl).connect(g).connect(musicG); o.start(t); o.stop(t + 1); }, 330);
   }
-  const buzz = p => { try { if (navigator.vibrate && !RM()) navigator.vibrate(p); } catch (e) { } };
+  let VIB = true; const buzz = p => { try { if (VIB && navigator.vibrate && !RM()) navigator.vibrate(p); } catch (e) { } };
+  let VOL = [.9, .22]; function setVol(sfx, music) { VOL = [sfx, music * .37]; if (sfxG) sfxG.gain.value = VOL[0]; if (musicG) musicG.gain.value = VOL[1]; }
   function setMute(m) { MUTE = m; LS.set('sh_mute', m); if (master) master.gain.value = m ? 0 : .8; $('bMute').textContent = $('bMute2').textContent = m ? '🔇' : '🔊'; const wm = $('wMute'); if (wm) wm.textContent = m ? '🔇' : '🔊'; }
 
   /* ---------------- canvas and view ---------------- */
@@ -277,9 +278,9 @@
   function useFalcon() { if (R && C.falcon(R.st)) events(); }
   $('bFalcon').addEventListener('pointerdown', e => { e.stopPropagation(); useFalcon(); });
   /* ---------------- screens ---------------- */
-  const OVS = ['menu', 'levels', 'intro', 'win', 'lose', 'shop', 'lobby', 'res', 'war', 'wlobby', 'wres']; let prevScreen = 'menu', curScreen = 'menu';
-  function show(id) { if (id && curScreen && curScreen !== id && ['menu', 'win', 'lose', 'res'].includes(curScreen)) prevScreen = curScreen; curScreen = id; for (const k of OVS) $(k).classList.toggle('hide', k !== id); }
-  function toMenu() { if (window.SHW) SHW.leave(); if (NET.ws) leaveDuel(); if (R) endRun(); show('menu'); refreshMenu(); }
+  const OVS = ['menu', 'levels', 'intro', 'win', 'lose', 'shop', 'lobby', 'res', 'wlobby', 'wres', 'home', 'quick', 'campaign', 'survival', 'daily', 'practice', 'ranked', 'board', 'missions', 'profile', 'armory', 'settings']; let prevScreen = 'menu', curScreen = 'menu';
+  function show(id) { if (id && curScreen && curScreen !== id && ['menu', 'win', 'lose', 'res'].includes(curScreen)) prevScreen = curScreen; curScreen = id; for (const k of OVS) $(k).classList.toggle('hide', k !== id); $('lang').classList.toggle('offHome', id === 'home'); /* home has its own settings → language; the floating pill overlapped the player card */ }
+  function toMenu() { if (window.SHW) SHW.leave(); if (NET.ws) leaveDuel(); if (R) endRun(); if (window.SHM) return SHM.home(); show('menu'); refreshMenu(); }
   function refreshMenu() { $('playSub').textContent = tr('playSub', PG.un, starsTotal()); $('shopSub').textContent = tr('shopSub', PG.coins); }
   const ICON = ['✨', '✖️', '🪤', '💃', '🔥', '🪨', '🦵', '💎', '🪭', '🏰', '🌀', '🌙', '🌪️', '⚔️', '👑'];
   function levels() { show('levels'); $('lvHead').textContent = tr('lvHead', starsTotal(), PG.coins);
@@ -299,7 +300,7 @@
   const nameIn = $('name'); nameIn.value = NAME; nameIn.placeholder = AR() ? 'اسمك' : 'Your name'; nameIn.oninput = () => { NAME = nameIn.value.trim().slice(0, 16); LS.set('sh_name', NAME); };
   const paintSw = () => { $('sw').style.background = `hsl(${HUE},80%,60%)`; }; $('sw').onclick = () => { HUE = (HUE + 47) % 360; LS.set('sh_hue', HUE); paintSw(); }; paintSw();
   function applyLang() { const h = document.documentElement; h.lang = LANG; h.dir = AR() ? 'rtl' : 'ltr'; document.querySelectorAll('[data-i]').forEach(e => e.textContent = tr(e.dataset.i)); $('lang').textContent = AR() ? 'English' : 'العربية'; nameIn.placeholder = AR() ? 'اسمك' : 'Your name'; refreshMenu(); }
-  $('lang').onclick = () => { LANG = AR() ? 'en' : 'ar'; LS.set('sh_lang', LANG); applyLang(); if (curScreen === 'levels') levels(); if (curScreen === 'shop') shop(); };
+  $('lang').onclick = () => { LANG = AR() ? 'en' : 'ar'; LS.set('sh_lang', LANG); applyLang(); if (curScreen === 'levels') levels(); if (curScreen === 'shop') shop(); if (window.SHG && SHG.onLang) SHG.onLang(); };
   /* ---------------- duels by link ---------------- */
   const NET = { ws: null, me: null, code: null, room: null, res: null, sentB: 0, t: 0, opp: new Map() };
   const link = code => location.origin + location.pathname.replace(/[^/]*$/, '') + '?r=' + code;
@@ -339,8 +340,8 @@
   $('bCopy').onclick = async () => { try { await navigator.clipboard.writeText(link(NET.code)); toast(tr('copied')); } catch (e) { prompt('', link(NET.code)); } };
   document.querySelectorAll('#emo button').forEach(b => b.addEventListener('pointerdown', e => { e.stopPropagation(); netSend({ t: 'emo', e: b.textContent }); }));
   /* ---------------- boot ---------------- */
-  addEventListener('resize', resize); resize(); setMute(MUTE); applyLang(); show('menu'); requestAnimationFrame(frame);
-  window.SHG = { $, LS, tr, TXT, esc, SFX, tone, noise, audio, buzz, show, toast, RM, applyLang, refreshMenu, toMenu, setMute, hsh, get NAME() { return NAME; }, get HUE() { return HUE; }, get TOK() { return TOK; }, get LANG() { return LANG; }, get MUTE() { return MUTE; } };
+  addEventListener('resize', resize); resize(); setMute(MUTE); applyLang(); show('home'); requestAnimationFrame(frame);
+  window.SHG = { $, LS, tr, TXT, esc, SFX, tone, noise, audio, buzz, show, toast, RM, applyLang, refreshMenu, toMenu, setMute, setVol, hsh, set vib(v) { VIB = v; }, setHue(h) { HUE = h; LS.set('sh_hue', h); paintSw(); }, setName(n) { NAME = String(n).trim().slice(0, 16); LS.set('sh_name', NAME); nameIn.value = NAME; }, get NAME() { return NAME; }, get HUE() { return HUE; }, get TOK() { return TOK; }, get LANG() { return LANG; }, get MUTE() { return MUTE; } };
   const qr = new URLSearchParams(location.search).get('r'); if (qr) setTimeout(() => connect(qr.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5)), 60);
   window.SH_DEBUG = { C, PG, run: () => R, NET, startRun, levels, intro, shop, connect, input, toMenu, finishRun };
 })();

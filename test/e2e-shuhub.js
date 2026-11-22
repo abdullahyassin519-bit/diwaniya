@@ -16,7 +16,7 @@ async function play(p, ms, mouse) { // hold the pointer and steer it to the best
   const mk = async (name, lang, vp) => { const p = await (await br.newContext({ viewport: vp, deviceScaleFactor: 2 })).newPage(); p.on('pageerror', e => errs.push(name + ': ' + e.message)); await p.addInitScript(([n, l]) => { localStorage.setItem('sh_lang', JSON.stringify(l)); localStorage.setItem('sh_name', JSON.stringify(n)); }, [name, lang]); return p; };
   try {
     const A = await mk('عبدالله', 'ar', { width: 390, height: 844 });
-    await A.goto(BASE + '/shuhub/'); await A.waitForFunction(() => window.SH_DEBUG); await sleep(500);
+    await A.goto(BASE + '/shuhub/'); await A.waitForFunction(() => window.SH_DEBUG && window.SHM_DEBUG); await sleep(500); await A.evaluate(() => { document.getElementById('hTutPop').classList.add('hide'); document.getElementById('hTrials').click(); }); await sleep(300);
     ok(await A.isVisible('#bPlay') && await A.isVisible('#bDuel') && await A.isVisible('#bShop'), 'menu: play, duel, workshop');
     ok((await A.textContent('#bPlay')).includes('العب'), 'Arabic by default'); await A.screenshot({ path: OUT + '/1-menu.png' });
     await A.click('#bPlay'); await sleep(250); ok(await A.isVisible('#intro') && (await A.textContent('#iTip')).length > 20, 'level 1 intro with a tip'); await A.screenshot({ path: OUT + '/2-intro.png' });
@@ -29,16 +29,16 @@ async function play(p, ms, mouse) { // hold the pointer and steer it to the best
     // a level with guards, rocks and a moving fort, to see it running
     await A.evaluate(() => { SH_DEBUG.PG.un = 15; SH_DEBUG.startRun(7, 'solo'); }); await play(A, 3500, false); await A.screenshot({ path: OUT + '/6-level7.png' });
     ok(await A.evaluate(() => SH_DEBUG.run().st.P.length > 20), 'swarm grows through gates on level 7');
-    await A.evaluate(() => { SH_DEBUG.toMenu(); SH_DEBUG.PG.un = 15; SH_DEBUG.startRun(12, 'solo'); }); await play(A, 3000, false); await A.screenshot({ path: OUT + '/7-night.png' });
+    await A.evaluate(() => { SH_DEBUG.toMenu(); document.getElementById('hTrials').click(); SH_DEBUG.PG.un = 15; SH_DEBUG.startRun(12, 'solo'); }); await play(A, 3000, false); await A.screenshot({ path: OUT + '/7-night.png' });
     await A.evaluate(() => { const R = SH_DEBUG.run(); R.st.charge = 1; }); await sleep(150); ok(await A.evaluate(() => document.getElementById('bFalcon').classList.contains('ready')), 'falcon button lights up when charged');
     await A.click('#bFalcon'); await sleep(350); ok(await A.evaluate(() => !!SH_DEBUG.run().st.falcon || SH_DEBUG.run().st.charge === 0), 'falcon dives'); await A.screenshot({ path: OUT + '/8-falcon.png' });
     // workshop
-    await A.evaluate(() => { SH_DEBUG.toMenu(); SH_DEBUG.PG.coins = 500; }); await A.click('#bShop'); await sleep(200); await A.screenshot({ path: OUT + '/9-shop.png' });
+    await A.evaluate(() => { SH_DEBUG.toMenu(); document.getElementById('hTrials').click(); SH_DEBUG.PG.coins = 500; }); await A.click('#bShop'); await sleep(200); await A.screenshot({ path: OUT + '/9-shop.png' });
     await A.click('[data-up="rate"]'); await sleep(120); const pg2 = await A.evaluate(() => SH_DEBUG.PG); ok(pg2.up.rate === 1 && pg2.coins === 440, 'workshop upgrade bought');
-    await A.click('#shop [data-back]'); await sleep(150);
+    await A.click('#shop [data-back]'); await sleep(150); await A.evaluate(() => { if (!document.getElementById('home').classList.contains('hide')) document.getElementById('hTrials').click(); });
     // levels map
     await A.click('#bLevels'); await sleep(200); ok(await A.evaluate(() => document.querySelectorAll('.lv').length === 15), '15 levels on the map'); await A.screenshot({ path: OUT + '/10-levels.png' });
-    await A.evaluate(() => SH_DEBUG.toMenu());
+    await A.evaluate(() => { SH_DEBUG.toMenu(); document.getElementById('hTrials').click(); });
     /* ---------- duel by link ---------- */
     await A.click('#bDuel'); await A.waitForFunction(() => SH_DEBUG.NET.room, null, { timeout: 6000 }); const code = await A.evaluate(() => SH_DEBUG.NET.code);
     ok(/^[A-Z0-9]{5}$/.test(code) && A.url().includes('?r=' + code), 'room code in the link ' + code);

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#140f2b">
 <title>شُهُب — حصار القلعة</title>
-<meta name="description" content="أطلق الشهب، ضاعفها عبر البوابات، واهدم القلعة النجدية. العب وحدك أو تحدَّ أصحابك برابط.">
+<meta name="description" content="حرب مدافع فوق الجبال: صوّب، ضاعف قذائفك عبر بوابات النجوم، ارفع الكثبان، واستدعِ الشهاب الأعظم. حملة، مصنّفة، تحدٍّ يومي، ومعارك مع أصحابك برابط.">
 <meta property="og:title" content="شُهُب — حصار القلعة"><meta property="og:description" content="سرب من الشهب ضد قلعة طينية تمشي. تحدَّ أصحابك برابط.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
@@ -33,6 +33,7 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 .me input{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--txt);font:inherit;font-weight:700;width:150px;text-align:center}
 .me .sw{width:34px;height:34px;border-radius:50%;border:2px solid #fff6}
 .tag{color:var(--mut);font-size:14px;line-height:1.6;margin:6px 0}
+.lang.offHome{display:none}
 .lang{position:fixed;top:max(10px,env(safe-area-inset-top));inset-inline-start:12px;z-index:7;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
 .lv{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 4px 8px;position:relative}
@@ -90,6 +91,45 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 .weps{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:10px;pointer-events:auto;direction:ltr}
 .weps button{position:relative;width:76px;height:66px;border-radius:16px;background:rgba(20,15,43,.7);border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:12px;overflow:hidden}
 .weps button i{font-style:normal;font-size:24px;line-height:1.1}.weps button.sel{border-color:var(--sand);box-shadow:0 0 16px rgba(242,196,109,.45)}.weps button u{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(10,8,25,.72);text-decoration:none}
+/* ---------- home & hub ---------- */
+.ov.home{align-items:flex-start;padding-top:max(14px,env(safe-area-inset-top));background:radial-gradient(ellipse at 50% 0%,rgba(60,30,80,.35),rgba(20,15,43,.92) 60%)}
+.pcard{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,rgba(255,240,210,.09),rgba(255,240,210,.04));border:1px solid var(--line);border-radius:18px;padding:10px 12px;text-align:start}
+.pav{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#1a1030;flex:none;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)}
+.pinfo{flex:1;min-width:0}.pinfo b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinfo small{font-size:11.5px;color:var(--mut);display:flex;gap:8px;align-items:center}
+.lvb{background:var(--sand);color:#2b1300;border-radius:999px;padding:0 7px;font-weight:900}
+.pxp{height:7px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden;margin:5px 0 3px}.pxp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3fe0c5,#ffd987);transition:width .8s cubic-bezier(.2,.8,.2,1)}.pxp.big{height:10px}
+.pright{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-weight:900;font-size:13px}.gear{pointer-events:auto;flex:none}
+.logo{margin:14px 0 6px}.logo h1{font-size:68px}.logo .sub{margin:2px 0 6px}
+.btn.hero{background:linear-gradient(180deg,#ffd987,#ff8a4a);color:#2b1300;border:0;font-size:22px;padding:16px 12px;box-shadow:0 10px 34px rgba(255,140,70,.35),inset 0 -4px 0 rgba(120,40,0,.25)}
+.btn.slim{padding:10px 12px;font-size:14px}.btn.slim small{display:inline;margin-inline-start:6px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.mode{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);min-height:84px;transition:transform .08s}.mode:active{transform:scale(.97)}
+.mode i{font-style:normal;font-size:24px}.mode b{font-size:15px}.mode small{font-size:11.5px;color:var(--mut);font-weight:700;line-height:1.3}
+.mode.ranked{background:linear-gradient(160deg,rgba(255,207,107,.18),rgba(255,207,107,.04));border-color:rgba(255,207,107,.35)}.mode.friend{background:linear-gradient(160deg,rgba(63,224,197,.16),rgba(63,224,197,.03));border-color:rgba(63,224,197,.35)}.mode.daily{background:linear-gradient(160deg,rgba(190,140,255,.16),rgba(190,140,255,.03));border-color:rgba(190,140,255,.35)}
+.dock{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.dock button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:11.5px;font-weight:800}.dock i{font-style:normal;font-size:20px}
+.badge{position:absolute;top:4px;inset-inline-end:8px;background:var(--red);color:#fff;font-style:normal;font-size:10px;border-radius:999px;padding:0 5px;font-weight:900}
+.lbl{text-align:start;font-weight:800;color:var(--sand2);margin:12px 0 2px;font-size:13px}.bigi{font-size:46px;margin-bottom:4px}.fine{font-size:11.5px;opacity:.75}
+.rkcard{background:linear-gradient(180deg,rgba(255,207,107,.14),rgba(255,207,107,.03));border:1px solid rgba(255,207,107,.35);border-radius:18px;padding:14px;margin:8px 0}.rkcard b{display:block;font-size:20px}.rkcard small{color:var(--mut)}.lgbig{font-size:46px}
+.ms{display:flex;gap:10px;align-items:center;text-align:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:8px 0}.ms div{flex:1}.ms b{display:block;font-size:14px}.ms i{display:block;height:6px;border-radius:4px;background:rgba(255,255,255,.1);margin:6px 0 4px;overflow:hidden}.ms i u{display:block;height:100%;background:linear-gradient(90deg,#3fe0c5,#ffd987)}.ms small{color:var(--mut);font-size:12px}
+.ms button{padding:8px 12px;border-radius:12px;background:linear-gradient(180deg,#ffd987,#ff9a4a);color:#2b1300;font-weight:900}.ms button[disabled]{filter:grayscale(1);opacity:.45}.ms.done{border-color:rgba(63,224,197,.45)}
+.achs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.ach{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 4px;opacity:.38;filter:grayscale(1)}.ach.got{opacity:1;filter:none;border-color:rgba(255,207,107,.45)}.ach i{font-style:normal;font-size:22px;display:block}.ach small{font-size:10px;line-height:1.25;display:block;margin-top:2px}
+.prhead{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:8px}.prhead .pav{width:64px;height:64px;font-size:30px;border-radius:20px}.prhead small{color:var(--mut)}
+.stats.grid4{display:grid;grid-template-columns:repeat(4,1fr)}.stats.grid4 div{padding:8px 2px}.stats.grid4 b{font-size:17px}.stats.grid4 span{font-size:10.5px}
+.cos{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 10px;margin:6px 0;text-align:start}.cos .sw{width:30px;height:30px;border-radius:9px;flex:none;border:2px solid rgba(255,255,255,.25)}.cos b{flex:1}.cos.eq{border-color:var(--sand)}
+.cos button{padding:7px 11px;border-radius:11px;background:linear-gradient(180deg,#ffd987,#ff9a4a);color:#2b1300;font-weight:800;font-size:13px}.cos button[disabled]{filter:grayscale(1);opacity:.5}
+.hues{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}.hues button{width:32px;height:32px;border-radius:50%;border:2px solid transparent}.hues button.on{border-color:#fff}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0;font-weight:800}.setrow input[type=range]{width:55%;accent-color:#ffb35a}.setrow input:not([type]){background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--txt);font:inherit;width:55%}
+.tg{padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-weight:800}.tg.on{background:var(--sand);color:#2b1300}
+.extra{font-size:22px;color:var(--sand);font-weight:900;min-height:4px;letter-spacing:2px}#wrT.win{color:#ffe08a}#wrT.lose{color:#ff9aa8}
+.xpbox{margin:10px 0}.xpbox small{display:flex;justify-content:space-between;font-weight:800;font-size:12.5px}.notes{list-style:none;margin:6px 0;padding:0;text-align:start}.notes li{background:rgba(255,207,107,.08);border:1px solid rgba(255,207,107,.25);border-radius:12px;padding:7px 10px;margin:5px 0;font-weight:800;font-size:13.5px;animation:pop .45s backwards}
+.weps button.ab{border-color:rgba(230,184,120,.45)}.weps button .cnt{position:absolute;top:3px;inset-inline-end:6px;font-size:11px;background:#e6b878;color:#2b1300;border-radius:999px;padding:0 5px}.weps button.star.full{border-color:#ffd36b;box-shadow:0 0 18px rgba(255,211,107,.7);animation:glow 1s infinite alternate}
+.weps button[disabled]{pointer-events:none}
+.weps{gap:6px}.weps button{width:62px;height:60px;font-size:11px}.weps button i{font-size:21px}
+.prac{position:absolute;top:max(150px,calc(env(safe-area-inset-top) + 144px));left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;pointer-events:auto;background:rgba(20,15,43,.65);border:1px solid var(--line);border-radius:999px;padding:5px 8px 5px 5px;font-weight:800;font-size:13px;white-space:nowrap}
+.wbanner{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);font-family:"Reem Kufi",Tajawal,sans-serif;font-size:74px;font-weight:700;letter-spacing:.06em;white-space:nowrap;animation:bannerIn .7s cubic-bezier(.2,1.4,.3,1) both}
+.wbanner.win{color:transparent;background:linear-gradient(180deg,#fff6d0,#ffcf6b 55%,#ff8a3a);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 6px 26px rgba(255,170,80,.6))}.wbanner.lose{color:#ffb0bc;text-shadow:0 6px 30px rgba(255,60,90,.5)}
+@keyframes bannerIn{0%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@media (min-width:700px){.modes{grid-template-columns:repeat(3,1fr)}.logo h1{font-size:84px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -100,27 +140,68 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 
 <div class="ov" id="menu"><div class="panel">
   <h1>شُهُب</h1><p class="sub" data-i="sub">أطلق الشهب. ضاعفها. اهدم القلعة.</p>
-  <button class="btn war" id="bWar"><span data-i="war">⚔️ حرب الجبل</span><small data-i="warS">واحد ضد واحد · صوّب فوق الجبل واهدم قلعة خصمك</small></button>
+  <button class="btn" data-home><span data-i="home">الرئيسية</span></button>
   <button class="btn main" id="bPlay"><span data-i="play">العب</span><small id="playSub"></small></button>
   <button class="btn duel" id="bDuel"><span data-i="duel">تحدَّ أصحابك</span><small data-i="duelS">أرسل رابطاً · من يهدم قلعته أولاً يفوز</small></button>
   <div class="row"><button class="btn" id="bLevels" data-i="levels">المراحل</button><button class="btn" id="bShop"><span data-i="shop">الورشة</span><small id="shopSub"></small></button></div>
   <div class="me"><button class="sw" id="sw" aria-label="color"></button><input id="name" maxlength="16" autocomplete="off"><button class="hbtn" id="bMute" style="pointer-events:auto">🔊</button></div>
 </div></div>
 
-<div class="ov hide" id="war"><div class="panel">
-  <h2 data-i="warT">حرب الجبل</h2>
-  <p class="tag" data-i="warHow">اسحب للخلف ثم أفلت: الاتجاه يحدد الزاوية، والمسافة تحدد القوة. مرّر قذائفك عبر بوابات المضاعفة فوق الجبل، واهدم قلب قلعة خصمك قبل أن يهدم قلبك.</p>
-  <div class="aibox">
-    <b class="aih" data-i="vsAI">🤖 ضد الآلي</b>
-    <div class="chips" id="diffChips"></div>
-    <div class="chips" id="mapChips"></div>
-    <button class="btn main" id="bAIgo" data-i="aiGo">ابدأ المعركة</button>
+<div class="ov home hide" id="home"><div class="panel wide">
+  <div class="pcard"><div class="pav" id="pcAv">ر</div><div class="pinfo"><b id="pcName"></b><div class="pxp"><i id="pcXp"></i></div><small><span class="lvb">★ <span id="pcLv">1</span></span> <span id="pcXpT"></span></small></div><div class="pright"><span id="pcCoins">🪙 0</span><span id="pcLeague"></span></div><button class="hbtn gear" id="hSettings" aria-label="settings">⚙️</button></div>
+  <div class="logo"><h1>شُهُب</h1><p class="sub" data-i="tagline">حرب المدافع فوق الجبال</p></div>
+  <button class="btn hero" id="hQuick"><span>⚔️ <span data-i="quick">معركة سريعة</span></span><small data-i="quickS"></small></button>
+  <div class="modes">
+    <button class="mode ranked" id="hRanked"><i>🏆</i><b data-i="ranked">المصنّفة</b><small data-i="rankedS"></small></button>
+    <button class="mode friend" id="hFriends"><i>🤝</i><b data-i="friends">ضد صديق</b><small data-i="friendsS"></small></button>
+    <button class="mode" id="hCampaign"><i>🗺️</i><b data-i="campaign">الحملة</b><small id="hCampS"></small></button>
+    <button class="mode" id="hSurvival"><i>🌊</i><b data-i="survival">البقاء</b><small id="hSurvS"></small></button>
+    <button class="mode daily" id="hDaily"><i>📅</i><b data-i="daily">تحدي اليوم</b><small id="hDailyS"></small></button>
+    <button class="mode" id="hPractice"><i>🎯</i><b data-i="practice">التدريب</b><small data-i="practiceS"></small></button>
   </div>
-  <button class="btn duel" id="bWarFriend"><span data-i="warFriend">⚔️ ضد صديق</span><small data-i="warFriendS">أرسل له رابطاً على واتساب</small></button>
-  <p class="tag" data-i="warBots" style="margin-top:12px;font-weight:800;color:var(--sand2)">أو تحدَّ قادة الجبل واحداً تلو الآخر</p>
-  <div id="botList"></div>
-  <button class="btn" data-back data-i="back">رجوع</button>
+  <button class="btn slim" id="hTrials"><span>☄️ <span data-i="trials">تجارب الشهب</span></span><small data-i="trialsS"></small></button>
+  <div class="dock"><button id="hMissions"><i>📜</i><span data-i="missions">المهام</span><em id="hMisB" class="badge hide"></em></button><button id="hArmory"><i>🎨</i><span data-i="armory">المخزن</span></button><button id="hProfile"><i>📊</i><span data-i="profile">الملف</span></button><button id="hBoard"><i>🥇</i><span data-i="board">الترتيب</span></button></div>
 </div></div>
+<div class="ov hide" id="hTutPop" style="z-index:9;background:rgba(12,8,28,.94)"><div class="panel"><h2 data-i="tutT">الدرس التعليمي</h2><p class="tag" data-i="tutS"></p><button class="btn main" id="tpYes" data-i="start">ابدأ</button><button class="btn" id="tpNo" data-i="back">رجوع</button></div></div>
+
+<div class="ov hide" id="quick"><div class="panel">
+  <h2 data-i="quickT">معركة سريعة</h2>
+  <p class="lbl" data-i="pers">الشخصية</p><div class="chips" id="qPers"></div><p class="tag" id="qDesc"></p>
+  <p class="lbl" data-i="map">الخريطة</p><div class="chips" id="qMap"></div>
+  <button class="btn main" id="qGo" data-i="go">إلى المعركة</button><button class="btn" data-home data-i="back">رجوع</button>
+</div></div>
+<div class="ov hide" id="campaign"><div class="panel">
+  <h2 data-i="campT">الحملة</h2><p class="tag" id="cmHead"></p><div id="cmList"></div><button class="btn" data-home data-i="back">رجوع</button>
+</div></div>
+<div class="ov hide" id="survival"><div class="panel">
+  <div class="bigi">🌊</div><h2 data-i="survT">البقاء</h2><p class="tag" data-i="survHow"></p><button class="btn main" id="svGo" data-i="start">ابدأ</button><button class="btn" data-home data-i="back">رجوع</button>
+</div></div>
+<div class="ov hide" id="daily"><div class="panel">
+  <div class="bigi">📅</div><h2 data-i="dailyT">تحدي اليوم</h2><div class="card"><div><b id="dcName"></b><small id="dcFoe" style="display:block;color:var(--mut);margin-top:4px"></small></div></div><p class="tag" id="dcState"></p><p class="tag" id="dcStreak"></p>
+  <button class="btn main" id="dcGo" data-i="start">ابدأ</button><button class="btn" data-home data-i="back">رجوع</button>
+</div></div>
+<div class="ov hide" id="practice"><div class="panel">
+  <div class="bigi">🎯</div><h2 data-i="practice">التدريب</h2>
+  <button class="btn main" id="prTut"><span data-i="tutT">الدرس التعليمي</span><small data-i="tutS"></small></button><button class="btn" id="prFree" data-i="range">ميدان حر</button><button class="btn" data-home data-i="back">رجوع</button>
+</div></div>
+<div class="ov hide" id="ranked"><div class="panel">
+  <h2 data-i="rkT">المصنّفة</h2><div class="rkcard" id="rkCard"></div>
+  <button class="btn main" id="rkFind" data-i="rkFind">ابحث عن خصم</button><button class="btn hide" id="rkCancel" data-i="rkCancel">إلغاء</button>
+  <p class="tag" id="rkStatus" aria-live="polite"></p><button class="btn slim" id="rkBoard" data-i="board">الترتيب</button><p class="tag fine" data-i="rkNote"></p><button class="btn" data-home data-i="back">رجوع</button>
+</div></div>
+<div class="ov hide" id="board"><div class="panel"><h2 data-i="boardT">ترتيب الموسم</h2><p class="tag" id="bdSeason"></p><ul class="plist" id="bdList"></ul><button class="btn" data-home data-i="back">رجوع</button></div></div>
+<div class="ov hide" id="missions"><div class="panel"><h2 data-i="msT">مهام اليوم</h2><p class="tag" data-i="msNew"></p><div id="msList"></div><h2 data-i="achT" style="margin-top:14px">الإنجازات</h2><div class="achs" id="msAch"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
+<div class="ov hide" id="profile"><div class="panel"><div class="prhead" id="prHead"></div><div class="stats grid4" id="prStats"></div><h2 data-i="achT">الإنجازات</h2><div class="achs" id="prAch"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
+<div class="ov hide" id="armory"><div class="panel"><h2 data-i="arT">المخزن</h2><p class="tag coins" id="arCoins"></p><p class="tag fine" data-i="arNote"></p>
+  <p class="lbl" data-i="skins">هيكل المدفع</p><div id="arSkins"></div><p class="lbl" data-i="trails">أثر القذائف</p><div id="arTrails"></div><p class="lbl" data-i="banner">لون الراية</p><div class="hues" id="arHue"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
+<div class="ov hide" id="settings"><div class="panel"><h2 data-i="setT">الإعدادات</h2>
+  <div class="setrow"><span data-i="sName">الاسم</span><input id="stName" maxlength="16" autocomplete="off"></div>
+  <div class="setrow"><span data-i="sLang">اللغة</span><button class="tg" id="stLang">English</button></div>
+  <div class="setrow"><span data-i="sSfx">المؤثرات</span><input type="range" id="stSfx" min="0" max="1" step=".05"></div>
+  <div class="setrow"><span data-i="sMusic">الموسيقى</span><input type="range" id="stMusic" min="0" max="1" step=".05"></div>
+  <div class="setrow"><span data-i="sVib">الاهتزاز</span><button class="tg" id="stVib"></button></div>
+  <div class="setrow"><span data-i="sFx">جودة المؤثرات</span><button class="tg" id="stFx"></button></div>
+  <button class="btn slim" id="stTut" data-i="sTut">أعد الدرس</button><p class="tag fine" data-i="sAbout"></p><button class="btn" data-home data-i="back">رجوع</button></div></div>
 
 <div class="ov hide" id="wlobby"><div class="panel">
   <h2 data-i="warLobby">غرفة الحرب</h2>
@@ -135,11 +216,11 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 </div></div>
 
 <div class="ov hide" id="wres"><div class="panel">
-  <h2 id="wrT"></h2><p class="tag" id="wrSub"></p>
-  <div class="stats"><div><b id="wrPeak">0</b><span data-i="peak">أكبر سرب</span></div><div><b id="wrAcc">0%</b><span data-i="acc">الدقة</span></div><div><b id="wrDmg">0</b><span data-i="dmg">ضرر</span></div><div><b id="wrTime">0</b><span data-i="time">الوقت</span></div></div>
-  <button class="btn main" id="wrMain"></button>
-  <p class="tag" id="wrWait"></p>
-  <button class="btn" id="wrBack" data-i="back">رجوع</button>
+  <h2 id="wrT"></h2><p class="tag" id="wrSub"></p><p class="extra" id="wrExtra"></p>
+  <div class="stats grid4"><div><b id="wrPeak">0</b><span data-i="peak">أكبر سرب</span></div><div><b id="wrAcc">0%</b><span data-i="acc">الدقة</span></div><div><b id="wrDmg">0</b><span data-i="dmg">ضرر</span></div><div><b id="wrTime">0</b><span data-i="time">الوقت</span></div></div>
+  <div class="xpbox"><small><b id="wrLv"></b><span id="wrXpT"></span></small><div class="pxp big"><i id="wrXp"></i></div></div>
+  <ul class="notes" id="wrNotes"></ul>
+  <button class="btn main" id="wrMain"></button><p class="tag" id="wrWait"></p><button class="btn" id="wrBack" data-i="home">الرئيسية</button>
 </div></div>
 
 <div class="ov hide" id="levels"><div class="panel wide">
@@ -203,7 +284,9 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
   <div class="wtop"><button class="hbtn" id="wMenu">☰</button><div class="wbars"><div class="wb mine"><small><span id="wN0"></span><b id="wP0">100%</b></small><div class="bar"><i id="wH0"></i></div></div><div class="wind" id="wWind"></div><div class="wb foe"><small><span id="wN1"></span><b id="wP1">100%</b></small><div class="bar"><i id="wH1"></i></div></div></div><button class="hbtn" id="wMute">🔊</button></div>
   <canvas id="wMini"></canvas>
   <div class="aimread hide" id="wAim"></div>
-  <div class="weps" id="wWeps"><button data-w="swarm"><i>☄️</i><span data-i="wSwarm">سرب</span><u></u></button><button data-w="fire"><i>🔥</i><span data-i="wFire">نار</span><u></u></button><button data-w="boulder"><i>🪨</i><span data-i="wBoulder">صخرة</span><u></u></button></div>
+  <div class="weps" id="wWeps"><button data-w="swarm"><i>☄️</i><span data-i="wSwarm">سرب</span><u></u></button><button data-w="fire"><i>🔥</i><span data-i="wFire">نار</span><u></u></button><button data-w="boulder"><i>🪨</i><span data-i="wBoulder">صخرة</span><u></u></button><button data-w="dune" class="ab"><i>🏜️</i><span data-i="wDune">كثيب</span><b class="cnt">3</b><u></u></button><button data-w="star" class="ab star"><i>🌠</i><span data-i="wStar">الشهاب</span><u></u></button></div>
+  <div class="prac hide" id="wPrac"><button class="tg" id="wArc" data-i="fullArc">المسار الكامل</button><span id="wPracInfo"></span></div>
+  <div class="wbanner hide" id="wBanner"></div>
   <div class="hold hide" id="wHint"></div>
   <div class="toast" id="wToast"></div>
   <div class="cd hide" id="wCd"></div>
@@ -228,5 +311,6 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 <script src="war-core.js"></script>
 <script src="game.js"></script>
 <script src="war.js"></script>
+<script src="meta.js"></script>
 </body>
 </html>
