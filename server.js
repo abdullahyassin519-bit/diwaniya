@@ -4,6 +4,7 @@
    قائد الغرفة يشغّل منطق اللعبة، وإذا انقطع ينقل الخادم القيادة تلقائياً للاعب متصل. */
 const { WebSocketServer } = require('ws');
 const SKC = require('./public/js/strike-core.js');
+const SH = require('./shuhub-server.js'); /* شُهُب: حصار القلعة */
 const SS = require('./soulstack-server.js'); /* SOULSTACK: البرج اليومي المشترك */
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, PUB = path.join(__dirname, 'public');
@@ -47,6 +48,7 @@ const server = http.createServer(async (req, res) => {
     const ip = ipOf(req);
     if (p === '/healthz') return json(res, 200, { ok: 1, up: Math.round(process.uptime()) });
     if (p.startsWith('/ss/api/')) return SS.handle(req, res, p, q, ip, { json, body, over });
+    if (p === '/shuhub') { res.writeHead(301, { Location: '/shuhub/' + u.search }); return res.end(); }
     if (p === '/soulstack') { res.writeHead(301, { Location: '/soulstack/' + u.search }); return res.end(); }
     if (p === '/api/ping') return json(res, 200, { ok: 1, rooms: rooms.size, id: pidOf(q), q: u.search.length });
     if (p === '/api/create' && req.method === 'POST') {
@@ -118,6 +120,7 @@ setInterval(() => { const t = Date.now(); for (const r of rooms.values()) { if (
 const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
 server.on('upgrade', (req, sock, head) => {
   let u; try { u = new URL(req.url, 'http://x'); } catch (e) { return sock.destroy(); }
+  if (u.pathname === '/sh/ws') return SH.upgrade(req, sock, head, u); /* شُهُب duels */
   if (u.pathname === '/ss/ws') return SS.upgrade(req, sock, head, u); /* SOULSTACK races */
   const room = rooms.get(String(u.searchParams.get('c') || '').toUpperCase()), pid = pidOf(u.searchParams);
   if (u.pathname !== '/ws' || !room || !pid || admit(room, pid) || !(room.members && room.members.has(pid))) return sock.destroy();
