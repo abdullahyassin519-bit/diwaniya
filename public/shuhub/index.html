@@ -124,7 +124,22 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 .xpbox{margin:10px 0}.xpbox small{display:flex;justify-content:space-between;font-weight:800;font-size:12.5px}.notes{list-style:none;margin:6px 0;padding:0;text-align:start}.notes li{background:rgba(255,207,107,.08);border:1px solid rgba(255,207,107,.25);border-radius:12px;padding:7px 10px;margin:5px 0;font-weight:800;font-size:13.5px;animation:pop .45s backwards}
 .weps button.ab{border-color:rgba(230,184,120,.45)}.weps button .cnt{position:absolute;top:3px;inset-inline-end:6px;font-size:11px;background:#e6b878;color:#2b1300;border-radius:999px;padding:0 5px}.weps button.star.full{border-color:#ffd36b;box-shadow:0 0 18px rgba(255,211,107,.7);animation:glow 1s infinite alternate}
 .weps button[disabled]{pointer-events:none}
-.weps{gap:6px}.weps button{width:62px;height:60px;font-size:11px}.weps button i{font-size:21px}
+.weps{gap:4px;max-width:calc(100vw - 12px)}.weps button{width:44px;height:56px;font-size:9.5px;border-radius:12px;padding:0 1px;background:linear-gradient(180deg,rgba(64,44,28,.86),rgba(30,20,14,.9));border:1.5px solid rgba(214,170,100,.45);box-shadow:inset 0 1px 0 rgba(255,230,180,.18),0 3px 8px rgba(0,0,0,.35);color:#f6e6c8;transition:transform .08s}
+.weps button span{white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%}.weps button i{font-size:19px}.weps button:active{transform:scale(.92)}
+.weps button.sel{border-color:#ffd36b;box-shadow:0 0 14px rgba(255,211,107,.55),inset 0 1px 0 rgba(255,240,200,.35);background:linear-gradient(180deg,rgba(120,84,40,.92),rgba(52,34,18,.94))}
+.weps button.lock{filter:grayscale(1) brightness(.6)}.weps button.lock::after{content:'🔒';position:absolute;top:2px;inset-inline-start:3px;font-size:10px}
+.weps button.bolt .cnt{background:#8fe8ff;color:#06222c}
+.wb .def{display:block;font-style:normal;font-size:10.5px;font-weight:800;opacity:.85;margin-top:2px;min-height:13px}
+.wb .bar{background:rgba(20,12,8,.55)!important;border:1px solid rgba(214,170,100,.5)!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+.inp{width:100%;box-sizing:border-box;margin:4px 0 8px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:inherit;font:inherit;font-weight:700}
+.upgrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:14px;margin:6px 0;background:rgba(255,240,210,.04);text-align:start}.upgrow i{font-style:normal;font-size:24px}.upgrow div{flex:1}.upgrow b{display:block}.upgrow small{opacity:.75;font-size:12px}.upgrow .pips{letter-spacing:2px;color:#ffd36b}.upgrow button{min-width:88px}
+.arsenal{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.arsenal div{border:1px solid var(--line);border-radius:12px;padding:6px 2px;font-size:11px;font-weight:800}.arsenal div i{display:block;font-style:normal;font-size:20px}.arsenal div.lk{opacity:.45}
+.wbanner.turn{font-size:44px;color:#ffe6b0;text-shadow:0 4px 24px rgba(0,0,0,.6)}
+#cv3{display:none;touch-action:none}
+body.r3 #cv{background:transparent}
+body.swapfade #cv3,body.swapfade #cv{opacity:.18;transition:opacity .25s}#cv3,#cv{transition:opacity .35s}
+.rotfade #cv3{opacity:0}
+@media (orientation:landscape) and (max-height:500px){.weps{bottom:max(6px,env(safe-area-inset-bottom));gap:5px}.weps button{width:50px;height:46px;font-size:9px}.weps button i{font-size:17px;line-height:1}.wtop{left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:4px}.wbanner{font-size:52px}}
 .prac{position:absolute;top:max(150px,calc(env(safe-area-inset-top) + 144px));left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;pointer-events:auto;background:rgba(20,15,43,.65);border:1px solid var(--line);border-radius:999px;padding:5px 8px 5px 5px;font-weight:800;font-size:13px;white-space:nowrap}
 .wbanner{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);font-family:"Reem Kufi",Tajawal,sans-serif;font-size:74px;font-weight:700;letter-spacing:.06em;white-space:nowrap;animation:bannerIn .7s cubic-bezier(.2,1.4,.3,1) both}
 .wbanner.win{color:transparent;background:linear-gradient(180deg,#fff6d0,#ffcf6b 55%,#ff8a3a);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 6px 26px rgba(255,170,80,.6))}.wbanner.lose{color:#ffb0bc;text-shadow:0 6px 30px rgba(255,60,90,.5)}
@@ -158,6 +173,8 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
     <button class="mode" id="hSurvival"><i>🌊</i><b data-i="survival">البقاء</b><small id="hSurvS"></small></button>
     <button class="mode daily" id="hDaily"><i>📅</i><b data-i="daily">تحدي اليوم</b><small id="hDailyS"></small></button>
     <button class="mode" id="hPractice"><i>🎯</i><b data-i="practice">التدريب</b><small data-i="practiceS"></small></button>
+    <button class="mode local" id="hLocal"><i>👥</i><b data-i="local">جهاز واحد</b><small data-i="localS"></small></button>
+    <button class="mode upg" id="hWorkshop"><i>⚒️</i><b data-i="workshop">ورشة الحصن</b><small id="hWsS"></small></button>
   </div>
   <button class="btn slim" id="hTrials"><span>☄️ <span data-i="trials">تجارب الشهب</span></span><small data-i="trialsS"></small></button>
   <div class="dock"><button id="hMissions"><i>📜</i><span data-i="missions">المهام</span><em id="hMisB" class="badge hide"></em></button><button id="hArmory"><i>🎨</i><span data-i="armory">المخزن</span></button><button id="hProfile"><i>📊</i><span data-i="profile">الملف</span></button><button id="hBoard"><i>🥇</i><span data-i="board">الترتيب</span></button></div>
@@ -180,6 +197,13 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
   <div class="bigi">📅</div><h2 data-i="dailyT">تحدي اليوم</h2><div class="card"><div><b id="dcName"></b><small id="dcFoe" style="display:block;color:var(--mut);margin-top:4px"></small></div></div><p class="tag" id="dcState"></p><p class="tag" id="dcStreak"></p>
   <button class="btn main" id="dcGo" data-i="start">ابدأ</button><button class="btn" data-home data-i="back">رجوع</button>
 </div></div>
+<div class="ov hide" id="local"><div class="panel">
+  <div class="bigi">👥</div><h2 data-i="local">جهاز واحد</h2><p class="tag fine" data-i="localD"></p>
+  <label class="lbl" data-i="p1">اللاعب ١</label><input class="inp" id="lcN1" maxlength="16"><label class="lbl" data-i="p2">اللاعب ٢</label><input class="inp" id="lcN2" maxlength="16">
+  <p class="lbl" data-i="map">الخريطة</p><div class="chips" id="lcMaps"></div>
+  <button class="btn main" id="lcGo" data-i="startB">ابدأ</button><button class="btn" data-home data-i="back">رجوع</button></div></div>
+<div class="ov hide" id="workshop"><div class="panel"><h2 data-i="workshop">ورشة الحصن</h2><p class="tag coins" id="wsCoins"></p><p class="tag fine" data-i="wsNote"></p><div id="wsList"></div>
+  <p class="lbl" data-i="arsenal">الترسانة</p><div id="wsArsenal" class="arsenal"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
 <div class="ov hide" id="practice"><div class="panel">
   <div class="bigi">🎯</div><h2 data-i="practice">التدريب</h2>
   <button class="btn main" id="prTut"><span data-i="tutT">الدرس التعليمي</span><small data-i="tutS"></small></button><button class="btn" id="prFree" data-i="range">ميدان حر</button><button class="btn" data-home data-i="back">رجوع</button>
@@ -193,14 +217,14 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 <div class="ov hide" id="missions"><div class="panel"><h2 data-i="msT">مهام اليوم</h2><p class="tag" data-i="msNew"></p><div id="msList"></div><h2 data-i="achT" style="margin-top:14px">الإنجازات</h2><div class="achs" id="msAch"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
 <div class="ov hide" id="profile"><div class="panel"><div class="prhead" id="prHead"></div><div class="stats grid4" id="prStats"></div><h2 data-i="achT">الإنجازات</h2><div class="achs" id="prAch"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
 <div class="ov hide" id="armory"><div class="panel"><h2 data-i="arT">المخزن</h2><p class="tag coins" id="arCoins"></p><p class="tag fine" data-i="arNote"></p>
-  <p class="lbl" data-i="skins">هيكل المدفع</p><div id="arSkins"></div><p class="lbl" data-i="trails">أثر القذائف</p><div id="arTrails"></div><p class="lbl" data-i="banner">لون الراية</p><div class="hues" id="arHue"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
+  <p class="lbl" data-i="cannons">طراز المدفع</p><div id="arCannons"></div><p class="lbl" data-i="forts">طراز القلعة</p><div id="arForts"></div><p class="lbl" data-i="skins">هيكل المدفع</p><div id="arSkins"></div><p class="lbl" data-i="trails">أثر القذائف</p><div id="arTrails"></div><p class="lbl" data-i="banner">لون الراية</p><div class="hues" id="arHue"></div><button class="btn" data-home data-i="back">رجوع</button></div></div>
 <div class="ov hide" id="settings"><div class="panel"><h2 data-i="setT">الإعدادات</h2>
   <div class="setrow"><span data-i="sName">الاسم</span><input id="stName" maxlength="16" autocomplete="off"></div>
   <div class="setrow"><span data-i="sLang">اللغة</span><button class="tg" id="stLang">English</button></div>
   <div class="setrow"><span data-i="sSfx">المؤثرات</span><input type="range" id="stSfx" min="0" max="1" step=".05"></div>
   <div class="setrow"><span data-i="sMusic">الموسيقى</span><input type="range" id="stMusic" min="0" max="1" step=".05"></div>
   <div class="setrow"><span data-i="sVib">الاهتزاز</span><button class="tg" id="stVib"></button></div>
-  <div class="setrow"><span data-i="sFx">جودة المؤثرات</span><button class="tg" id="stFx"></button></div>
+  <div class="setrow"><span data-i="sGfx">الرسوم</span><button class="tg" id="stGfx"></button></div><div class="setrow"><span data-i="sFx">جودة المؤثرات</span><button class="tg" id="stFx"></button></div>
   <button class="btn slim" id="stTut" data-i="sTut">أعد الدرس</button><p class="tag fine" data-i="sAbout"></p><button class="btn" data-home data-i="back">رجوع</button></div></div>
 
 <div class="ov hide" id="wlobby"><div class="panel">
@@ -281,10 +305,10 @@ h2{font-family:"Reem Kufi",Tajawal,sans-serif;font-size:32px;margin-bottom:8px;c
 </div></div>
 
 <div id="whud" class="hide">
-  <div class="wtop"><button class="hbtn" id="wMenu">☰</button><div class="wbars"><div class="wb mine"><small><span id="wN0"></span><b id="wP0">100%</b></small><div class="bar"><i id="wH0"></i></div></div><div class="wind" id="wWind"></div><div class="wb foe"><small><span id="wN1"></span><b id="wP1">100%</b></small><div class="bar"><i id="wH1"></i></div></div></div><button class="hbtn" id="wMute">🔊</button></div>
+  <div class="wtop"><button class="hbtn" id="wMenu">☰</button><div class="wbars"><div class="wb mine"><small><span id="wN0"></span><b id="wP0">100%</b></small><div class="bar"><i id="wH0"></i></div><em class="def" id="wD0"></em></div><div class="wind" id="wWind"></div><div class="wb foe"><small><span id="wN1"></span><b id="wP1">100%</b></small><div class="bar"><i id="wH1"></i></div><em class="def" id="wD1"></em></div></div><button class="hbtn" id="wMute">🔊</button></div>
   <canvas id="wMini"></canvas>
   <div class="aimread hide" id="wAim"></div>
-  <div class="weps" id="wWeps"><button data-w="swarm"><i>☄️</i><span data-i="wSwarm">سرب</span><u></u></button><button data-w="fire"><i>🔥</i><span data-i="wFire">نار</span><u></u></button><button data-w="boulder"><i>🪨</i><span data-i="wBoulder">صخرة</span><u></u></button><button data-w="dune" class="ab"><i>🏜️</i><span data-i="wDune">كثيب</span><b class="cnt">3</b><u></u></button><button data-w="star" class="ab star"><i>🌠</i><span data-i="wStar">الشهاب</span><u></u></button></div>
+  <div class="weps" id="wWeps"><button data-w="swarm"><i>☄️</i><span data-i="wSwarm">سرب</span><u></u></button><button data-w="ball"><i>⚫</i><span data-i="wBall">قذيفة</span><u></u></button><button data-w="fire"><i>🔥</i><span data-i="wFire">نار</span><u></u></button><button data-w="cluster"><i>💣</i><span data-i="wCluster">عنقودية</span><u></u></button><button data-w="boulder"><i>🪨</i><span data-i="wBoulder">صخرة</span><u></u></button><button data-w="bolt" class="ab bolt"><i>⚡</i><span data-i="wBolt">صاعقة</span><b class="cnt">2</b><u></u></button><button data-w="dune" class="ab"><i>🏜️</i><span data-i="wDune">كثيب</span><b class="cnt">3</b><u></u></button><button data-w="star" class="ab star"><i>🌠</i><span data-i="wStar">الشهاب</span><u></u></button></div>
   <div class="prac hide" id="wPrac"><button class="tg" id="wArc" data-i="fullArc">المسار الكامل</button><span id="wPracInfo"></span></div>
   <div class="wbanner hide" id="wBanner"></div>
   <div class="hold hide" id="wHint"></div>

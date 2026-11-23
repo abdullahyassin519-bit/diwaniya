@@ -2,3 +2,4 @@ node_modules/
 .DS_Store
 *.log
 test/*.png
+src/shuhub3d/node_modules

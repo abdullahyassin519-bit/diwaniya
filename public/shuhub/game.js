@@ -45,7 +45,9 @@
   }
   const gate = (k, ms) => { const t = performance.now(); if (t - (lastS[k] || 0) < ms) return false; lastS[k] = t; return true; };
   function tone(f, dur, type = 'sine', vol = .2, slide = 1, delay = 0, out = sfxG) { if (!AC) return; const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (slide !== 1) o.frequency.exponentialRampToValueAtTime(Math.max(30, f * slide), t + dur); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0008, t + dur); o.connect(g).connect(out); o.start(t); o.stop(t + dur + .05); }
-  function noise(dur, f0, f1, vol = .2, q = 1, delay = 0) { if (!AC) return; const t = AC.currentTime + delay, s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = noiseBuf; fl.type = 'bandpass'; fl.Q.value = q; fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); s.connect(fl).connect(g).connect(sfxG); s.start(t, Math.random() * .5); s.stop(t + dur); }
+  function noise(dur, f0, f1, vol = .2, q = 1, delay = 0, out = sfxG) { if (!AC) return; const t = AC.currentTime + delay, s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = noiseBuf; fl.type = 'bandpass'; fl.Q.value = q; fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); s.connect(fl).connect(g).connect(out || sfxG); s.start(t, Math.random() * .5); s.stop(t + dur); }
+  /* positional audio: a stereo panner per position bucket (-1 left … 1 right); falls back to the plain bus */
+  const pans = {}; function pan(p) { if (!AC || !AC.createStereoPanner) return sfxG; const k = Math.round(Math.max(-1, Math.min(1, p)) * 4); if (!pans[k]) { pans[k] = AC.createStereoPanner(); pans[k].pan.value = k / 4; pans[k].connect(sfxG); } return pans[k]; }
   const HIJAZ = [293.7, 311.1, 370, 392, 440, 466.2, 523.3, 587.3]; // D Eb F# G A Bb C D
   const SFX = {
     fire: () => { if (gate('fire', 45)) { noise(.09, 2400 + Math.random() * 800, 700, .05, 2); tone(520 + Math.random() * 120, .07, 'triangle', .025, 1.8); } },
@@ -278,7 +280,7 @@
   function useFalcon() { if (R && C.falcon(R.st)) events(); }
   $('bFalcon').addEventListener('pointerdown', e => { e.stopPropagation(); useFalcon(); });
   /* ---------------- screens ---------------- */
-  const OVS = ['menu', 'levels', 'intro', 'win', 'lose', 'shop', 'lobby', 'res', 'wlobby', 'wres', 'home', 'quick', 'campaign', 'survival', 'daily', 'practice', 'ranked', 'board', 'missions', 'profile', 'armory', 'settings']; let prevScreen = 'menu', curScreen = 'menu';
+  const OVS = ['menu', 'levels', 'intro', 'win', 'lose', 'shop', 'lobby', 'res', 'wlobby', 'wres', 'home', 'quick', 'campaign', 'survival', 'daily', 'practice', 'ranked', 'board', 'missions', 'profile', 'armory', 'settings', 'local', 'workshop']; let prevScreen = 'menu', curScreen = 'menu';
   function show(id) { if (id && curScreen && curScreen !== id && ['menu', 'win', 'lose', 'res'].includes(curScreen)) prevScreen = curScreen; curScreen = id; for (const k of OVS) $(k).classList.toggle('hide', k !== id); $('lang').classList.toggle('offHome', id === 'home'); /* home has its own settings → language; the floating pill overlapped the player card */ }
   function toMenu() { if (window.SHW) SHW.leave(); if (NET.ws) leaveDuel(); if (R) endRun(); if (window.SHM) return SHM.home(); show('menu'); refreshMenu(); }
   function refreshMenu() { $('playSub').textContent = tr('playSub', PG.un, starsTotal()); $('shopSub').textContent = tr('shopSub', PG.coins); }
@@ -341,7 +343,7 @@
   document.querySelectorAll('#emo button').forEach(b => b.addEventListener('pointerdown', e => { e.stopPropagation(); netSend({ t: 'emo', e: b.textContent }); }));
   /* ---------------- boot ---------------- */
   addEventListener('resize', resize); resize(); setMute(MUTE); applyLang(); show('home'); requestAnimationFrame(frame);
-  window.SHG = { $, LS, tr, TXT, esc, SFX, tone, noise, audio, buzz, show, toast, RM, applyLang, refreshMenu, toMenu, setMute, setVol, hsh, set vib(v) { VIB = v; }, setHue(h) { HUE = h; LS.set('sh_hue', h); paintSw(); }, setName(n) { NAME = String(n).trim().slice(0, 16); LS.set('sh_name', NAME); nameIn.value = NAME; }, get NAME() { return NAME; }, get HUE() { return HUE; }, get TOK() { return TOK; }, get LANG() { return LANG; }, get MUTE() { return MUTE; } };
+  window.SHG = { $, LS, tr, TXT, esc, SFX, tone, noise, pan, audio, buzz, show, toast, RM, applyLang, refreshMenu, toMenu, setMute, setVol, hsh, set vib(v) { VIB = v; }, setHue(h) { HUE = h; LS.set('sh_hue', h); paintSw(); }, setName(n) { NAME = String(n).trim().slice(0, 16); LS.set('sh_name', NAME); nameIn.value = NAME; }, get NAME() { return NAME; }, get HUE() { return HUE; }, get TOK() { return TOK; }, get LANG() { return LANG; }, get MUTE() { return MUTE; } };
   const qr = new URLSearchParams(location.search).get('r'); if (qr) setTimeout(() => connect(qr.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5)), 60);
   window.SH_DEBUG = { C, PG, run: () => R, NET, startRun, levels, intro, shop, connect, input, toMenu, finishRun };
 })();

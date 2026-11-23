@@ -86,7 +86,7 @@ function upgrade(req, sock, head, u) {
       if (R.state !== 'duel' || now < R.at - 300) return;
       if (R.mode === 'war') { // mountain war: relay shots and the defender's own castle state; the defender declares their own fall
         const side = R.sides[pid]; if (side == null) return;
-        if (m.t === 'fire' && ['swarm', 'fire', 'boulder', 'dune', 'star'].includes(m.w) && isFinite(+m.a) && isFinite(+m.p) && Number.isInteger(m.k)) { bcast(R, { t: 'fire', side, k: m.k, a: +m.a, p: +m.p, w: m.w, s: m.s >>> 0 }, pid); return; }
+        if (m.t === 'fire' && ['swarm', 'fire', 'boulder', 'dune', 'star', 'ball', 'cluster', 'bolt'].includes(m.w) && isFinite(+m.a) && isFinite(+m.p) && Number.isInteger(m.k)) { bcast(R, { t: 'fire', side, k: m.k, a: +m.a, p: +m.p, w: m.w, s: m.s >>> 0 }, pid); return; }
         if (m.t === 'cs' && m.pk && Array.isArray(m.pk.hp) && m.pk.hp.length <= 120) { P.hp = Math.max(0, Math.min(1, +m.f || 0)); bcast(R, { t: 'cs', side, pk: { hp: m.pk.hp.map(v => +v || 0), core: +m.pk.core || 0 } }, pid); return; }
         if (m.t === 'dead') { P.hp = 0; const other = [...R.players.values()].find(p => p.id !== pid); finish(R, other ? other.id : null); return; }
         return;

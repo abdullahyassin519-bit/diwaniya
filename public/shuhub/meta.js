@@ -35,7 +35,14 @@
     next: 'Next', retry: 'Retry', again: 'Another battle', nextWave: 'Next wave ⚔️', rematch: 'Rematch', queueAgain: 'Search again', home: 'Home', dcGoal: 'Goal: {0}', dcPassed: '✓ Challenge complete', dcFailed: '✗ Goal not met', tutT: 'Tutorial', tutS: '6 steps · 2 minutes', range: 'Free range',
     w_swarm: 'Swarm', w_fire: 'Fire', w_boulder: 'Boulder', fired0: '', acc: 'accuracy', dmg: 'damage', time: 'time', home: 'Home', warLobby: 'War room', warLobbyS: "Send the link to a friend. You're left of the mountain, they're right — each of you sees yourself on the left.", warStart: 'Start the war', need2: 'Waiting for your friend…', mapN: 'Map: {0}', fair: 'Same fort and weapons for both sides.', foeGone: 'Your opponent did not arrive' });
   /* ---------------- saved state ---------------- */
-  const P = Object.assign({ xp: 0, lv: 1, coins: 0, camp: {}, campUn: 1, survBest: 0, daily: {}, streak: 0, lastDaily: '', ms: {}, ach: {}, stats: { battles: 0, wins: 0, dmg: 0, gates: 0, stars: 0, best: 0, accSum: 0, accN: 0, chains: 0, dunes: 0, thuds: 0, rankedWins: 0 }, cos: { skin: 'bronze', trail: 'ember', own: { bronze: 1, ember: 1 } }, set: { sfx: .9, music: .6, vib: 1, fx: 'high' }, fired: 0, tut: 0, quickP: 'tactical', quickMap: -1 }, G.LS.get('sh2_prog', {}));
+  Object.assign(G.TXT.ar, { local: 'جهاز واحد', localS: 'لاعبان بالتناوب', localD: 'سلّم الجهاز بعد كل طلقة. لا خبرة ولا دنانير — المتعة فقط.', p1: 'اللاعب ١', p2: 'اللاعب ٢', startB: 'ابدأ المعركة', workshop: 'ورشة الحصن', wsNote: 'التحسينات تعمل ضد الآلي فقط (الحملة، البقاء، السريعة، التحدي). المصنّفة وضد صديق وجهاز واحد متكافئة دائماً.', arsenal: 'الترسانة', wsLvl: 'مستوى {0}/{1}', maxed: 'مكتمل', upBuy: 'ترقية 🪙{0}', cannons: 'طراز المدفع', forts: 'طراز القلعة', sGfx: 'الرسوم', g3d: 'ثلاثية الأبعاد', g2d: 'كلاسيكية 2D', localWin: 'فاز {0}!', again2: 'جولة أخرى', unlockAt: 'المستوى {0}', unlocked: 'فُتح سلاح جديد: {0}', hWsS: '{0} ترقيات',
+    u_arch: 'رماة أسرع', u_archD: 'يعيد رماتك التلقيم أسرع بـ 12% لكل مستوى', u_burn: 'نار أطول', u_burnD: 'تشتعل الحجارة ثانية إضافية لكل مستوى', u_clus: 'عنقودية أكبر', u_clusD: 'قنيبلة إضافية لكل مستوى', u_bolt: 'صاعقة إضافية', u_boltD: 'شحنة صاعقة إضافية في كل معركة', u_wall: 'أسوار أمتن', u_wallD: '+6% متانة لقلعتك لكل مستوى',
+    c_bronze: 'برونزي', c_iron: 'قاذفة حديد', c_dragon: 'مدفع التنين', c_royal: 'المدفع الملكي', f_sand: 'حجر رملي', f_granite: 'غرانيت', f_royal: 'قلعة ملكية', f_obsidian: 'قلعة السَّبَج' });
+  Object.assign(G.TXT.en, { local: 'One device', localS: 'Two players, taking turns', localD: 'Pass the device after every shot. No XP or dinars — just bragging rights.', p1: 'Player 1', p2: 'Player 2', startB: 'Start battle', workshop: 'Fort workshop', wsNote: 'Upgrades apply against the computer only (campaign, survival, quick, daily). Ranked, friends and one-device battles are always even.', arsenal: 'Arsenal', wsLvl: 'Level {0}/{1}', maxed: 'Maxed', upBuy: 'Upgrade 🪙{0}', cannons: 'Cannon model', forts: 'Fort style', sGfx: 'Graphics', g3d: '3D', g2d: 'Classic 2D', localWin: '{0} wins!', again2: 'Another round', unlockAt: 'Level {0}', unlocked: 'New weapon unlocked: {0}', hWsS: '{0} upgrades',
+    u_arch: 'Faster archers', u_archD: 'Your archers reload 12% faster per level', u_burn: 'Longer fire', u_burnD: 'Stone burns one second longer per level', u_clus: 'Bigger cluster', u_clusD: 'One more bomblet per level', u_bolt: 'Extra lightning', u_boltD: 'One more lightning charge each battle', u_wall: 'Stronger walls', u_wallD: '+6% fort strength per level',
+    c_bronze: 'Bronze', c_iron: 'Iron bombard', c_dragon: 'Dragon cannon', c_royal: 'Royal cannon', f_sand: 'Sandstone', f_granite: 'Granite', f_royal: 'Royal keep', f_obsidian: 'Obsidian hold' });
+  const P = Object.assign({ xp: 0, lv: 1, coins: 0, camp: {}, campUn: 1, survBest: 0, daily: {}, streak: 0, lastDaily: '', ms: {}, ach: {}, stats: { battles: 0, wins: 0, dmg: 0, gates: 0, stars: 0, best: 0, accSum: 0, accN: 0, chains: 0, dunes: 0, thuds: 0, rankedWins: 0 }, cos: { skin: 'bronze', trail: 'ember', own: { bronze: 1, ember: 1 } }, set: { sfx: .9, music: .6, vib: 1, fx: 'high' }, fired: 0, tut: 0, quickP: 'tactical', quickMap: -1, up: {}, p2: '' }, G.LS.get('sh2_prog', {}));
+  P.up = Object.assign({ arch: 0, burn: 0, clus: 0, bolt: 0, wall: 0 }, P.up || {}); P.cos.cannon = P.cos.cannon || 'bronze'; P.cos.fort = P.cos.fort || 'sand'; P.set.gfx = P.set.gfx || '3d';
   for (const k of ['stats', 'cos', 'set']) P[k] = Object.assign({}, { stats: { battles: 0, wins: 0, dmg: 0, gates: 0, stars: 0, best: 0, accSum: 0, accN: 0, chains: 0, dunes: 0, thuds: 0, rankedWins: 0 }, cos: { skin: 'bronze', trail: 'ember', own: { bronze: 1, ember: 1 } }, set: { sfx: .9, music: .6, vib: 1, fx: 'high' } }[k], P[k] || {});
   const save = () => G.LS.set('sh2_prog', P);
   const today = () => new Date().toISOString().slice(0, 10);
@@ -51,14 +58,27 @@
     { id: 'dune', t: ['ارفع {0} كثبان', 'Raise {0} dunes'], n: 3, k: 'dunes', r: 40 },
     { id: 'battles', t: ['العب {0} معارك', 'Play {0} battles'], n: 3, k: 'battles', r: 40 },
     { id: 'falls', t: ['أسقط {0} طوبة بالانهيار', 'Topple {0} bricks by collapse'], n: 15, k: 'falls', r: 50 },
+    { id: 'bolts', t: ['اضرب بالصاعقة {0} مرات', 'Strike with lightning {0} times'], n: 3, k: 'bolts', r: 60 },
+    { id: 'crates', t: ['أصب منطاد الإمدادات {0} مرة', 'Pop the supply balloon {0} time(s)'], n: 1, k: 'crates', r: 70 },
+    { id: 'shotdown', t: ['دع رماتك يسقطون {0} قذائف', 'Let your archers shoot down {0} shots'], n: 6, k: 'shotdown', r: 50 },
   ];
   const ACH = [
     { id: 'first', i: '🏆', t: ['أول نصر', 'First victory'], r: 50 }, { id: 'campaign', i: '🗺️', t: ['هزمت الصقر الأسود', 'Beat the Black Falcon'], r: 200 }, { id: 'stars30', i: '⭐', t: ['30 نجمة في الحملة', '30 campaign stars'], r: 250 },
     { id: 'ranked', i: '🥇', t: ['أول نصر مصنّف', 'First ranked win'], r: 100 }, { id: 'wave5', i: '🌊', t: ['الموجة 5 في البقاء', 'Survival wave 5'], r: 100 }, { id: 'wave10', i: '🌊', t: ['الموجة 10 في البقاء', 'Survival wave 10'], r: 200 },
     { id: 'gates100', i: '✨', t: ['50 مرور عبر البوابات', '50 gate threads'], r: 80 }, { id: 'flawless', i: '🛡️', t: ['انتصار دون أن يُمسّ قلبك', 'Win with an untouched heart'], r: 120 }, { id: 'comeback', i: '🔥', t: ['انتصار وقلبك تحت 15%', 'Win with your heart under 15%'], r: 120 },
     { id: 'finisher', i: '🌠', t: ['أنهِ معركة بالشهاب الأعظم', 'Finish a battle with the Great Star'], r: 100 }, { id: 'chain3', i: '🏺', t: ['3 جرار في معركة واحدة', '3 jars in one battle'], r: 100 }, { id: 'demolisher', i: '💥', t: ['5000 ضرر في معركة', '5000 damage in a battle'], r: 100 },
-    { id: 'sniper', i: '🎯', t: ['دقة 80% بثماني طلقات أو أكثر', '80% accuracy over 8+ volleys'], r: 100 }, { id: 'architect', i: '🏜️', t: ['20 كثيباً', '20 dunes raised'], r: 80 }, { id: 'lv10', i: '👑', t: ['المستوى 10', 'Reach level 10'], r: 150 }, { id: 'streak7', i: '📅', t: ['سلسلة 7 أيام من التحديات', '7-day challenge streak'], r: 200 },
+    { id: 'sniper', i: '🎯', t: ['دقة 80% بثماني طلقات أو أكثر', '80% accuracy over 8+ volleys'], r: 100 }, { id: 'architect', i: '🏜️', t: ['20 كثيباً', '20 dunes raised'], r: 80 }, { id: 'lv10', i: '👑', t: ['المستوى 10', 'Reach level 10'], r: 150 }, { id: 'archers', i: '🏹', t: ['أسقط رماتك 25 قذيفة', 'Archers shot down 25 shots'], r: 100 }, { id: 'rockslide', i: '⛰️', t: ['أطلق انهياراً صخرياً', 'Start a rockslide'], r: 60 }, { id: 'balloon', i: '🎈', t: ['أصب منطاد الإمدادات', 'Pop a supply balloon'], r: 60 }, { id: 'stormcaller', i: '⚡', t: ['صاعقتان في معركة واحدة', 'Two lightning strikes in one battle'], r: 60 }, { id: 'laststand', i: '🔥', t: ['انتصر بعد صمودك الأخير', 'Win after your last stand'], r: 120 }, { id: 'streak7', i: '📅', t: ['سلسلة 7 أيام من التحديات', '7-day challenge streak'], r: 200 },
   ];
+  /* weapons unlock with level in solo modes (online and one-device battles always have everything) */
+  const UNLOCK = { swarm: 1, ball: 1, fire: 1, boulder: 1, dune: 1, star: 1, cluster: 3, bolt: 5 }, WICON = { swarm: '☄️', ball: '⚫', fire: '🔥', cluster: '💣', boulder: '🪨', bolt: '⚡', dune: '🏜️', star: '🌠' };
+  const lockLv = w => (UNLOCK[w] || 1) > P.lv ? UNLOCK[w] : 0;
+  /* the fort workshop: earned with dinars, only used against the computer */
+  const UPG = [{ k: 'arch', i: '🏹', max: 3, c: [150, 300, 500] }, { k: 'burn', i: '🔥', max: 3, c: [120, 260, 450] }, { k: 'clus', i: '💣', max: 3, c: [150, 320, 520], lv: 3 }, { k: 'bolt', i: '⚡', max: 2, c: [300, 650], lv: 5 }, { k: 'wall', i: '🧱', max: 3, c: [200, 400, 700] }];
+  const myMods = () => ({ arch: P.up.arch, burn: P.up.burn, clus: P.up.clus, bolt: P.up.bolt });
+  const botMods = lvl => ({ arch: Math.min(3, Math.floor(lvl / 3)), burn: Math.min(3, Math.floor(lvl / 4)), clus: Math.min(3, Math.floor(lvl / 5)), bolt: lvl >= 8 ? 1 : 0 }); // the computer gets stronger along the campaign and survival
+  const pve = (o, lvl) => Object.assign(o, { mods: [myMods(), botMods(lvl)], hp0: 1 + .06 * P.up.wall });
+  const CANNONS = [{ k: 'bronze', c: 0, lv: 1 }, { k: 'iron', c: 300, lv: 2 }, { k: 'dragon', c: 700, lv: 6 }, { k: 'royal', c: 1200, lv: 10 }];
+  const FORTS = [{ k: 'sand', c: 0, lv: 1 }, { k: 'granite', c: 250, lv: 2 }, { k: 'royal', c: 600, lv: 5 }, { k: 'obsidian', c: 1000, lv: 9 }];
   const SKINS = [{ k: 'bronze', c: 0, lv: 1 }, { k: 'obsidian', c: 250, lv: 3 }, { k: 'jade', c: 400, lv: 5 }, { k: 'royal', c: 700, lv: 8 }, { k: 'crystal', c: 1000, lv: 12 }];
   const TRAILS = [{ k: 'ember', c: 0, lv: 1 }, { k: 'frost', c: 200, lv: 2 }, { k: 'emerald', c: 300, lv: 4 }, { k: 'violet', c: 500, lv: 6 }, { k: 'rainbow', c: 900, lv: 10 }];
   const COSN = { bronze: ['برونز', 'Bronze'], obsidian: ['سَبَج', 'Obsidian'], jade: ['يشم', 'Jade'], royal: ['ملكي', 'Royal gold'], crystal: ['بلّور', 'Crystal'], ember: ['جمر', 'Ember'], frost: ['صقيع', 'Frost'], emerald: ['زمرد', 'Emerald'], violet: ['بنفسج', 'Violet'], rainbow: ['قوس قزح', 'Rainbow'] };
@@ -68,7 +88,7 @@
     { id: 'boulders', t: ['المدحرج: انتصر بالصخور فقط', 'The Roller: win with boulders only'], rules: { only: ['boulder', 'dune', 'star'] }, per: 'defensive', map: 1 },
     { id: 'sniper', t: ['القنّاص: انتصر بـ 14 طلقة أو أقل', 'Sniper: win in 14 volleys or fewer'], rules: { maxVolleys: 14 }, per: 'tactical', map: 2 },
     { id: 'storm', t: ['العاصفة: انتصر والريح في أقصاها', 'Storm: win in a raging wind'], rules: { windMax: 16 }, per: 'tactical', map: 4 },
-    { id: 'nodune', t: ['بلا دروع: انتصر دون كثبان', 'No shields: win without dunes'], rules: { only: ['swarm', 'fire', 'boulder', 'star'] }, per: 'aggressive', map: 0 },
+    { id: 'nodune', t: ['بلا دروع: انتصر دون كثبان', 'No shields: win without dunes'], rules: { only: ['swarm', 'ball', 'fire', 'cluster', 'boulder', 'bolt', 'star'] }, per: 'aggressive', map: 0 },
     { id: 'fire', t: ['المحرقة: انتصر بالنار فقط', 'Inferno: win with fire only'], rules: { only: ['fire', 'dune', 'star'] }, per: 'tactical', map: 3 },
     { id: 'swarm', t: ['السرب: انتصر بالسرب فقط', 'The Swarm: win with swarms only'], rules: { only: ['swarm', 'dune', 'star'] }, per: 'defensive', map: 2 },
     { id: 'grand', t: ['المعلّم: اهزم الخبير على العاصفة', 'Master: beat the Grandmaster in the Storm'], rules: {}, per: 'expert', map: 4 },
@@ -79,7 +99,7 @@
   /* ---------------- API for the battle client ---------------- */
   window.SHM = {
     cos: () => P.cos, set: () => P.set, fired: () => P.fired, onFire() { P.fired++; if (P.fired % 10 === 0) save(); }, onAct() { }, onTutDone() { P.tut = 1; save(); },
-    result, home,
+    result, home, lockLv,
   };
   /* audio & vibration settings */
   function applySet() { if (G.setVol) G.setVol(P.set.sfx, P.set.music); G.vib = !!P.set.vib; }
@@ -88,7 +108,7 @@
     if (window.SHW) SHW.leave(); G.show('home'); msToday(); const need = xpNeed(P.lv);
     $('pcAv').style.background = `hsl(${G.HUE},70%,55%)`; $('pcAv').textContent = (G.NAME || (AR() ? 'ر' : 'A')).trim().slice(0, 1); $('pcLv').textContent = P.lv; $('pcName').textContent = G.NAME || (AR() ? 'رامي' : 'Archer');
     $('pcXp').style.width = Math.min(100, P.xp / need * 100).toFixed(0) + '%'; $('pcXpT').textContent = P.xp + ' / ' + need; $('pcCoins').textContent = '🪙 ' + P.coins;
-    const stars = Object.values(P.camp).reduce((a, b) => a + b, 0); $('hCampS').textContent = tr('campS', Math.min(10, Object.keys(P.camp).length), stars); $('hSurvS').textContent = tr('survS', P.survBest);
+    const stars = Object.values(P.camp).reduce((a, b) => a + b, 0); $('hCampS').textContent = tr('campS', Math.min(10, Object.keys(P.camp).length), stars); $('hSurvS').textContent = tr('survS', P.survBest); $('hWsS').textContent = tr('hWsS', Object.values(P.up).reduce((a, b) => a + b, 0));
     const dc = dcToday(); $('hDailyS').textContent = P.daily[dc.date] ? tr('dailyDone') : nm({ n: dc.t }); const open = msToday().list.filter(m => m.done && !m.claimed).length; $('hMisB').textContent = open || ''; $('hMisB').classList.toggle('hide', !open);
     fetchBoard().then(b => { if (b && b.me) { $('pcLeague').textContent = LGI[b.me.lg] + ' ' + b.me.r; } }).catch(() => { });
   }
@@ -99,18 +119,28 @@
     $('qPers').querySelectorAll('button').forEach(b => b.onclick = () => { G.SFX.click(); P.quickP = b.dataset.p; save(); quick(); }); $('qMap').querySelectorAll('button').forEach(b => b.onclick = () => { G.SFX.click(); P.quickMap = +b.dataset.m; save(); quick(); });
     $('qDesc').textContent = { beginner: AR() ? 'يتعلّم التصويب ويخطئ كثيراً.' : 'Still learning to aim; misses a lot.', tactical: AR() ? 'يقرأ الأرض والبوابات ويصحّح بدقة.' : 'Reads terrain and gates, corrects precisely.', aggressive: AR() ? 'يطلق بلا توقف ويستدعي الشهاب فوراً.' : 'Fires nonstop and calls the star at once.', defensive: AR() ? 'يبني الكثبان كلما اقتربت قذائفك.' : 'Raises dunes whenever you get close.', expert: AR() ? 'يتكيّف معك: يلتف حول دروعك ويصطاد جرارك.' : 'Adapts: lobs over your shields, hunts your jars.' }[P.quickP];
   }
-  function startQuick() { const B0 = C.P[P.quickP] || C.P.tactical, map = P.quickMap >= 0 ? P.quickMap : Math.floor(Math.random() * C.MAPS.length); SHW.start({ mode: 'bot', kind: 'quick', diff: P.quickP, map, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: B0, names: [myName(), '🤖 ' + nm(B0)], hues: [G.HUE, 8] }); }
+  function startQuick() { const B0 = C.P[P.quickP] || C.P.tactical, map = P.quickMap >= 0 ? P.quickMap : Math.floor(Math.random() * C.MAPS.length); SHW.start(pve({ mode: 'bot', kind: 'quick', diff: P.quickP, map, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: B0, names: [myName(), '🤖 ' + nm(B0)], hues: [G.HUE, 8] }, ['beginner', 'tactical', 'aggressive', 'defensive', 'expert'].indexOf(P.quickP) * 2)); }
   const myName = () => G.NAME || (AR() ? 'أنت' : 'You');
   const ICON = ['🐑', '🛡️', '🐺', '🧱', '🐎', '🌪️', '🌴', '⚔️', '👑', '🦅'];
   function campaign() { G.show('campaign'); const stars = Object.values(P.camp).reduce((a, b) => a + b, 0); $('cmHead').textContent = tr('campS', Object.keys(P.camp).length, stars);
     $('cmList').innerHTML = C.BOTS.map((b, i) => { const lock = i + 1 > P.campUn, s = P.camp[i] || 0; return `<button class="bot ${lock ? 'lock' : ''} ${i + 1 === P.campUn && !s ? 'next' : ''}" data-b="${i}" ${lock ? 'disabled' : ''}><i>${lock ? '🔒' : ICON[i]}</i><div>${i + 1}. ${esc(nm(b))}<small>${esc(nm(C.P[b.per]))} · ⛰️ ${esc(nm(C.MAPS[b.map]))}</small></div><b>${'★'.repeat(s)}${'☆'.repeat(3 - s)}</b></button>`; }).join('');
     $('cmList').querySelectorAll('[data-b]').forEach(b => b.onclick = () => { G.SFX.click(); startCamp(+b.dataset.b); }); }
-  function startCamp(i) { const Bt = C.BOTS[i]; SHW.start({ mode: 'bot', kind: 'campaign', botIdx: i, map: Bt.map, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: Bt, names: [myName(), nm(Bt)], hues: [G.HUE, 8] }); }
+  function startCamp(i) { const Bt = C.BOTS[i]; SHW.start(pve({ mode: 'bot', kind: 'campaign', botIdx: i, map: Bt.map, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: Bt, names: [myName(), nm(Bt)], hues: [G.HUE, 8] }, i)); }
   const SURV = ['beginner', 'aggressive', 'tactical', 'defensive', 'aggressive', 'tactical', 'expert', 'defensive', 'expert'];
   function startSurvival(wave, carry) { const per = SURV[Math.min(SURV.length - 1, wave - 1)], B0 = Object.assign({}, C.P[per], { err: Math.max(1.5, C.P[per].err - wave * .3), slow: Math.max(.75, C.P[per].slow - wave * .03) });
-    SHW.start({ mode: 'bot', kind: 'survival', wave, carry, map: (wave - 1) % C.MAPS.length, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: B0, hpMul: .8 + wave * .08, names: [myName(), (AR() ? 'الموجة ' : 'Wave ') + wave + ' · ' + nm(B0)], hues: [G.HUE, (wave * 47) % 360] }); }
+    SHW.start(pve({ mode: 'bot', kind: 'survival', wave, carry, map: (wave - 1) % C.MAPS.length, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: B0, hpMul: .8 + wave * .08, names: [myName(), (AR() ? 'الموجة ' : 'Wave ') + wave + ' · ' + nm(B0)], hues: [G.HUE, (wave * 47) % 360] }, wave)); }
   function daily() { G.show('daily'); const dc = dcToday(); $('dcName').textContent = nm({ n: dc.t }); $('dcFoe').textContent = '🤖 ' + nm(C.P[dc.per]) + ' · ⛰️ ' + nm(C.MAPS[dc.map]); $('dcState').textContent = P.daily[dc.date] ? tr('dailyDone') : ''; $('dcStreak').textContent = tr('streak', P.streak); }
-  function startDaily() { const dc = dcToday(), B0 = C.P[dc.per]; SHW.start({ mode: 'bot', kind: 'daily', challenge: dc.id, rules: dc.rules, map: dc.map, seed: C.hashStr(dc.date), side: 0, bot: B0, names: [myName(), '📅 ' + nm(B0)], hues: [G.HUE, 280] }); }
+  function startDaily() { const dc = dcToday(), B0 = C.P[dc.per]; SHW.start(pve({ mode: 'bot', kind: 'daily', challenge: dc.id, rules: dc.rules, map: dc.map, seed: C.hashStr(dc.date), side: 0, bot: B0, names: [myName(), '📅 ' + nm(B0)], hues: [G.HUE, 280] }, 4)); }
+  /* one device, two players */
+  function local() { G.show('local'); $('lcN1').value = G.NAME || tr('p1'); $('lcN2').value = P.p2 || tr('p2'); const mp = P.quickMap;
+    $('lcMaps').innerHTML = [`<button data-m="-1" class="${mp === -1 ? 'on' : ''}">${tr('randomMap')}</button>`].concat(C.MAPS.map((m, i) => `<button data-m="${i}" class="${mp === i ? 'on' : ''}">⛰️ ${esc(nm(m))}</button>`)).join('');
+    $('lcMaps').querySelectorAll('button').forEach(b => b.onclick = () => { G.SFX.click(); P.quickMap = +b.dataset.m; save(); local(); }); }
+  function startLocal() { const n1 = ($('lcN1').value || tr('p1')).trim().slice(0, 16), n2 = ($('lcN2').value || tr('p2')).trim().slice(0, 16); P.p2 = n2; save(); const map = P.quickMap >= 0 ? P.quickMap : Math.floor(Math.random() * C.MAPS.length);
+    SHW.start({ mode: 'local', kind: 'local', map, seed: (Math.random() * 4e9) >>> 0, side: 0, bot: C.P.tactical, names: [n1, n2], hues: [G.HUE, (G.HUE + 180) % 360] }); }
+  function workshop() { G.show('workshop'); $('wsCoins').textContent = '🪙 ' + P.coins;
+    $('wsList').innerHTML = UPG.map(u => { const l = P.up[u.k], lock = u.lv && P.lv < u.lv, cost = u.c[l]; return `<div class="upgrow"><i>${u.i}</i><div><b>${tr('u_' + u.k)}</b><small>${tr('u_' + u.k + 'D')}</small><div class="pips">${'◆'.repeat(l)}${'◇'.repeat(u.max - l)}</div></div><button class="tg" data-u="${u.k}" ${l >= u.max || lock || P.coins < cost ? 'disabled' : ''}>${l >= u.max ? tr('maxed') : lock ? tr('needLv', u.lv) : tr('upBuy', cost)}</button></div>`; }).join('');
+    $('wsList').querySelectorAll('[data-u]').forEach(b => b.onclick = () => { const u = UPG.find(x => x.k === b.dataset.u), l = P.up[u.k]; if (l >= u.max || P.coins < u.c[l]) return; P.coins -= u.c[l]; P.up[u.k]++; G.SFX.coin(); save(); workshop(); });
+    $('wsArsenal').innerHTML = Object.keys(WICON).map(w => { const lk = lockLv(w); return `<div class="${lk ? 'lk' : ''}"><i>${WICON[w]}</i>${esc(tr('w' + w[0].toUpperCase() + w.slice(1)))}${lk ? '<br>🔒 ' + tr('unlockAt', lk) : ''}</div>`; }).join(''); }
   function startPractice(tutorial) { SHW.start({ mode: 'practice', kind: tutorial ? 'tutorial' : 'practice', tut: tutorial, map: tutorial ? 1 : (P.quickMap >= 0 ? P.quickMap : 0), seed: 12345, side: 0, bot: C.P.beginner, names: [myName(), tutorial ? tr('tutT') : tr('range')], hues: [G.HUE, 8] }); }
   /* ---------------- ranked queue (real players only) ---------------- */
   let RQ = null;
@@ -137,12 +167,15 @@
     $('prAch').innerHTML = ACH.map(a => `<div class="ach ${P.ach[a.id] ? 'got' : ''}"><i>${a.i}</i><small>${esc(nm({ n: a.t }))}</small></div>`).join(''); }
   function armory() { G.show('armory'); $('arCoins').textContent = '🪙 ' + P.coins;
     const row = (list, slot) => list.map(o => { const own = P.cos.own[o.k], eq = P.cos[slot] === o.k, lock = P.lv < o.lv; return `<div class="cos ${eq ? 'eq' : ''}"><span class="sw" style="background:${COSC[o.k]}"></span><b>${esc(nm({ n: COSN[o.k] }))}</b><button data-k="${o.k}" data-s="${slot}" ${eq || (lock && !own) || (!own && P.coins < o.c) ? 'disabled' : ''}>${eq ? tr('equipped') : own ? tr('equip') : lock ? tr('needLv', o.lv) : tr('buy', o.c)}</button></div>`; }).join('');
+    const row2 = (list, slot, pre) => list.map(o => { const key = pre + o.k, own = P.cos.own[key] || !o.c, eq = P.cos[slot] === o.k, lock = P.lv < o.lv; return `<div class="cos ${eq ? 'eq' : ''}"><span class="sw" style="background:${{ bronze: '#c9953a', iron: '#4a4e58', dragon: '#3a7a52', royal: '#f2d27a', sand: '#e0a464', granite: '#b8b4ae', obsidian: '#5c5468' }[o.k] || (slot === 'fort' ? '#f2ead8' : '#f2d27a')}"></span><b>${esc(tr(pre + o.k))}</b><button data-k2="${o.k}" data-s="${slot}" data-p="${pre}" ${eq || (lock && !own) || (!own && P.coins < o.c) ? 'disabled' : ''}>${eq ? tr('equipped') : own ? tr('equip') : lock ? tr('needLv', o.lv) : tr('buy', o.c)}</button></div>`; }).join('');
+    $('arCannons').innerHTML = row2(CANNONS, 'cannon', 'c_'); $('arForts').innerHTML = row2(FORTS, 'fort', 'f_');
+    $('armory').querySelectorAll('[data-k2]').forEach(b => b.onclick = () => { const k = b.dataset.k2, s = b.dataset.s, key = b.dataset.p + k, o = (s === 'cannon' ? CANNONS : FORTS).find(x => x.k === k); if (!P.cos.own[key] && o.c) { if (P.coins < o.c || P.lv < o.lv) return; P.coins -= o.c; P.cos.own[key] = 1; G.SFX.coin(); } P.cos[s] = k; save(); armory(); });
     $('arSkins').innerHTML = row(SKINS, 'skin'); $('arTrails').innerHTML = row(TRAILS, 'trail');
     $('armory').querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k, s = b.dataset.s, o = (s === 'skin' ? SKINS : TRAILS).find(x => x.k === k); if (!P.cos.own[k]) { if (P.coins < o.c || P.lv < o.lv) return; P.coins -= o.c; P.cos.own[k] = 1; G.SFX.coin(); } P.cos[s] = k; save(); armory(); });
     $('arHue').innerHTML = [0, 30, 50, 130, 175, 200, 260, 300, 340].map(h => `<button data-h="${h}" style="background:hsl(${h},75%,58%)" class="${G.HUE === h ? 'on' : ''}"></button>`).join(''); $('arHue').querySelectorAll('[data-h]').forEach(b => b.onclick = () => { G.setHue(+b.dataset.h); armory(); }); }
-  function settings() { G.show('settings'); $('stSfx').value = P.set.sfx; $('stMusic').value = P.set.music; $('stVib').textContent = P.set.vib ? tr('on') : tr('off'); $('stFx').textContent = P.set.fx === 'low' ? tr('low') : tr('high'); $('stName').value = G.NAME; $('stLang').textContent = AR() ? 'English' : 'العربية'; }
+  function settings() { G.show('settings'); $('stSfx').value = P.set.sfx; $('stMusic').value = P.set.music; $('stVib').textContent = P.set.vib ? tr('on') : tr('off'); $('stFx').textContent = P.set.fx === 'low' ? tr('low') : tr('high'); $('stGfx').textContent = P.set.gfx === '2d' ? tr('g2d') : tr('g3d'); $('stName').value = G.NAME; $('stLang').textContent = AR() ? 'English' : 'العربية'; }
   $('stSfx').oninput = e => { P.set.sfx = +e.target.value; applySet(); save(); }; $('stMusic').oninput = e => { P.set.music = +e.target.value; applySet(); save(); };
-  $('stVib').onclick = () => { P.set.vib = P.set.vib ? 0 : 1; applySet(); save(); settings(); }; $('stFx').onclick = () => { P.set.fx = P.set.fx === 'low' ? 'high' : 'low'; save(); settings(); };
+  $('stVib').onclick = () => { P.set.vib = P.set.vib ? 0 : 1; applySet(); save(); settings(); }; $('stFx').onclick = () => { P.set.fx = P.set.fx === 'low' ? 'high' : 'low'; save(); settings(); }; $('stGfx').onclick = () => { P.set.gfx = P.set.gfx === '2d' ? '3d' : '2d'; save(); settings(); };
   $('stName').oninput = e => G.setName(e.target.value); $('stLang').onclick = () => { $('lang').click(); settings(); }; $('stTut').onclick = () => startPractice(true);
   /* ---------------- results: rewards, progress, next step ---------------- */
   function bumpMission(key, v) { if (!v) return []; const out = []; for (const x of msToday().list) { const d = MISSIONS.find(m => m.id === x.id); if (d.k !== key || x.done) continue; x.p += v; if (x.p >= d.n) { x.done = 1; out.push(nm({ n: d.t }).replace('{0}', d.n)); } } return out; }
@@ -150,6 +183,10 @@
   function result(o) {
     const S = o.stats || {}, won = !!o.won, notes = [], kind = o.kind || (o.mode === 'practice' ? 'practice' : 'quick');
     if (kind === 'practice' || kind === 'tutorial') return home();
+    if (kind === 'local') { const wn = (o.names || [])[o.winner] || ''; G.show('wres'); $('wrT').textContent = tr('localWin', wn); $('wrT').className = 'win'; $('wrSub').textContent = (o.names || []).join(' ⚔️ '); $('wrExtra').textContent = '';
+      $('wrPeak').textContent = S.peak || 0; $('wrAcc').textContent = (S.acc || 0) + '%'; $('wrDmg').textContent = S.dmg || 0; $('wrTime').textContent = Math.floor((S.secs || 0) / 60) + ':' + String((S.secs || 0) % 60).padStart(2, '0'); $('wrXpT').textContent = ''; $('wrXp').style.width = '0%'; $('wrLv').textContent = ''; $('wrNotes').innerHTML = '';
+      $('wrMain').textContent = tr('again2'); $('wrMain').classList.remove('hide'); $('wrMain').onclick = () => { G.SFX.click(); startLocal(); }; $('wrWait').textContent = ''; $('wrBack').onclick = () => { if (window.SHW) SHW.leave(); home(); }; return; }
+    const lv0 = P.lv;
     // statistics
     const st = P.stats; st.battles++; if (won) st.wins++; st.dmg += S.dmg || 0; st.gates += S.gates || 0; st.stars += S.stars || 0; st.best = Math.max(st.best, S.peak || 0); if (S.volleys) { st.accSum += S.acc || 0; st.accN++; } st.chains += S.chains || 0; st.dunes += S.dunes || 0; st.thuds += S.thuds || 0; if (won && kind === 'ranked') st.rankedWins++;
     // XP and dinars
@@ -168,10 +205,12 @@
     // achievements from the battle
     if (won) { grant('first', notes); if (S.minHp >= .999) grant('flawless', notes); if (S.minHp < .15) grant('comeback', notes); if (S.starHit && S.foeHeart <= 0) grant('finisher', notes); }
     if (S.chains >= 3) grant('chain3', notes); if (S.dmg >= 5000) grant('demolisher', notes); if (S.volleys >= 8 && S.acc >= 80) grant('sniper', notes); if (st.gates >= 50) grant('gates100', notes); if (st.dunes >= 20) grant('architect', notes);
+    st.shotDown = (st.shotDown || 0) + (S.shotDown || 0); if (st.shotDown >= 25) grant('archers', notes); if (S.slides) grant('rockslide', notes); if (S.crates) grant('balloon', notes); if (S.bolts >= 2) grant('stormcaller', notes); if (won && S.heart < .3) grant('laststand', notes);
+    const extraNotes = []; if (S.shotDown) extraNotes.push((AR() ? '🏹 أسقط رماتك ' : '🏹 Your archers shot down ') + S.shotDown); if (S.repairs) extraNotes.push((AR() ? '🧱 رمّم البنّاؤون ' : '🧱 Masons rebuilt ') + S.repairs); if (S.burned) extraNotes.push((AR() ? '🔥 ضرر الحريق ' : '🔥 Fire damage ') + S.burned); notes.push(...extraNotes);
     // missions
-    for (const [k, v] of [['gates', S.gates], ['wins', won ? 1 : 0], ['dmg', S.dmg], ['chains', S.chains], ['stars', S.stars], ['thuds', S.thuds], ['dunes', S.dunes], ['battles', 1], ['falls', S.falls]]) for (const t of bumpMission(k, v)) notes.push(tr('msDone', t));
+    for (const [k, v] of [['gates', S.gates], ['wins', won ? 1 : 0], ['dmg', S.dmg], ['chains', S.chains], ['stars', S.stars], ['thuds', S.thuds], ['dunes', S.dunes], ['battles', 1], ['falls', S.falls], ['bolts', S.bolts], ['crates', S.crates], ['shotdown', S.shotDown]]) for (const t of bumpMission(k, v)) notes.push(tr('msDone', t));
     // level
-    P.xp += xp; P.coins += coins; let lvUp = 0; while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; P.coins += 50; lvUp = P.lv; } if (lvUp) { notes.unshift(tr('lvUp', lvUp)); if (P.lv >= 10) grant('lv10', notes); }
+    P.xp += xp; P.coins += coins; let lvUp = 0; while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; P.coins += 50; lvUp = P.lv; } if (lvUp) { notes.unshift(tr('lvUp', lvUp)); if (P.lv >= 10) grant('lv10', notes); for (const w in UNLOCK) if (UNLOCK[w] > lv0 && UNLOCK[w] <= P.lv) notes.unshift(tr('unlocked', WICON[w] + ' ' + tr('w' + w[0].toUpperCase() + w.slice(1)))); }
     save();
     G.show('wres'); $('wrT').textContent = title; $('wrT').className = won ? 'win' : 'lose'; $('wrSub').textContent = sub; $('wrExtra').textContent = extra;
     $('wrPeak').textContent = S.peak || 0; $('wrAcc').textContent = (S.acc || 0) + '%'; $('wrDmg').textContent = S.dmg || 0; $('wrTime').textContent = Math.floor((S.secs || 0) / 60) + ':' + String((S.secs || 0) % 60).padStart(2, '0');
@@ -183,12 +222,12 @@
   /* ---------------- wiring ---------------- */
   const on = (id, f) => { const e = $(id); if (e) e.onclick = () => { G.audio(); G.SFX.click(); f(); }; };
   on('hQuick', quick); on('qGo', startQuick); on('hCampaign', campaign); on('hSurvival', () => { G.show('survival'); }); on('svGo', () => startSurvival(1)); on('hDaily', daily); on('dcGo', startDaily);
-  on('hPractice', () => G.show('practice')); on('prTut', () => startPractice(true)); on('prFree', () => startPractice(false)); on('hRanked', ranked); on('rkFind', rkFind); on('rkCancel', rkCancel); on('rkBoard', board);
+  on('hPractice', () => G.show('practice')); on('hLocal', local); on('lcGo', startLocal); on('hWorkshop', workshop); on('prTut', () => startPractice(true)); on('prFree', () => startPractice(false)); on('hRanked', ranked); on('rkFind', rkFind); on('rkCancel', rkCancel); on('rkBoard', board);
   on('hFriends', () => SHW.startNet(null)); on('hTrials', () => { G.show('menu'); G.refreshMenu(); }); on('hMissions', missions); on('hArmory', armory); on('hProfile', profile); on('hBoard', board); on('hSettings', settings);
   document.querySelectorAll('[data-home]').forEach(b => b.onclick = () => { G.SFX.click(); rkCancel(); home(); });
   G.onLang = () => { if (document.getElementById('home').classList.contains('hide')) return; home(); };
   applySet(); G.applyLang();
-  window.SHM_DEBUG = { P, home, result, startQuick, startCamp, startSurvival, startDaily, startPractice, ranked, rkFind, rkCancel, board, missions, profile, armory, settings, quick, campaign, daily, dcToday, msToday, save };
+  window.SHM_DEBUG = { P, local, startLocal, workshop, lockLv, home, result, startQuick, startCamp, startSurvival, startDaily, startPractice, ranked, rkFind, rkCancel, board, missions, profile, armory, settings, quick, campaign, daily, dcToday, msToday, save };
   // first visit: offer the tutorial; links: ?w= (friend war) is handled by war.js, ?r= by the trials
   const q = new URLSearchParams(location.search); if (!q.get('w') && !q.get('r')) { home(); if (!P.tut && !P.stats.battles) setTimeout(() => { if (!document.getElementById('home').classList.contains('hide')) $('hTutPop').classList.remove('hide'); }, 600); }
   on('tpYes', () => { $('hTutPop').classList.add('hide'); startPractice(true); }); on('tpNo', () => { $('hTutPop').classList.add('hide'); P.tut = 1; save(); });

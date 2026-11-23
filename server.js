@@ -9,6 +9,7 @@ const SS = require('./soulstack-server.js'); /* SOULSTACK: البرج اليوم
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, PUB = path.join(__dirname, 'public');
 const MAX_BODY = 400 * 1024, MAX_ROOMS = 3000, IDLE_MS = 3 * 3600e3, HOST_GRACE = 12000;
+const zlib = require('zlib'), GZ = new Map(), ZIPPABLE = new Set(['.html', '.js', '.css', '.svg', '.json', '.webmanifest']); /* compressed copies of static files, cached per mtime */
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const rooms = new Map();
 const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -104,7 +105,13 @@ const server = http.createServer(async (req, res) => {
     /* ملفات الواجهة */
     let f = path.normalize(path.join(PUB, decodeURIComponent(p.endsWith('/') ? p + 'index.html' : p)));
     if (!f.startsWith(PUB)) return json(res, 403, {});
-    fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end('not found'); } res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-cache' }); res.end(d); });
+    fs.stat(f, (se, stt) => { if (se || !stt.isFile()) { res.writeHead(404); return res.end('not found'); }
+      const ext = path.extname(f), gz = /\bgzip\b/.test(req.headers['accept-encoding'] || '') && ZIPPABLE.has(ext), key = f + ':' + stt.mtimeMs, tag = '"' + stt.size.toString(36) + '-' + Math.floor(stt.mtimeMs).toString(36) + (gz ? '-z' : '') + '"';
+      if (req.headers['if-none-match'] === tag) { res.writeHead(304, { ETag: tag, 'Cache-Control': 'no-cache' }); return res.end(); }
+      const send = d => { res.writeHead(200, Object.assign({ 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': 'no-cache', ETag: tag, Vary: 'Accept-Encoding' }, gz ? { 'Content-Encoding': 'gzip' } : {})); res.end(d); };
+      if (gz && GZ.has(key)) return send(GZ.get(key));
+      fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end('not found'); } if (!gz) return send(d); zlib.gzip(d, { level: 9 }, (ze, z) => { if (ze) { res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' }); return res.end(d); } if (GZ.size > 200) GZ.clear(); GZ.set(key, z); send(z); }); });
+    });
   } catch (e) { if (!res.headersSent) json(res, typeof e === 'number' ? e : 400, { err: 'bad request' }); }
 });
 /* محاكاة طخطخة تعمل هنا على الخادم: هو الحكم في الجولات والضرر والقنبلة والآليين */

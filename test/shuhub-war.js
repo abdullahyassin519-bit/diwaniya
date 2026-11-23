@@ -40,7 +40,7 @@ for (let m = 0; m < C.MAPS.length; m++) {
 { const st = C.create(0, 1), Cs = st.castles[0]; const n0 = Cs.t.filter(Boolean).length; for (let r = 4; r < Cs.rows; r++) for (const c of [0, 1]) { Cs.t[r * Cs.cols + c] = 0; } Cs.dirty = 1; Cs.by = 1; C.step(st); const falls = st.ev.filter(e => e.e === 'fall').length; ok(falls === 8, 'cutting a tower at its base drops the 8 bricks above ' + falls); ok(Cs.t.some(k => k === 9), 'the heart stays'); }
 // the computer corrects its aim from where its shots land (gets closer over time)
 for (const dk of ['normal', 'expert']) { let firstErr = 0, laterErr = 0, n1 = 0, n2 = 0;
-  for (let sd = 1; sd <= 8; sd++) { const st = C.create(1, sd * 37), r = C.rng(sd), mem = {}, B = C.DIFF[dk], E = st.castles[0], tx = E.x0 + (E.cc + 1) * C.CS; st.wind = 0; let seen = -1, k = 0;
+  for (let sd = 1; sd <= 8; sd++) { const st = C.create(1, sd * 37, { noEvents: 1 }), r = C.rng(sd), mem = {}, B = C.DIFF[dk], E = st.castles[0], tx = E.x0 + (E.cc + 1) * C.CS; st.wind = 0; let seen = -1, k = 0;
     while (k < 7 && st.tick < 60 * 60) { if (st.tick % 170 === 10) { const pl = C.botPlan(st, 1, B, mem, r); if (C.fire(st, { side: 1, a: pl.a, p: pl.p, w: 'swarm', s: 5 })) C.remember(st, mem, pl.a, pl.p); }
       C.step(st); st.ev.length = 0; const I = st.impact[1]; if (I && I.vid !== seen) { seen = I.vid; k++; const e = I.hit === 0 ? Math.max(0, Math.abs(I.x - tx) - 14) : Math.abs(I.x - tx); if (k === 1) { firstErr += e; n1++; } else if (k >= 4) { laterErr += e; n2++; } } } }
   ok(laterErr / n2 <= firstErr / n1, `${dk} AI zeroes in: first-shot miss ${(firstErr / n1).toFixed(1)} → later ${(laterErr / n2).toFixed(1)}`); }
