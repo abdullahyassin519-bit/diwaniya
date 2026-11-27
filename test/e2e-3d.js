@@ -30,6 +30,12 @@ let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; con
     await A.waitForFunction(() => !SHW_DEBUG.b() || SHW_DEBUG.b().endT > 0, null, { timeout: 120000 }).catch(() => {}); ok(await A.evaluate(() => !SHW_DEBUG.b() || SHW_DEBUG.b().endT > 0), 'victory starts the end cinematic ' + JSON.stringify(await A.evaluate(() => { const b = SHW_DEBUG.b(); return b && { done: b.st.done, w: b.st.winner, tick: b.st.tick, core: b.st.castles[1].coreHp }; })));
     await A.waitForFunction(() => !document.getElementById('wres').classList.contains('hide'), null, { timeout: 200000 }).catch(() => {}); ok(await A.evaluate(() => !document.getElementById('wres').classList.contains('hide')), 'results screen after the cinematic');
     ok(await A.evaluate(() => getComputedStyle(document.getElementById('cv3')).display === 'none'), 'the 3D canvas is released after the battle');
+    // 1b) boss battle: the 5th lord raises a rune shield that falls with its towers
+    const Bo = await mk({ width: 390, height: 844 }, { tut: 1, fired: 9, lv: 8, campUn: 10 });
+    await Bo.evaluate(() => SHM_DEBUG.startCamp(4)); await Bo.waitForFunction(() => SHW_DEBUG.b(), null, { timeout: 10000 });
+    await lockClock(Bo); await frames(Bo, 170); ok(await Bo.evaluate(() => /زعيم|Boss/.test(document.getElementById('wBanner').textContent + document.getElementById('wToast').textContent)), 'boss battles open with a boss card'); await frames(Bo, 20);
+    ok(await Bo.evaluate(() => /🛡️/.test(document.getElementById('wD1').textContent) && SHW_DEBUG.C.shieldUp(SHW_DEBUG.b().st.castles[1])), 'the boss heart is shielded');
+    await Bo.evaluate(() => { const E = SHW_DEBUG.b().st.castles[1]; E.t[0] = 0; }); await frames(Bo, 5); ok(await Bo.evaluate(() => !/🛡️/.test(document.getElementById('wD1').textContent)), 'toppling a rune tower breaks the shield');
     // 2) local versus: turns pass between the two players, no reload timers, full arsenal even at level 1
     const L = await mk({ width: 390, height: 844 }, { tut: 1, fired: 9, lv: 1, quickMap: 1 });
     await L.click('#hLocal'); await L.fill('#lcN2', 'Sara'); await L.click('#lcGo'); await L.waitForFunction(() => SHW_DEBUG.b() && SHW_DEBUG.b().mode === 'local');

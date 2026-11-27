@@ -155,6 +155,7 @@ function buildCastle(s) {
   // the heart: a golden gem in a dark alcove
   const hx_ = Cs.x0 + (Cs.cc + 1) * CS, hy = -(Cs.y0 + (Cs.cr + 1) * CS); V.gem = new THREE.Mesh(new THREE.OctahedronGeometry(2.1, 0), new THREE.MeshStandardMaterial({ color: '#ffcf5a', emissive: '#ff9a20', emissiveIntensity: 1.4, roughness: .25, metalness: .4, flatShading: true })); V.gem.position.set(hx_, hy, 2.2); g.add(V.gem);
   V.gemGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: TX.glow, color: '#ffc14a', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); V.gemGlow.scale.set(12, 12, 1); V.gemGlow.position.copy(V.gem.position); g.add(V.gemGlow);
+  V.dome = new THREE.Mesh(new THREE.SphereGeometry(9, 24, 16), new THREE.MeshBasicMaterial({ color: '#7fd8ff', transparent: true, opacity: .2, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })); V.dome.position.copy(V.gem.position); V.dome.visible = false; V.shieldWas = 0; g.add(V.dome);
   root.add(g); return V;
 }
 function syncCastle(V, dt, T) {
@@ -170,6 +171,10 @@ function syncCastle(V, dt, T) {
   if (changed || any) { V.bricks.instanceMatrix.needsUpdate = true; V.bricks.instanceColor.needsUpdate = true; rebuildDetails(V); }
   // the heart pulses faster as it weakens
   const f = Math.max(0, Cs.coreHp / Cs.core0), alive = Cs.coreHp > 0 && !V.collapse; V.gem.visible = V.gemGlow.visible = alive; if (alive) { V.gem.rotation.y += dt * (1 + (1 - f) * 4); const pu = 1 + Math.sin(T * (5 + (1 - f) * 9)) * .12; V.gem.scale.setScalar(pu); V.gemGlow.material.opacity = .55 + .3 * Math.sin(T * (5 + (1 - f) * 9)); V.gem.material.emissive.setHSL((40 - (1 - f) * 34) / 360, 1, .5); }
+  // boss rune shield: a shimmering dome while both tower tops stand; it shatters when one falls
+  const sh = !!(Cs.shield && Cs.t[POSTS[0][1] * Cs.cols + POSTS[0][0]] && Cs.t[POSTS[1][1] * Cs.cols + POSTS[1][0]]) && !V.collapse;
+  V.dome.visible = sh; if (sh) { V.dome.material.opacity = .14 + .08 * Math.sin(T * 3); V.dome.rotation.y += dt * .5; V.dome.scale.setScalar(1 + Math.sin(T * 2) * .03); V.shieldWas = 1; }
+  else if (V.shieldWas) { V.shieldWas = 0; const p = V.gem.position; for (let i = 0; i < (LOW ? 30 : 90); i++) { const a = rnd(6.28), b = rnd(-1.5, 1.5), v = rnd(8, 22); FX.emit(p.x + Math.cos(a) * 8, p.y + b * 5, p.z + Math.sin(a) * 4, Math.cos(a) * v, b * v * .5, Math.sin(a) * v * .4, rnd(.4, .9), 2, .3, C_.cyan, 1, 10); } lightFlash(p.x, p.y, 4, '#8fe8ff', 160); }
   // shake when hit
   V.shake = Math.max(0, V.shake - dt * 3); V.g.position.set((Math.random() - .5) * V.shake * .9, (Math.random() - .5) * V.shake * .4, 0);
   // flags ripple with the wind (they stream downwind)
@@ -353,6 +358,7 @@ function onEvent(e) {
     case 'starcall': starMarks.push({ x: e.x, side: e.side, t: 0, T: 70 / 60 + .2 }); break;
     case 'split': for (let i = 0; i < 10; i++) FX.emit(e.x, -e.y, 0, rnd(-10, 10), rnd(-10, 10), rnd(-4, 4), .25, 2.5, .3, C_.ember, 1); SM.emit(e.x, -e.y, 0, 0, 1, 0, 1, 2, 6, C_.smoke, .5); break;
     case 'arrow': shootArrow(e); break;
+    case 'gate': { const g = B.st.gates[e.g]; if (!g) break; const c = e.k >= 10 ? C_.gold : C_.cyan; for (let i = 0; i < (LOW ? 4 : 10); i++) FX.emit(g.x + rnd(-1, 1), -g.y + rnd(-g.h / 2, g.h / 2), rnd(-1, 1), rnd(6, 16), rnd(-6, 6), rnd(-4, 4), rnd(.25, .5), 2.4, .3, c, 1, 0, 2); const grp = gates3[e.g]; if (grp) grp.userData.kick = 1; break; }
     case 'sortie': { const V = castles[e.side]; if (!V) break; const [tx] = cellPos(V.C, e.i), [gx] = cellPos(V.C, V.C.gate[0]); V.crewOut = 2; soldiersOf(e.side, s => s.mason).forEach((m, j) => { m.g.visible = true; m.x = gx; m.z = -1; m.y = -GY; m.carry = 1; m.set('walk'); m.wp = [tx + (j ? 1.6 : -1.6), null, 5.5 + j]; m.onArrive = () => { m.set('work'); m.face = 1; }; m.job = e.i; }); G_sfx('steps', e.side); break; }
     case 'repair': { const V = castles[e.side]; if (!V) break; const [x, y] = cellPos(V.C, e.i); for (let i = 0; i < 12; i++) SM.emit(x + rnd(-1.5, 1.5), y + rnd(-1.5, 1.5), 3, rnd(-2, 2), rnd(0, 3), 1, 1, 2, 5, C_.dust, .5); masonsHome(e.side); break; }
     case 'laststand': { const V = castles[e.side]; if (!V) break; soldiersOf(e.side).forEach(so => { so.back = so.st === 'walk' ? 'walk' : 'idle'; so.set('rally'); }); for (let i = 0; i < 40; i++) FX.emit(V.C.x0 + rnd(0, 27), -V.C.y0 + rnd(-30, 0), rnd(-4, 4), 0, rnd(4, 10), 0, rnd(.6, 1.2), 3, .5, C_.blood, .8, -3); break; }
@@ -382,7 +388,7 @@ function buildGates() {
     const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex('×' + gt.v, '#ffffff'), transparent: true, depthWrite: false })); lab.scale.set(7, 3.5, 1); lab.position.set(0, 0, 1); grp.add(lab);
     grp.userData = { pane, fm, g: gt }; root.add(grp); return grp; });
 }
-function syncGates(T) { for (const grp of gates3) { const g = grp.userData.g; grp.position.set(g.x, -g.y, 0); grp.userData.pane.material.opacity = .14 + g.flash * .4 + Math.sin(T * 3 + g.i) * .03; grp.userData.fm.emissiveIntensity = 1 + g.flash * 2; grp.rotation.y = Math.sin(T * .8 + g.i) * .25; } }
+function syncGates(T) { for (const grp of gates3) { const g = grp.userData.g; grp.position.set(g.x, -g.y, 0); grp.userData.pane.material.opacity = .14 + g.flash * .4 + Math.sin(T * 3 + g.i) * .03; grp.userData.fm.emissiveIntensity = 1 + g.flash * 2; grp.rotation.y = Math.sin(T * .8 + g.i) * .25; const k = grp.userData.kick || 0; grp.scale.setScalar(1 + k * .25); grp.userData.kick = Math.max(0, k - .06); } }
 function buildJars() {
   jars3 = new Map(); const prof = []; for (let i = 0; i <= 12; i++) { const t = i / 12; prof.push(new THREE.Vector2(.25 + Math.sin(t * Math.PI) * 1.25 + (t > .85 ? (t - .85) * 2 : 0), t * 4.2)); }
   const geo = new THREE.LatheGeometry(prof, 12), mat = new THREE.MeshStandardMaterial({ color: '#a85a2a', roughness: .8 }), band = new THREE.MeshStandardMaterial({ color: '#e8c370', roughness: .6 });
@@ -428,7 +434,7 @@ function begin(battle, opts) {
   if (!ren) return false; end(); B = battle; O = opts; LOW = !!opts.low; G_sfx = opts.sfx || (() => {}); O.home = opts.home != null ? opts.home : opts.me; O.trail = opts.trail ? opts.trail.map(t => col('rgb(' + t + ')')) : null; clockT = 0; endCam = null; stormT = rnd(3, 6);
   ren.setPixelRatio(Math.min(devicePixelRatio || 1, LOW ? 1.25 : 2)); ren.shadowMap.enabled = !LOW; sun.castShadow = !LOW;
   const m = opts.mood; scene.background = skyTex(m); scene.fog = new THREE.Fog(col(m.sky[2]).lerp(col(m.far), .35), 260, 1500);
-  hemi.color.set(m.sky[3]); hemi.groundColor.set(m.rock[2]); hemi.intensity = m.night ? .55 : m.fx === 'rain' ? .8 : 1.15; sun.color.set(m.night ? '#9fb4ff' : m.sun === 1 ? '#ffd2b0' : m.sun === 2 ? '#fff4e0' : '#ffc890'); sun.intensity = m.night ? .9 : m.fx === 'rain' ? 1.2 : m.sun === 2 ? 3 : 2.5;
+  hemi.color.set(m.sky[3]); hemi.groundColor.set(m.rock[2]); hemi.intensity = m.night ? .95 : m.fx === 'rain' ? .85 : 1.15; sun.color.set(m.night ? '#9fb4ff' : m.sun === 1 ? '#ffd2b0' : m.sun === 2 ? '#fff4e0' : '#ffc890'); sun.intensity = m.night ? 1.6 : m.fx === 'rain' ? 1.2 : m.sun === 2 ? 3 : 2.5;
   const sx = m.sun === 1 ? -120 : 120; sun.position.set(150 + sx, 60, 160); sun.target.position.set(150, -GY, 0);
   h0 = Float32Array.from(B.st.h); root.add(buildTerrain(m)); root.add(farRange(-260, -150, 150, m.far, 1.3), farRange(-170, -150, 95, col(m.near).lerp(col(m.far), .3), 4.1)); root.add(decorate(m));
   FX = new Particles(LOW ? 900 : 2200, true, TX.glow); SM = new Particles(LOW ? 500 : 1300, false, TX.smoke); root.add(FX.pts, SM.pts);
@@ -450,15 +456,19 @@ function frame(V, dtr) {
   syncCannon(cannons[V.side], dt, V.aim.mine, V.aim.rec); syncCannon(cannons[1 - V.side], dt, V.aim.foe, V.aim.foeRec);
   syncSoldiers(dt, T); syncArrows(dt); syncProjectiles(dt, T); syncGates(T); syncJars(); syncBalloon(T); syncMarks(dt); syncRings(dt); syncBolts(dt);
   FX.update(dt); SM.update(dt); debris.update(dt);
-  flashL = Math.max(0, flashL - dt * 220); lightP.intensity = flashL * 60; hemiFlash = Math.max(0, hemiFlash - dt * 3); hemi.intensity = (O.mood.night ? .55 : O.mood.fx === 'rain' ? .8 : 1.15) + hemiFlash * 2.5;
+  flashL = Math.max(0, flashL - dt * 220); lightP.intensity = flashL * 60; hemiFlash = Math.max(0, hemiFlash - dt * 3); hemi.intensity = (O.mood.night ? .95 : O.mood.fx === 'rain' ? .85 : 1.15) + hemiFlash * 2.5;
   // camera: an off-axis perspective that maps the battle line exactly like the 2D overlay
   const sh = V.shake ? V.shake * 1.4 : 0, camX0 = V.L + V.viewW / 2, D = V.viewW * 1.15, n = .5;
   if (V.endT >= .15 && !endCam) { const Cs = B.st.castles[V.loser]; const cxw = Cs.x0 + Cs.cols * CS / 2, vxw = V.side ? W - cxw : cxw; endCam = { x: vxw, y: -GY + 12, t: 0, dir: vxw < 150 ? -1 : 1 }; /* orbit from the open plain side, never from inside the mountain */ }
-  if (endCam) { endCam.t += dt; const asp = V.VW / V.VH, R0 = clamp(38 / (Math.tan(27.5 * Math.PI / 180) * asp), 62, 170), a = .9 - endCam.t * .12, R = R0 - Math.min(R0 * .2, endCam.t * 4), tgt = V3.set(endCam.x, endCam.y + 4, 0); /* portrait screens are narrow: pull back so the whole fort stays in frame */ cam.position.set(endCam.x + Math.sin(a) * R * endCam.dir, Math.max(endCam.y + 26 + endCam.t * 1.5, groundAt(clamp(endCam.x + Math.sin(a) * R * endCam.dir, 0, W), Math.cos(a) * R) + 8), Math.cos(a) * R); cam.lookAt(tgt); cam.fov = 55; cam.aspect = V.VW / V.VH; cam.updateProjectionMatrix(); }
+  if (V.intro > 0 && !endCam) { // battle intro: sweep from the enemy fort, over the mountain, down to your cannon
+    const u = clamp((1 - V.intro / 2.6 - .35) / .65, 0, 1), e = u * u * (3 - 2 * u), /* hold on the enemy fort, then sweep */ fx = W - 32, H0 = V.VH / V.K, camYp = (V.OY / V.K) - H0 / 2 + V.viewW * .16;
+    const px = fx + (camX0 - fx) * e, py = (-GY + 58) + (camYp - (-GY + 58)) * e, pz = 105 + (D - 105) * e, tx = fx + (camX0 - fx) * e, ty = (-GY + 12) + (camYp - V.viewW * .16 - (-GY + 12)) * e;
+    cam.position.set(px + Math.sin(u * 3) * 6 * (1 - e), py, pz); cam.lookAt(V3.set(tx, ty, 0)); cam.fov = 2 * Math.atan(H0 / 2 / D) * 180 / Math.PI; cam.aspect = V.VW / V.VH; cam.updateProjectionMatrix(); }
+  else if (endCam) { endCam.t += dt; const asp = V.VW / V.VH, R0 = clamp(38 / (Math.tan(27.5 * Math.PI / 180) * asp), 62, 170), a = .9 - endCam.t * .12, R = R0 - Math.min(R0 * .2, endCam.t * 4), tgt = V3.set(endCam.x, endCam.y + 4, 0); /* portrait screens are narrow: pull back so the whole fort stays in frame */ cam.position.set(endCam.x + Math.sin(a) * R * endCam.dir, Math.max(endCam.y + 26 + endCam.t * 1.5, groundAt(clamp(endCam.x + Math.sin(a) * R * endCam.dir, 0, W), Math.cos(a) * R) + 8), Math.cos(a) * R); cam.lookAt(tgt); cam.fov = 55; cam.aspect = V.VW / V.VH; cam.updateProjectionMatrix(); }
   else { const camY = (V.OY / V.K) - V.VH / V.K / 2 + V.viewW * .16; cam.position.set(camX0 + (Math.random() - .5) * sh, camY + (Math.random() - .5) * sh, D); cam.rotation.set(0, 0, 0);
     const k = n / D, left = (V.L - camX0) * k, right = (V.L + V.VW / V.K - camX0) * k, topW = V.OY / V.K, top = (topW - camY) * k, bottom = (topW - V.VH / V.K - camY) * k;
     cam.projectionMatrix.makePerspective(left, right, top, bottom, n, 3000); cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert(); }
-  const pr = ren.getPixelRatio(), pxPerUnit = endCam ? V.VH / (2 * Math.tan(cam.fov * Math.PI / 360)) : V.K * D; FX.mat.uniforms.scale.value = SM.mat.uniforms.scale.value = pxPerUnit * pr;
+  const pr = ren.getPixelRatio(), pxPerUnit = endCam || V.intro > 0 ? V.VH / (2 * Math.tan(cam.fov * Math.PI / 360)) : V.K * D; FX.mat.uniforms.scale.value = SM.mat.uniforms.scale.value = pxPerUnit * pr;
   syncWeather(dt, T, camX0);
   const w = canvas.clientWidth | 0, h = canvas.clientHeight | 0; if (canvas.width !== Math.floor(w * pr) || canvas.height !== Math.floor(h * pr)) ren.setSize(w, h, false);
   const tB = performance.now(); ren.render(scene, cam); const tC = performance.now(); perfA.u = perfA.u * .95 + (tB - tA) * .05; perfA.r = perfA.r * .95 + (tC - tB) * .05;

@@ -7,12 +7,12 @@
     aimHint: '👆 اسحب للخلف وأفلت لتطلق', placeDune: '🏜️ المس الأرض أمام قلعتك لترفع كثيباً', placeStar: '🌠 المس أي مكان لتستدعي الشهاب الأعظم', noSand: 'نفد الرمل — يتجدد مع الوقت', starNotReady: 'املأ عدّاد الشهاب بالضرب والبوابات', chain: 'سلسلة انفجارات!', smash: 'ضربة متدحرجة!', starFall: 'الشهاب الأعظم!',
     victory: 'النصر', defeat: 'الهزيمة', onlyW: 'هذا التحدي يسمح فقط بـ: {0}', volleysLeft: 'الطلقات المتبقية: {0}', practiceT: 'ميدان التدريب', fullArc: 'المسار الكامل', shortBy: 'قصيرة بـ {0} م', longBy: 'طويلة بـ {0} م', onTarget: 'في الهدف!', rebuilt: 'أُعيد بناء القلعة',
     tut1: '١/٦ اسحب للخلف من أي مكان ثم أفلت: الاتجاه زاوية، والمسافة قوة', tut2: '٢/٦ أصب القلعة الحمراء', tut3: '٣/٦ مرّر سربك عبر بوابة ×', tut4: '٤/٦ اختر 🪨 الصخرة: تتدحرج على المنحدر وتصطدم بالجدار', tut5: '٥/٦ اختر 🏜️ الكثيب ثم المس الأرض أمام قلعتك', tut6: '٦/٦ عدّاد الشهاب ممتلئ: اختر 🌠 ثم المس قلعة الخصم', tutDone: 'أتقنت الأساسيات! 🎉', wave: 'الموجة {0}',
-    wBall: 'قذيفة', wCluster: 'عنقودية', wBolt: 'صاعقة', gust: '🌪️ عاصفة! الريح تنقلب', crateUp: '🎈 منطاد إمدادات — أصبه!', cratePop: '+شهاب +كثيب', shower: '☄️ زخة شهب تضرب الجبل!', slide: 'انهيار صخري!', lastStand: '🔥 الصمود الأخير!', foeLastStand: '⚠️ العدو في صموده الأخير!', repaired: 'رمّم البنّاؤون الجدار', shotDown: 'أسقطها الرماة!', locked: '🔒 تُفتح في المستوى {0}', turnOf: 'دور {0}', noBolts: 'نفدت الصواعق', defenders: 'رماة' });
+    loading3d: 'تحميل ساحة المعركة…', reconnecting: '📡 انقطع الاتصال… نعيد المحاولة', lostConn: 'تعذّرت إعادة الاتصال', resumed: '✅ عدت إلى المعركة', foeDrop: '📡 انقطع اتصال خصمك — ننتظره قليلاً', foeBack: '✅ عاد خصمك', series: 'السلسلة {0} – {1}', wBall: 'قذيفة', wCluster: 'عنقودية', wBolt: 'صاعقة', gust: '🌪️ عاصفة! الريح تنقلب', crateUp: '🎈 منطاد إمدادات — أصبه!', cratePop: '+شهاب +كثيب', shower: '☄️ زخة شهب تضرب الجبل!', slide: 'انهيار صخري!', lastStand: '🔥 الصمود الأخير!', foeLastStand: '⚠️ العدو في صموده الأخير!', repaired: 'رمّم البنّاؤون الجدار', shotDown: 'أسقطها الرماة!', locked: '🔒 تُفتح في المستوى {0}', turnOf: 'دور {0}', noBolts: 'نفدت الصواعق', defenders: 'رماة' });
   Object.assign(G.TXT.en, { wSwarm: 'Swarm', wFire: 'Fire', wBoulder: 'Boulder', wDune: 'Dune', wStar: 'Star', reload: 'Reloading…', incoming: '⚠️ Incoming!', heartHit: 'Heart hit!', collapse: 'Tower down!',
     aimHint: '👆 Pull back and release to fire', placeDune: '🏜️ Tap the ground in front of your fort to raise a dune', placeStar: '🌠 Tap anywhere to call the Great Star', noSand: 'Out of sand — it refills over time', starNotReady: 'Fill the star meter with hits and gates', chain: 'Chain reaction!', smash: 'Rolling smash!', starFall: 'THE GREAT STAR!',
     victory: 'VICTORY', defeat: 'DEFEAT', onlyW: 'This challenge allows only: {0}', volleysLeft: 'Volleys left: {0}', practiceT: 'Practice range', fullArc: 'Full arc', shortBy: '{0} m short', longBy: '{0} m long', onTarget: 'On target!', rebuilt: 'Fort rebuilt',
     tut1: '1/6 Pull back anywhere and release: direction = angle, distance = power', tut2: '2/6 Hit the red fort', tut3: '3/6 Thread your swarm through a × gate', tut4: '4/6 Pick 🪨 Boulder: it rolls down the slope and smashes the wall', tut5: '5/6 Pick 🏜️ Dune, then tap the ground in front of your fort', tut6: '6/6 Star meter is full: pick 🌠 and tap the enemy fort', tutDone: 'You know the basics! 🎉', wave: 'Wave {0}',
-    wBall: 'Cannonball', wCluster: 'Cluster', wBolt: 'Lightning', gust: '🌪️ Storm! The wind turns', crateUp: '🎈 Supply balloon — shoot it!', cratePop: '+Star +Dune', shower: '☄️ A meteor shower hits the mountain!', slide: 'Rockslide!', lastStand: '🔥 LAST STAND!', foeLastStand: '⚠️ The enemy makes a last stand!', repaired: 'Masons rebuilt the wall', shotDown: 'Shot down by archers!', locked: '🔒 Unlocks at level {0}', turnOf: '{0}\'s turn', noBolts: 'No lightning left', defenders: 'archers' });
+    loading3d: 'Loading the battlefield…', reconnecting: '📡 Connection lost… retrying', lostConn: 'Could not reconnect', resumed: '✅ Back in the battle', foeDrop: '📡 Your opponent dropped — waiting for them', foeBack: '✅ Your opponent is back', series: 'Series {0} – {1}', wBall: 'Cannonball', wCluster: 'Cluster', wBolt: 'Lightning', gust: '🌪️ Storm! The wind turns', crateUp: '🎈 Supply balloon — shoot it!', cratePop: '+Star +Dune', shower: '☄️ A meteor shower hits the mountain!', slide: 'Rockslide!', lastStand: '🔥 LAST STAND!', foeLastStand: '⚠️ The enemy makes a last stand!', repaired: 'Masons rebuilt the wall', shotDown: 'Shot down by archers!', locked: '🔒 Unlocks at level {0}', turnOf: '{0}\'s turn', noBolts: 'No lightning left', defenders: 'archers' });
   const AR = () => G.LANG === 'ar', nm = o => o.n[AR() ? 0 : 1];
   const M = () => window.SHM || {};
   const MOOD = {
@@ -31,7 +31,7 @@
   function load3D() { if (window.SH3D) return Promise.resolve(true); if (R3load) return R3load; R3load = new Promise(res => { const sc = document.createElement('script'); sc.src = 'war3d.js?v=3'; sc.onload = () => res(!!window.SH3D); sc.onerror = () => { R3load = null; res(false); }; document.head.appendChild(sc); }); return R3load; }
   setTimeout(() => { if (want3D()) load3D(); }, 900);
   function sfx3(k, side) { const pn = side == null ? G.pan(0) : G.pan(((side === me() ? -1 : 1) * .7)); if (k === 'arrow') { G.noise(.18, 3000, 900, .05, 3, 0, pn); G.tone(220, .06, 'triangle', .03, 1.6, 0, pn); } else if (k === 'steps') { for (let i = 0; i < 6; i++) G.noise(.05, 300, 200, .05, 2, i * .22, pn); G.tone(160, .12, 'square', .02, .7, 0, pn); } else if (k === 'thunder') { G.noise(2.2, 200, 40, .32, .6, .15); G.noise(.3, 4000, 900, .12, 1); } }
-  function begin3D() { if (!B || R3 || !want3D()) return; const b0 = B; load3D().then(ok => { if (!ok || B !== b0 || R3 || !window.SH3D.init(cv3)) return; const cs = (M().cos && M().cos()) || {};
+  function begin3D() { if (!B || R3 || !want3D()) return; const b0 = B; if (!window.SH3D) $('wLoad3').classList.remove('hide'); load3D().then(ok => { $('wLoad3').classList.add('hide'); if (!ok || B !== b0 || R3 || !window.SH3D.init(cv3)) return; const cs = (M().cos && M().cos()) || {};
     R3 = SH3D.begin(B, { mood: MOOD[B.st.M.wx] || MOOD.dusk, low: LOW(), me: me(), home: B.mode === 'local' ? 0 : me(), cannon: cs.cannon, fort: cs.fort, trail: B.mode === 'local' ? null : TRAIL[cs.trail || 'ember'], sfx: sfx3 }); document.body.classList.toggle('r3', !!R3); }); }
   function end3D() { if (R3) { SH3D.end(); R3 = false; } document.body.classList.remove('r3'); }
   let VW = 0, VH = 0, DPR = 1, K0 = 1, K = 1, OY = 0, GSY = 0, viewW0 = 120, viewW = 120, BG = null, BGkey = ''; let TOP = 104, BOT = 104, lastLand = null;
@@ -53,10 +53,10 @@
   window.SHW = { get on() { return !!B; }, frame, leave, start, startNet: (c, o) => connect(c, o), get b() { return B; } };
   const LOW = () => (M().set && M().set().fx === 'low') || G.RM();
   function start(o) {
-    G.audio(); const rules = o.rules || {}; const st = C.create(o.map, o.seed, { hp0: o.hp0 || 1, hp1: o.mode === 'bot' ? (o.bot.hp || 1) * (o.hpMul || 1) : 1, protect: o.mode === 'net' ? 1 - o.side : null, noJars: rules.noJars, windMax: rules.windMax, mods: o.mods, noCd: o.mode === 'local' ? 1 : 0 });
+    G.audio(); const rules = o.rules || {}; const st = C.create(o.map, o.seed, { hp0: o.hp0 || 1, hp1: o.mode === 'bot' ? (o.bot.hp || 1) * (o.hpMul || 1) : 1, protect: o.mode === 'net' ? 1 - o.side : null, noJars: rules.noJars, windMax: rules.windMax, mods: o.mods, noCd: o.mode === 'local' ? 1 : 0, boss: o.mode === 'bot' && o.bot && o.bot.boss ? [null, o.bot.boss] : null });
     if (o.carry != null) { const Cm = st.castles[0]; Cm.coreHp = Math.max(Cm.core0 * .15, Math.min(Cm.core0, o.carry * Cm.core0)); }
     B = Object.assign({ st, cam: 0, shake: 0, aim: null, wsel: 'swarm', place: null, fired: 0, endT: 0, flash: 0, slow: 1, lastCs: 0, botNext: 2.4 * 60, botR: C.rng(o.seed ^ 77), botMem: {}, botAimAt: null, foeArm: .7,
-      ghost: null, track: null, hits: 0, volleys: 0, seenImp: -1, hpPrev: [0, 0], dmgAcc: [0, 0], dmgT: 0, thuds: 0, falls: 0, starHit: 0, tutStep: o.tut ? 1 : 0, used: {}, minHp: 1, rules, side: 0, lastAs: [.7, .7], lt: { ph: 'aim', t: 0 }, slowMo: 0, zoom: null, bigT: 0 }, o);
+      ghost: null, track: null, hits: 0, volleys: 0, seenImp: -1, hpPrev: [0, 0], dmgAcc: [0, 0], dmgT: 0, thuds: 0, falls: 0, starHit: 0, tutStep: o.tut ? 1 : 0, used: {}, minHp: 1, rules, side: 0, lastAs: [.7, .7], seen: new Set(), lt: { ph: 'aim', t: 0 }, slowMo: 0, zoom: null, bigT: 0 }, o);
     B.localAt = B.mode === 'net' ? o.localAt : performance.now() + (o.mode === 'practice' ? 600 : 2600); B.hpPrev = [castleHP(st.castles[0]), castleHP(st.castles[1])];
     K = K0; viewW = viewW0; OY = GSY - C.GY * K; B.cam = 0; parts.length = floats.length = lights.length = scorch.length = wx.length = 0;
     G.show(null); $('whud').classList.remove('hide'); $('hud').classList.add('hide'); $('lang').classList.add('hide');
@@ -65,6 +65,7 @@
     document.querySelectorAll('#wWeps button').forEach(b => { const w = b.dataset.w, ok = !rules.only || rules.only.includes(w); b.disabled = !ok; b.style.opacity = ok ? '' : .3; });
     $('wCd').classList.toggle('hide', B.mode === 'practice'); $('wCd').textContent = ''; $('wPrac').classList.toggle('hide', B.mode !== 'practice'); $('wPracInfo').textContent = ''; $('wBanner').className = 'wbanner hide';
     selW(rules.only ? rules.only[0] : 'swarm'); hud(true); ambience(true); if (B.mode === 'local') turnNames(); begin3D();
+    if (B.mode === 'bot' && o.bot && o.bot.boss) { const b0 = B, show = () => { if (B !== b0) return; const b = $('wBanner'); b.textContent = tr('bossT', nm(o.bot)); b.className = 'wbanner boss'; G.tone(110, 1.2, 'sawtooth', .06, .8); G.tone(82, 1.4, 'sawtooth', .05, .8, .3); setTimeout(() => { if (B === b0 && b.classList.contains('boss')) { b.className = 'wbanner hide'; toast(tr('bossHint')); } }, 2000); }; toast(tr('bossT', nm(o.bot))); setTimeout(show, Math.max(0, B.localAt - performance.now()) + 150); B.shieldWas = 1; } /* the boss card follows the countdown so the two never fight for the banner */
   }
   function turnNames() { $('wN0').textContent = B.names[me()]; $('wN1').textContent = B.names[foe()]; }
   function leave() { if (NET.ws) { const ws = NET.ws; NET.ws = null; try { ws.close(); } catch (e) { } history.replaceState(null, '', location.pathname); } end3D(); if (B) { B = null; ambience(false); $('whud').classList.add('hide'); $('lang').classList.remove('hide'); } }
@@ -126,6 +127,7 @@
       else if (e.e === 'core') { SFX.core(); const [x, y] = cellXY(st.castles[e.side], e.i); burst(x, y, 4, '#ffd36b', 26, .5, 20, .9); lights.push({ x, y, r: 12, l: .25, m: .25, c: '255,215,120' }); B.shake = Math.max(B.shake, .22);
         if (e.side === me()) G.buzz(30); else { if (B.tutStep === 2) tut(3); if (!B.hhT || performance.now() - B.hhT > 2500) { B.hhT = performance.now(); floats.push({ x, y: y - 9, t: tr('heartHit'), c: '#ffd36b', l: 1.4, s: .9 }); } } }
       else if (e.e === 'wind') toast('🌬 ' + windTxt());
+      else if (e.e === 'bossvolley') { toast(tr('bossVolley')); G.tone(98, .6, 'sawtooth', .07, .7); G.buzz([20, 30, 20]); }
       else if (e.e === 'gust') { toast(tr('gust') + ' ' + windTxt()); G.noise(2.4, 300, 1800, .14, .5); G.noise(1.8, 900, 200, .08, .7, .6); }
       else if (e.e === 'crate') { toast(tr('crateUp')); G.tone(784, .2, 'triangle', .05); G.tone(988, .3, 'triangle', .05, 1, .15); }
       else if (e.e === 'cratepop') { G.tone(1046, .25, 'triangle', .07); G.tone(1318, .35, 'sine', .05, 1, .1); floats.push({ x: e.x, y: e.y - 4, t: tr('cratePop'), c: e.side === me() ? '#ffe08a' : '#ff8a9a', l: 1.6, s: .9 }); }
@@ -180,7 +182,7 @@
     if (B.endT && now - B.endT > (R3 ? 4200 : 3000) && B.mode !== 'net') return finish(st.winner === me());
     if (B.mode === 'local') localTurns(now);
     if (R3) { const T = now / 1000, ang = s => s === me() ? (B.aim ? B.aim.a : B.lastAs[s] || .7) : B.mode === 'bot' ? B.foeArm : B.lastAs[s] || .7 + Math.sin(T + s) * .04;
-      SH3D.frame({ L: B.cam, viewW, K, OY, VW, VH, shake: G.RM() ? 0 : B.shake, side: me(), aim: { mine: ang(me()), foe: ang(foe()), rec: B.recoil, foeRec: B.foeRecoil }, endT: B.endT ? (now - B.endT) / 1000 : -1, loser: st.winner >= 0 ? 1 - st.winner : foe() }, dtr); }
+      SH3D.frame({ L: B.cam, viewW, K, OY, VW, VH, shake: G.RM() ? 0 : B.shake, side: me(), aim: { mine: ang(me()), foe: ang(foe()), rec: B.recoil, foeRec: B.foeRecoil }, endT: B.endT ? (now - B.endT) / 1000 : -1, intro: B.mode !== 'local' && now < B.localAt ? (B.localAt - now) / 1000 : 0, loser: st.winner >= 0 ? 1 - st.winner : foe() }, dtr); }
     draw(); drawMini(); hud();
   }
   /* local versus: one device, players take turns; the view swings to whoever is aiming */
@@ -312,7 +314,8 @@
     const now = performance.now(); if (!force && now - hudT < 70) return; hudT = now; const st = B.st;
     for (const [s, el] of [[me(), 0], [foe(), 1]]) { const Cs = st.castles[s], f = Math.max(0, Cs.coreHp / Cs.core0); $('wH' + el).style.width = (f * 100).toFixed(1) + '%'; $('wP' + el).textContent = Math.ceil(f * 100) + '%'; }
     $('wWind').textContent = '🌬 ' + (st.windMax || st.gust ? windTxt() : '0');
-    for (const [s, el] of [[me(), 0], [foe(), 1]]) { const Cs = st.castles[s], n = C.POSTS.filter(([c, r]) => Cs.t[r * Cs.cols + c]).length, burn = Cs.burn.some(Boolean); $('wD' + el).textContent = '🏹' + n + (burn ? ' 🔥' : '') + (Cs.rage > st.tick ? ' ⚔️' : ''); }
+    for (const [s, el] of [[me(), 0], [foe(), 1]]) { const Cs = st.castles[s], n = C.POSTS.filter(([c, r]) => Cs.t[r * Cs.cols + c]).length, burn = Cs.burn.some(Boolean); $('wD' + el).textContent = '🏹' + n + (burn ? ' 🔥' : '') + (Cs.rage > st.tick ? ' ⚔️' : '') + (C.shieldUp(Cs) ? ' 🛡️' : '');
+      if (s === foe() && B.shieldWas && !C.shieldUp(Cs)) { B.shieldWas = 0; toast(tr('shieldDown')); G.tone(880, .3, 'triangle', .06); G.noise(.5, 3000, 400, .15, .8); } }
     document.querySelectorAll('#wWeps button').forEach(b => { const wk = b.dataset.w; let left = 0, full = 1;
       if (wk === 'star') { left = 1 - st.star[me()]; b.classList.toggle('full', st.star[me()] >= 1); }
       else { const key = me() * C.NA + C.ACTS.indexOf(wk); left = Math.max(0, (st.cd[key] || 0) - st.tick); full = wk === 'dune' ? 90 : C.WPN[wk].cd * 60; if (wk === 'dune') { b.querySelector('b').textContent = st.sand[me()]; if (!st.sand[me()]) left = full; } if (wk === 'bolt') { b.querySelector('b').textContent = st.bolts[me()]; if (!st.bolts[me()]) left = full; } if (B.mode === 'local') left = st.opt.noCd && wk !== 'dune' && !(wk === 'bolt' && !st.bolts[me()]) ? 0 : left; }
@@ -352,7 +355,7 @@
     else if (w === 'star') act('star', 0, Math.max(0, Math.min(1, x / C.W)));
     B.place = null; selW(B.wsel);
   }
-  function act(w, a, p) { if (B.mode === 'local' && B.lt.ph !== 'aim') return false; const st = B.st, s = (Math.random() * 4e9) >>> 0, k = st.tick + (B.mode === 'net' ? 8 : 1); if (!C.fire(st, { side: me(), a, p, w, s, k })) { toast(w === 'dune' ? tr('noSand') : tr('reload')); return false; } if (B.mode === 'net') netSend({ t: 'fire', k, a: +a.toFixed(4), p: +p.toFixed(4), w, s }); if (B.mode === 'local' && w !== 'dune') { B.lt.ph = 'fly'; B.lt.t = performance.now(); B.aim = null; } B.used[w] = 1; events(); M().onAct && M().onAct(w); return true; }
+  function act(w, a, p) { if (B.mode === 'local' && B.lt.ph !== 'aim') return false; const st = B.st, s = (Math.random() * 4e9) >>> 0, k = st.tick + (B.mode === 'net' ? 8 : 1); if (!C.fire(st, { side: me(), a, p, w, s, k })) { toast(w === 'dune' ? tr('noSand') : tr('reload')); return false; } if (B.mode === 'net') { netSend({ t: 'fire', k, a: +a.toFixed(4), p: +p.toFixed(4), w, s }); B.seen.add(me() + ':' + k + ':' + s); } if (B.mode === 'local' && w !== 'dune') { B.lt.ph = 'fly'; B.lt.t = performance.now(); B.aim = null; } B.used[w] = 1; events(); M().onAct && M().onAct(w); return true; }
   function shoot(a, p, wk) {
     const st = B.st; if (B.rules.maxVolleys && B.volleys >= B.rules.maxVolleys) return;
     if (!C.ready(st, me(), wk)) { if (wk === 'bolt' && st.bolts[me()] < 1) toast(tr('noBolts')); const alt = ['swarm', 'ball', 'fire', 'cluster', 'boulder'].filter(k => !lockLv(k)).filter(k => !B.rules.only || B.rules.only.includes(k)).find(k => C.ready(st, me(), k)); if (!alt) { toast(tr('reload')); return; } wk = alt; selW(alt); }
@@ -365,11 +368,22 @@
   const link = code => location.origin + location.pathname.replace(/[^/]*$/, '') + '?w=' + code;
   const netSend = m => { if (NET.ws && NET.ws.readyState === 1) NET.ws.send(JSON.stringify(m)); };
   function connect(code, opt) {
-    opt = opt || {}; if (NET.ws) try { NET.ws.close(); } catch (e) { } G.audio(); NET.ranked = opt.ranked ? 1 : 0; NET.last = null; NET.room = null;
-    if (!NET.ranked) { G.show('wlobby'); $('wCode').textContent = code || '·····'; $('wWait').textContent = tr('connecting'); $('wPlayers').innerHTML = ''; }
+    opt = opt || {}; if (NET.ws) try { NET.ws.close(); } catch (e) { } G.audio(); NET.ranked = opt.ranked ? 1 : 0; NET.last = null; NET.room = null; if (!opt.resume) { NET.code = code || null; NET.retry = 0; }
+    if (!NET.ranked && !opt.resume) { G.show('wlobby'); $('wCode').textContent = code || '·····'; $('wWait').textContent = tr('connecting'); $('wPlayers').innerHTML = ''; }
     const nm2 = G.NAME || (AR() ? 'رامي' : 'Archer'); const ws = new WebSocket(location.origin.replace(/^http/, 'ws') + '/sh/ws?m=war&t=' + G.TOK + '&n=' + encodeURIComponent(nm2) + '&h=' + G.HUE + '&lv=1' + (code ? '&r=' + code : ''));
-    NET.ws = ws; ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch (x) { return; } onNet(m); }; ws.onclose = () => { if (NET.ws === ws) NET.ws = null; };
+    NET.ws = ws; ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch (x) { return; } onNet(m); }; ws.onclose = () => { if (NET.ws !== ws) return; NET.ws = null; if (B && B.mode === 'net' && !B.st.done && !B.endT) reconnect(); };
   }
+  /* reconnection: a dropped connection retries for ~25 s; the server keeps the seat and replays every shot on return */
+  function recon(on) { const b = $('wBanner'); if (on) { b.textContent = tr('reconnecting'); b.className = 'wbanner recon'; } else if (b.classList.contains('recon')) b.className = 'wbanner hide'; }
+  function reconnect() { if (!B || B.mode !== 'net' || B.st.done) return; NET.retry = (NET.retry || 0) + 1; if (NET.retry > 14) { recon(false); G.toast(tr('lostConn')); return; } recon(true); clearTimeout(NET.rt); NET.rt = setTimeout(() => { if (!NET.ws && B && B.mode === 'net' && NET.code) connect(NET.code, { ranked: NET.ranked, resume: 1 }); }, NET.retry < 3 ? 600 : 1800); }
+  addEventListener('online', () => { if (B && B.mode === 'net' && !NET.ws) { NET.retry = 0; connect(NET.code, { ranked: NET.ranked, resume: 1 }); } });
+  function resume(m) { const st = B.st, seen = B.seen; NET.retry = 0; recon(false); const target = Math.floor((m.now - m.at) / (1000 / 60)), key = f => f.side + ':' + f.k + ':' + f.s;
+    const pend = m.log.filter(f => !seen.has(key(f))).sort((a, b) => a.k - b.k), fire = f => { seen.add(key(f)); C.fire(st, { side: f.side, a: f.a, p: f.p, w: f.w, s: f.s, k: Math.max(f.k, st.tick + 1) }); };
+    const fresh = st.tick < target - 30; // the page was reloaded: rebuild the battle by fast-forwarding the deterministic sim
+    if (fresh) { let i = 0; while (st.tick < target && st.tick < 60 * 900 && !st.done) { while (i < pend.length && pend[i].k <= st.tick + 1) fire(pend[i++]); C.step(st); st.ev.length = 0; } while (i < pend.length) fire(pend[i++]); B.localAt = performance.now() - st.tick * (1000 / 60); }
+    else pend.forEach(fire);
+    for (const sd of [0, 1]) if (m.cs[sd] && (fresh || sd !== me())) C.applyCastle(st, st.castles[sd], m.cs[sd]);
+    G.toast(tr('resumed')); }
   const keepWs = fn => { const ws = NET.ws; NET.ws = null; fn(); NET.ws = ws; };
   function onNet(m) {
     if (m.t === 'hello') { NET.me = m.me; NET.code = m.code; if (!NET.ranked) { history.replaceState(null, '', '?w=' + m.code); $('wCode').textContent = m.code; } return; }
@@ -379,7 +393,9 @@
         if (B) keepWs(leave); start({ mode: 'net', kind: NET.ranked ? 'ranked' : 'friends', map: (m.lv - 1) % C.MAPS.length, seed: m.seed, side, names: side ? [pl(1).n, pl(0).n] : [pl(0).n, pl(1).n], hues: [pl(0).h, pl(1).h], localAt: performance.now() + (m.at - m.now) }); return; }
       if (m.state === 'lobby' && !NET.ranked) { if (B) keepWs(leave); lobby(); } return; }
     if (!B) { if (m.t === 'res') results(m); return; }
-    if (m.t === 'fire') { const st = B.st; C.fire(st, { side: m.side, a: m.a, p: m.p, w: m.w, s: m.s, k: Math.max(m.k, st.tick + 1) }); return; }
+    if (m.t === 'resume') { resume(m); return; }
+    if (m.t === 'drop') { G.toast(tr('foeDrop')); return; } if (m.t === 'back') { G.toast(tr('foeBack')); return; }
+    if (m.t === 'fire') { const st = B.st; if (B.seen) { const kk = m.side + ':' + m.k + ':' + m.s; if (B.seen.has(kk)) return; B.seen.add(kk); } C.fire(st, { side: m.side, a: m.a, p: m.p, w: m.w, s: m.s, k: Math.max(m.k, st.tick + 1) }); return; }
     if (m.t === 'cs') { if (m.side !== me()) C.applyCastle(B.st, B.st.castles[m.side], m.pk); events(); return; }
     if (m.t === 'emo') { const pl = NET.room && NET.room.players.find(p => p.id === m.id), d = document.createElement('div'); d.innerHTML = m.e + '<small>' + G.esc(pl ? pl.n : '') + '</small>'; d.style.left = (15 + Math.random() * 70) + '%'; $('wEmof').appendChild(d); setTimeout(() => d.remove(), 2500); return; }
     if (m.t === 'res') { const mine = m.res.find(x => x.id === NET.me), won = !!(mine && mine.time); if (!B.endT) { collapseFx(won ? foe() : me()); B.endT = performance.now(); won ? SFX.win() : SFX.lose(); const b = $('wBanner'); b.textContent = won ? tr('victory') : tr('defeat'); b.className = 'wbanner ' + (won ? 'win' : 'lose'); }
@@ -387,11 +403,11 @@
   }
   function netTick(now) { if (now - B.lastCs < 300 || now < B.localAt) return; B.lastCs = now; const Cs = B.st.castles[me()]; netSend({ t: 'cs', pk: C.packCastle(Cs), f: +(Cs.coreHp / Cs.core0).toFixed(3) }); }
   function lobby() { const r = NET.room; if (!r) return; G.show('wlobby'); const host = r.host === NET.me, hn = (r.players.find(p => p.id === r.host) || {}).n || '', Mp = C.MAPS[(r.lv - 1) % C.MAPS.length];
-    $('wCode').textContent = r.code; $('wPlayers').innerHTML = r.players.map(p => `<li class="${p.id === NET.me ? 'mine' : ''}"><i style="background:hsl(${p.h},80%,60%)"></i>${G.esc(p.n)}${p.id === NET.me ? ' (' + tr('you') + ')' : ''}${p.id === r.host ? ' 👑' : ''}<b>${p.on ? '●' : '○'}</b></li>`).join('');
+    $('wCode').textContent = r.code; $('wPlayers').innerHTML = r.players.map(p => `<li class="${p.id === NET.me ? 'mine' : ''}"><i style="background:hsl(${p.h},80%,60%)"></i>${G.esc(p.n)}${p.id === NET.me ? ' (' + tr('you') + ')' : ''}${p.id === r.host ? ' 👑' : ''}${p.w ? ' · 🏆' + p.w : ''}<b>${p.on ? '●' : '○'}</b></li>`).join('');
     $('wMap').innerHTML = `⛰️ ${tr('mapN', G.esc(nm(Mp)))}<small>${tr('fair')}</small>`; $('wPrev').disabled = $('wNext').disabled = !host; const two = r.players.filter(p => p.on).length >= 2;
     $('wStart').classList.toggle('hide', !host); $('wStart').disabled = !two; $('wStart').style.opacity = two ? 1 : .5; $('wWait').textContent = !two ? tr('need2') : host ? tr('youHost') : tr('waitHost', hn); }
   function results(m) { const res = m.res, mine = res.find(x => x.id === NET.me), won = !!(mine && mine.time), foeP = res.find(x => x.id !== NET.me), S = NET.last || { peak: 0, dmg: 0, secs: 0, acc: 0, volleys: 0, gates: 0, chains: 0, stars: 0, dunes: 0, thuds: 0, falls: 0, minHp: 1, used: [] };
-    if (M().result) M().result({ mode: 'net', kind: NET.ranked ? 'ranked' : 'friends', won, stats: S, foeName: foeP ? foeP.n : '', delta: m.delta && m.delta[NET.me], host: NET.room && NET.room.host === NET.me, rematch: () => netSend({ t: 'again' }) }); }
+    if (M().result) M().result({ mode: 'net', kind: NET.ranked ? 'ranked' : 'friends', won, stats: S, foeName: foeP ? foeP.n : '', series: !NET.ranked && mine && foeP ? [mine.w || 0, foeP.w || 0] : null, delta: m.delta && m.delta[NET.me], host: NET.room && NET.room.host === NET.me, rematch: () => netSend({ t: 'again' }) }); }
   $('wPrev').onclick = () => { const r = NET.room; if (r) netSend({ t: 'lv', lv: r.lv > 1 ? r.lv - 1 : C.MAPS.length }); }; $('wNext').onclick = () => { const r = NET.room; if (r) netSend({ t: 'lv', lv: r.lv < C.MAPS.length ? r.lv + 1 : 1 }); };
   $('wStart').onclick = () => netSend({ t: 'go' }); $('wLeave').onclick = () => G.toMenu();
   const inviteText = () => (AR() ? 'تحدَّني في شُهُب! من يهدم قلعة الآخر أولاً؟ غرفتي ' : 'Challenge me in SHUHUB! Who breaks the other fort first? Room ') + (NET.code || '') + ':';

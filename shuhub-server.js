@@ -20,17 +20,19 @@ const cleanName = s => String(s || '').replace(/[\u0000-\u001f\u007f<>&"'`\\]/g,
 const cleanHue = h => ((h | 0) % 360 + 360) % 360;
 const NLV = SHC.LEVELS.length, clampLv = n => Math.max(1, Math.min(NLV, n | 0 || 1));
 const code5 = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c; do { c = Array.from({ length: 5 }, () => A[Math.floor(Math.random() * A.length)]).join(''); } while (rooms.has(c)); return c; };
+const GRACE = +process.env.SH_GRACE_MS || 25000;
 const live = p => p.ws && p.ws.readyState === 1;
-function rstate(R) { return { t: 'room', code: R.code, host: R.host, lv: R.lv, mode: R.mode, seed: R.seed || 0, sides: R.sides || {}, state: R.state, at: R.at || 0, now: Date.now(), players: [...R.players.values()].map(p => ({ id: p.id, n: p.n, h: p.h, hp: p.hp, sw: p.sw || 0, out: p.out || 0, on: live(p) ? 1 : 0 })) }; }
+function rstate(R) { return { t: 'room', code: R.code, host: R.host, lv: R.lv, mode: R.mode, seed: R.seed || 0, sides: R.sides || {}, state: R.state, at: R.at || 0, now: Date.now(), players: [...R.players.values()].map(p => ({ id: p.id, n: p.n, h: p.h, hp: p.hp, sw: p.sw || 0, out: p.out || 0, on: live(p) ? 1 : 0, w: p.wins || 0 })) }; }
 function bcast(R, m, skip) { const s = typeof m === 'string' ? m : JSON.stringify(m); for (const p of R.players.values()) if (p.id !== skip && live(p) && p.ws.bufferedAmount < 5e5) p.ws.send(s); }
 function finish(R, winner) {
-  if (R.state !== 'duel') return; R.state = 'done'; clearTimeout(R.timer);
+  if (R.state !== 'duel') return; R.state = 'done'; clearTimeout(R.timer); for (const k in R.grace || {}) clearTimeout(R.grace[k]); R.grace = {};
+  if (winner && R.players.get(winner)) R.players.get(winner).wins = (R.players.get(winner).wins || 0) + 1; // series score for friends who keep playing
   if (R.ranked && winner && R.players.size === 2) { // Elo, K = 32; a win against a stronger player is worth more
     const [a, b] = [...R.players.values()], ra = rec(a.id), rb = rec(b.id), ea = 1 / (1 + 10 ** ((rb.r - ra.r) / 400)), sa = a.id === winner ? 1 : 0, d = Math.round(32 * (sa - ea));
     ra.r += d; rb.r -= d; ra.best = Math.max(ra.best, ra.r); rb.best = Math.max(rb.best, rb.r); if (sa) { ra.w++; rb.l++; } else { rb.w++; ra.l++; } rDirty = 1;
     R.delta = { [a.id]: { d, r: ra.r, lg: leagueOf(ra.r) }, [b.id]: { d: -d, r: rb.r, lg: leagueOf(rb.r) } };
   }
-  const res = [...R.players.values()].sort((a, b) => (b.id === winner) - (a.id === winner) || a.hp - b.hp).map((p, i) => ({ id: p.id, n: p.n, h: p.h, hp: Math.round(p.hp * 100), place: i + 1, broke: p.broke || 0, time: p.id === winner ? Math.round((Date.now() - R.at) / 100) / 10 : 0 }));
+  const res0 = [...R.players.values()].sort((a, b) => (b.id === winner) - (a.id === winner) || a.hp - b.hp).map((p, i) => ({ id: p.id, n: p.n, h: p.h, hp: Math.round(p.hp * 100), place: i + 1, broke: p.broke || 0, time: p.id === winner ? Math.round((Date.now() - R.at) / 100) / 10 : 0, w: p.wins || 0 })), res = res0;
   bcast(R, { t: 'res', res, lv: R.lv, ranked: R.ranked ? 1 : 0, delta: R.delta || null }); bcast(R, rstate(R));
 }
 /* ranked matchmaking: a real queue of real players. Pairs the two closest ratings (the window widens while you wait). */
@@ -69,8 +71,11 @@ function upgrade(req, sock, head, u) {
     P.ws = ws; P.n = cleanName(u.searchParams.get('n')); P.h = cleanHue(u.searchParams.get('h')); R.last = Date.now();
     if (R.ranked) rec(pid, P.n, P.h);
     ws.send(JSON.stringify({ t: 'hello', me: pid, code: R.code, ranked: R.ranked ? 1 : 0 })); bcast(R, rstate(R));
+    if (R.mode === 'war' && R.state === 'duel' && R.sides && R.sides[pid] != null) { // a player came back mid-battle: hand them every shot so far and the last fort states
+      if (R.grace && R.grace[pid]) { clearTimeout(R.grace[pid]); delete R.grace[pid]; bcast(R, { t: 'back', id: pid }, pid); }
+      ws.send(JSON.stringify({ t: 'resume', log: R.log || [], cs: R.cs || {}, now: Date.now(), at: R.at })); }
     if (R.ranked && R.state === 'lobby' && [...R.players.values()].filter(live).length === 2) { // both arrived: the ranked war starts by itself
-      const ids = [...R.allow]; R.sides = { [ids[0]]: 0, [ids[1]]: 1 }; R.seed = (Math.random() * 4e9) >>> 0; R.state = 'duel'; R.at = Date.now() + 4000; for (const p of R.players.values()) p.hp = 1;
+      const ids = [...R.allow]; R.sides = { [ids[0]]: 0, [ids[1]]: 1 }; R.seed = (Math.random() * 4e9) >>> 0; R.state = 'duel'; R.at = Date.now() + 4000; R.log = []; R.cs = {}; R.grace = {}; for (const p of R.players.values()) p.hp = 1;
       clearTimeout(R.timer); R.timer = setTimeout(() => finish(R, null), 4000 + 8 * 60 * 1000); bcast(R, rstate(R)); }
     ws.on('message', (d, bin) => {
       const now = Date.now(); if (now - (ws.wT || 0) > 1000) { ws.wT = now; ws.wN = 0; } if (++ws.wN > 30 || bin) return;
@@ -78,7 +83,7 @@ function upgrade(req, sock, head, u) {
       if (m.t === 'lv' && pid === R.host && R.state !== 'duel') { R.lv = R.mode === 'war' ? Math.max(1, Math.min(5, m.lv | 0 || 1)) : clampLv(m.lv); bcast(R, rstate(R)); return; }
       if (m.t === 'go' && pid === R.host && R.state !== 'duel' && [...R.players.values()].filter(live).length >= (R.mode === 'war' ? 2 : 1)) {
         if (R.mode === 'war') { const ids = [...R.players.values()].filter(live).map(p => p.id); R.sides = { [ids[0]]: 0, [ids[1]]: 1 }; R.seed = (Math.random() * 4e9) >>> 0; }
-        R.state = 'duel'; R.at = now + 3500; for (const p of R.players.values()) { p.hp = 1; p.sw = 0; p.out = 0; p.broke = 0; p.last = 0; }
+        R.state = 'duel'; R.at = now + 3500; R.log = []; R.cs = {}; R.grace = {}; for (const p of R.players.values()) { p.hp = 1; p.sw = 0; p.out = 0; p.broke = 0; p.last = 0; }
         clearTimeout(R.timer); R.timer = setTimeout(() => finish(R, null), 3500 + 5 * 60 * 1000); bcast(R, rstate(R)); return;
       }
       if (m.t === 'again' && pid === R.host && R.state === 'done' && !R.ranked) { R.state = 'lobby'; bcast(R, rstate(R)); return; }
@@ -86,8 +91,9 @@ function upgrade(req, sock, head, u) {
       if (R.state !== 'duel' || now < R.at - 300) return;
       if (R.mode === 'war') { // mountain war: relay shots and the defender's own castle state; the defender declares their own fall
         const side = R.sides[pid]; if (side == null) return;
+        if (m.t === 'fire' && R.log && R.log.length < 3000 && ['swarm','fire','boulder','dune','star','ball','cluster','bolt'].includes(m.w) && isFinite(+m.a) && isFinite(+m.p) && Number.isInteger(m.k)) R.log.push({ t: 'fire', side, k: m.k, a: +m.a, p: +m.p, w: m.w, s: m.s >>> 0 });
         if (m.t === 'fire' && ['swarm', 'fire', 'boulder', 'dune', 'star', 'ball', 'cluster', 'bolt'].includes(m.w) && isFinite(+m.a) && isFinite(+m.p) && Number.isInteger(m.k)) { bcast(R, { t: 'fire', side, k: m.k, a: +m.a, p: +m.p, w: m.w, s: m.s >>> 0 }, pid); return; }
-        if (m.t === 'cs' && m.pk && Array.isArray(m.pk.hp) && m.pk.hp.length <= 120) { P.hp = Math.max(0, Math.min(1, +m.f || 0)); bcast(R, { t: 'cs', side, pk: { hp: m.pk.hp.map(v => +v || 0), core: +m.pk.core || 0 } }, pid); return; }
+        if (m.t === 'cs' && m.pk && Array.isArray(m.pk.hp) && m.pk.hp.length <= 120) { P.hp = Math.max(0, Math.min(1, +m.f || 0)); (R.cs = R.cs || {})[side] = { hp: m.pk.hp.map(v => +v || 0), core: +m.pk.core || 0 }; bcast(R, { t: 'cs', side, pk: { hp: m.pk.hp.map(v => +v || 0), core: +m.pk.core || 0 } }, pid); return; }
         if (m.t === 'dead') { P.hp = 0; const other = [...R.players.values()].find(p => p.id !== pid); finish(R, other ? other.id : null); return; }
         return;
       }
@@ -100,7 +106,10 @@ function upgrade(req, sock, head, u) {
       }
       if (m.t === 'win') { if ((now - R.at) / 1000 < 3 || P.hp > .02) { ws.send(JSON.stringify({ t: 'err', e: 'nowin' })); return; } finish(R, pid); return; } /* referee: your reported heart must be broken */
     });
-    ws.on('close', () => { R.last = Date.now(); if (R.mode === 'war' && R.state === 'duel') { const other = [...R.players.values()].find(p => p.id !== pid && live(p)); if (other) finish(R, other.id); } if (R.host === pid) { const nx = [...R.players.values()].find(p => p.id !== pid && live(p)); if (nx) R.host = nx.id; } bcast(R, rstate(R)); if (R.state === 'duel' && [...R.players.values()].every(p => p.out || !live(p))) finish(R, null); });
+    ws.on('close', () => { R.last = Date.now(); if (P.ws !== ws) return; /* replaced by a newer connection of the same player */
+      if (R.mode === 'war' && R.state === 'duel') { // a dropped connection gets GRACE ms to come back before the battle is forfeited
+        R.grace = R.grace || {}; clearTimeout(R.grace[pid]); bcast(R, { t: 'drop', id: pid, ms: GRACE }, pid);
+        R.grace[pid] = setTimeout(() => { delete R.grace[pid]; if (R.state !== 'duel' || live(P)) return; const other = [...R.players.values()].find(p => p.id !== pid && live(p)); finish(R, other ? other.id : null); }, GRACE); } if (R.host === pid) { const nx = [...R.players.values()].find(p => p.id !== pid && live(p)); if (nx) R.host = nx.id; } bcast(R, rstate(R)); if (R.mode !== 'war' && R.state === 'duel' && [...R.players.values()].every(p => p.out || !live(p))) finish(R, null); });
   });
 }
 setInterval(() => { const t = Date.now(); for (const [k, R] of rooms) if (![...R.players.values()].some(live) && t - R.last > 120000) { clearTimeout(R.timer); rooms.delete(k); } }, 30000).unref();

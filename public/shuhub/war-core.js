@@ -46,17 +46,25 @@
   /* legacy difficulty names (quick battle) map onto personalities */
   const DIFF = { easy: Object.assign({}, P.beginner, { n: ['سهل', 'Easy'] }), normal: Object.assign({}, P.tactical, { n: ['متوسط', 'Normal'], err: 6, corr: .55, nA: 1.8, nP: .03, slow: 1.25, dune: .15 }), hard: Object.assign({}, P.tactical, { n: ['صعب', 'Hard'], err: 3.5 }), expert: Object.assign({}, P.expert, { n: ['خبير', 'Expert'] }) };
   /* the campaign: ten lords, each with a personality, a map and a fort strength */
+  /* skill is separate from personality: six levels that change how well the computer reads the battle (aim, correction, gate use,
+     defence, timing), never its fort's strength. Personality decides the style (weapons, star timing); skill decides the quality. */
+  const LEVELS = ['beginner', 'easy', 'medium', 'hard', 'expert', 'master'];
+  const SK = { err: [12, 7, 5, 3.4, 2, 1.1], corr: [.22, .5, .62, .78, .9, .96], nA: [3.4, 2.1, 1.6, 1.15, .55, .32], nP: [.06, .038, .03, .021, .011, .006], slow: [1.8, 1.35, 1.15, 1, .93, .86], gates: [0, .15, .6, .9, 1.1, 1.4], dune: [0, .35, .7, 1, 1.15, 1.35], jars: [0, .3, .6, 1, 1.15, 1.3] };
+  const LVN = { beginner: { n: ['مبتدئ', 'Beginner'] }, easy: { n: ['سهل', 'Easy'] }, medium: { n: ['متوسط', 'Medium'] }, hard: { n: ['صعب', 'Hard'] }, expert: { n: ['خبير', 'Expert'] }, master: { n: ['أستاذ', 'Master'] } };
+  function skill(per, lvl) { const i = Math.max(0, LEVELS.indexOf(lvl)), b = Object.assign({}, per); b.err = SK.err[i]; b.corr = SK.corr[i]; b.nA = SK.nA[i]; b.nP = SK.nP[i]; b.slow = per.slow / (P.tactical.slow) * SK.slow[i];
+    b.gates = Math.min(1.6, (per.gates == null ? 1 : Math.max(per.gates, .3)) * SK.gates[i]); b.dune = Math.min(1, per.dune * SK.dune[i] + (i >= 4 ? .1 * (i - 3) : 0)); b.jars = Math.min(1, per.jars * SK.jars[i]);
+    if (i <= 1) b.star = 'late'; b.adapt = i >= 4 ? 1 : 0; b.smart = i >= 5 ? 1 : 0; b.hp = 1; b.lvl = lvl; b.li = i; return b; }
   const BOTS = [
     Object.assign({}, P.beginner, { n: ['الراعي', 'The Shepherd'], map: 0, hp: .7, per: 'beginner' }),
     Object.assign({}, P.beginner, { n: ['الحارس', 'The Watchman'], map: 1, corr: .45, err: 7, per: 'beginner' }),
     Object.assign({}, P.aggressive, { n: ['الذئب', 'The Wolf'], map: 2, err: 6.5, corr: .5, per: 'aggressive' }),
     Object.assign({}, P.defensive, { n: ['البنّاء', 'The Mason'], map: 0, err: 6, per: 'defensive' }),
-    Object.assign({}, P.tactical, { n: ['الفارس', 'The Knight'], map: 3, per: 'tactical' }),
+    Object.assign({}, P.tactical, { n: ['الفارس الحديدي', 'The Iron Knight'], map: 3, per: 'tactical', hp: 1.25, boss: { shield: 1 } }),
     Object.assign({}, P.aggressive, { n: ['العاصفة الحمراء', 'Red Storm'], map: 4, per: 'aggressive' }),
     Object.assign({}, P.defensive, { n: ['حارسة الواحة', 'Oasis Warden'], map: 2, err: 3.5, corr: .8, per: 'defensive' }),
     Object.assign({}, P.tactical, { n: ['القائد', 'The Captain'], map: 1, err: 3, corr: .82, per: 'tactical', hp: 1.1 }),
     Object.assign({}, P.expert, { n: ['الأمير', 'The Emir'], map: 4, err: 2.6, corr: .85, per: 'expert', hp: 1.15 }),
-    Object.assign({}, P.expert, { n: ['الصقر الأسود', 'The Black Falcon'], map: 3, per: 'expert', hp: 1.3 }),
+    Object.assign({}, P.expert, { n: ['الصقر الأسود', 'The Black Falcon'], map: 3, per: 'expert', hp: 1.4, boss: { shield: 1, volley: 24 } }),
   ];
   function buildTerrain(M) {
     const h = new Float32Array(W + 1);
@@ -77,12 +85,12 @@
     for (let i = 0; i < t.length; i++) if (t[i] && r() < .3) { t[i] = 2; hp[i] = HP[2] * hpMul; }
     const cc = 3 + (side ? 1 : 0), cr = 7; for (const [dc, dr] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(cc + dc, cr + dr, 9);
     for (const [c, rr] of [[cc - 1, cr - 1], [cc + 2, cr - 1], [cc - 1, cr + 2], [cc + 2, cr + 2], [cc, cr - 1], [cc + 1, cr - 1]]) { const i = rr * cols + c; if (t[i] && t[i] !== 9) { t[i] = 2; hp[i] = HP[2] * hpMul; } }
-    const gc = side ? 6 : 2; return { side, cols, rows, t, hp, x0, y0: GY - rows * CS, cc, cr, coreHp: 360 * hpMul, core0: 360 * hpMul, hm: hpMul, orig: Uint8Array.from(t), gone: new Int32Array(cols * rows), burn: new Uint16Array(cols * rows), arc: [0, 0, 0, 0], gate: [(rows - 1) * cols + gc, (rows - 2) * cols + gc], rep: null, ls: 0, rage: 0, repairs: 0 };
+    const gc = side ? 6 : 2; return { shield: 0, volley: 0, side, cols, rows, t, hp, x0, y0: GY - rows * CS, cc, cr, coreHp: 360 * hpMul, core0: 360 * hpMul, hm: hpMul, orig: Uint8Array.from(t), gone: new Int32Array(cols * rows), burn: new Uint16Array(cols * rows), arc: [0, 0, 0, 0], gate: [(rows - 1) * cols + gc, (rows - 2) * cols + gc], rep: null, ls: 0, rage: 0, repairs: 0 };
   }
   function create(mapIdx, seed, opt) {
     opt = opt || {}; const M = MAPS[mapIdx % MAPS.length], r = rng(seed ^ 0xa11);
     const st = { M, map: mapIdx % MAPS.length, seed, tick: 0, h: buildTerrain(M), castles: [buildCastle(0, seed ^ 1, opt.hp0 || 1), buildCastle(1, seed ^ 2, opt.hp1 || 1)],
-      gates: M.gates.map(([x, y, h, v, amp, sp], i) => ({ i, x, y0: y, y, h, v, amp, sp, ph: i * 2.1, flash: 0 })), R: [], pending: [], cd: new Array(NA * 2).fill(0), bolts: [0, 1].map(s => WPN.bolt.ammo + (((opt.mods || [])[s] || {}).bolt || 0)), mods: [0, 1].map(s => ((opt.mods || [])[s]) || {}), re: rng(seed ^ 0xe7e7), nextEv: 900, gust: 0, crate: null, slid: {}, arrows: [0, 0], intercepted: [0, 0], bolted: [0, 0], burned: [0, 0], slides: [0, 0], crates: [0, 0], wind: 0, vid: 0, impact: [null, null], rw: r,
+      gates: M.gates.map(([x, y, h, v, amp, sp], i) => ({ i, x, y0: y, y, h, v, amp, sp, ph: i * 2.1, flash: 0 })), R: [], pending: [], cd: new Array(NA * 2).fill(0), bossInit: (() => { const bs = opt.boss || []; return bs; })(), bolts: [0, 1].map(s => WPN.bolt.ammo + (((opt.mods || [])[s] || {}).bolt || 0)), mods: [0, 1].map(s => ((opt.mods || [])[s]) || {}), re: rng(seed ^ 0xe7e7), nextEv: 900, gust: 0, crate: null, slid: {}, arrows: [0, 0], intercepted: [0, 0], bolted: [0, 0], burned: [0, 0], slides: [0, 0], crates: [0, 0], wind: 0, vid: 0, impact: [null, null], rw: r,
       protect: opt.protect == null ? -1 : opt.protect, done: 0, winner: -1, ev: [], peak: [0, 0], dealt: [0, 0], gatesHit: [0, 0], gv: {}, chains: [0, 0], stars: [0, 0], dunes: [0, 0],
       sand: [SAND_MAX, SAND_MAX], sandT: [0, 0], star: [0, 0], starCalls: [], jars: (opt.noJars ? [] : M.jars).map((x, i) => ({ i, x, y: 0, alive: 1, fuse: 0, by: -1 })), opt };
     for (const j of st.jars) j.y = st.h[Math.round(j.x)];
@@ -110,7 +118,7 @@
   function cellOf(C, x, y) { const c = Math.floor((x - C.x0) / CS), r = Math.floor((y - C.y0) / CS); if (c < 0 || c >= C.cols || r < 0 || r >= C.rows) return -1; return r * C.cols + c; }
   function hit(st, C, i, dmg, by, noCharge) {
     const k = C.t[i]; if (!k) return 0;
-    if (k === 9) { const d = Math.max(0, Math.min(dmg, C.coreHp - (st.protect === C.side ? .5 : 0))); /* online: only the defender may break their own heart */ C.coreHp -= d; st.dealt[by] += d; if (!C.ls && C.coreHp < C.core0 * .3 && C.coreHp > 1e-6) { C.ls = 1; C.lsAt = st.tick + 1; } if (by !== C.side && !noCharge) st.star[by] = Math.min(1, st.star[by] + d / 520); st.ev.push({ e: 'core', side: C.side, i }); if (C.coreHp <= 1e-6 && !st.done) { st.done = 1; st.winner = 1 - C.side; for (let j = 0; j < C.t.length; j++) if (C.t[j] === 9) C.t[j] = 0; st.ev.push({ e: 'win', winner: st.winner }); } return d; }
+    if (k === 9) { const d = Math.max(0, Math.min(dmg, C.coreHp - (st.protect === C.side ? .5 : 0))); /* online: only the defender may break their own heart */ C.coreHp -= d; st.dealt[by] += d; if (shieldUp(C)) { C.coreHp += d * .7; st.dealt[by] -= d * .7; } /* a boss shield soaks 70% while both rune towers stand */ if (!C.ls && C.coreHp < C.core0 * .3 && C.coreHp > 1e-6) { C.ls = 1; C.lsAt = st.tick + 1; } if (by !== C.side && !noCharge) st.star[by] = Math.min(1, st.star[by] + d / 520); st.ev.push({ e: 'core', side: C.side, i }); if (C.coreHp <= 1e-6 && !st.done) { st.done = 1; st.winner = 1 - C.side; for (let j = 0; j < C.t.length; j++) if (C.t[j] === 9) C.t[j] = 0; st.ev.push({ e: 'win', winner: st.winner }); } return d; }
     const d = Math.min(dmg, C.hp[i]); C.hp[i] -= d; st.dealt[by] += d; if (by !== C.side && !noCharge) st.star[by] = Math.min(1, st.star[by] + d / 520); if (C.hp[i] <= 1e-6) { C.t[i] = 0; C.burn[i] = 0; C.gone[i] = st.tick; C.dirty = 1; C.by = by; st.ev.push({ e: 'brk', side: C.side, i, k }); } return d;
   }
   function blastCastles(st, x, y, rad, dmg, by) { for (const C of st.castles) for (let i = 0; i < C.t.length; i++) { if (!C.t[i]) continue; const cx = C.x0 + ((i % C.cols) + .5) * CS, cy = C.y0 + (((i / C.cols) | 0) + .5) * CS, d = Math.hypot(cx - x, cy - y); if (d < rad) hit(st, C, i, dmg * (1 - d / rad * .6), by, 1); } } /* blasts never recharge the star meter */
@@ -134,7 +142,10 @@
   }
   function ignite(st, C, i, ticks) { if (!C.t[i] || C.t[i] === 9) return; if (!C.burn[i]) st.ev.push({ e: 'ignite', side: C.side, i }); C.burn[i] = Math.max(C.burn[i], ticks); }
   /* the living fort: archers, fire, repair crews, last stand */
+  /* boss fort: a rune shield over the heart while both tower tops stand, and (for the last lord) a timed war-volley */
+  function shieldUp(C) { return C.shield && C.t[POSTS[0][1] * C.cols + POSTS[0][0]] && C.t[POSTS[1][1] * C.cols + POSTS[1][0]]; }
   function forts(st) {
+    if (st.bossInit) { st.bossInit.forEach((b, s) => { if (b) { st.castles[s].shield = b.shield ? 1 : 0; st.castles[s].volley = b.volley || 0; } }); st.bossInit = null; }
     const t = st.tick;
     for (const C of st.castles) {
       const s = C.side, frac = Math.max(0, C.coreHp / C.core0), mods = st.mods[s];
@@ -153,6 +164,8 @@
       if (!C.rep && gateUp && frac > 0 && (t + s * 270) % REPAIR_EVERY === 0) { let best = -1, bs = 1e9; const gc = C.gate[0] % C.cols;
         for (let i = 0; i < C.t.length; i++) { if (C.t[i] || !C.orig[i] || C.orig[i] === 9 || t - C.gone[i] < 120) continue; const r = (i / C.cols) | 0; if (r < C.rows - 1 && !C.t[i + C.cols]) continue; const sc = (C.rows - r) * 20 + Math.abs((i % C.cols) - gc); if (sc < bs) { bs = sc; best = i; } }
         if (best >= 0) { C.rep = { i: best, at: t + REPAIR_WALK }; st.ev.push({ e: 'sortie', side: s, i: best }); } }
+      if (C.volley && t > 0 && t % (C.volley * 60) === 0 && !st.done && frac > 0) { const r = rng((st.seed ^ t ^ (s + 7) * 131) >>> 0), A = botAim(st, s, { err: 6, perr: .05, gates: 0 }, r), L = launcher(s), vid = ++st.vid;
+        for (let j = 0; j < 2; j++) { const v = velocity(s, A.a + (r() - .5) * .04, A.p * (1 + (r() - .5) * .04)); st.pending.push({ k: t + 30 + j * 24, x: L.x, y: L.y, vx: v.vx, vy: v.vy, w: 5, m: 0, o: s, wk: 'ball', f: 0, big: 0, vid }); } st.ev.push({ e: 'bossvolley', side: s }); }
       // last stand: once the heart falls below 30%, the crew fires a free triple salvo and the archers rally
       if (C.lsAt && t >= C.lsAt && !st.done) { C.lsAt = 0; C.rage = t + 600; const r = rng((st.seed ^ (s + 1) * 7919) >>> 0), A = botAim(st, s, { err: 5, perr: .05, gates: 0 }, r), L = launcher(s), vid = ++st.vid;
         for (let j = 0; j < 3; j++) { const v = velocity(s, A.a + (r() - .5) * .03, A.p * (1 + (r() - .5) * .03)); st.pending.push({ k: t + 40 + j * 26, x: L.x, y: L.y, vx: v.vx, vy: v.vy, w: 5, m: 0, o: s, wk: 'ball', f: 0, big: 0, vid, ls: 1 }); }
@@ -286,11 +299,15 @@
     // 3) a weapon by appetite (what is loaded)
     const opts = ['swarm', 'fire', 'boulder', 'ball', 'cluster', 'bolt'].filter(w => ready(st, side, w) && (B.w[w] || 0) > 0); if (!opts.length) return null;
     let adaptBoost = 0; if (B.adapt && mem.blocked > 1) adaptBoost = .6; // the player hides behind dunes: lob boulders and fire
-    let tot = 0; const wts = opts.map(w => { const v = (B.w[w] || .1) + (w !== 'swarm' ? adaptBoost : 0); tot += v; return v; }); let pick = r() * tot, wk = opts[0]; for (let i = 0; i < opts.length; i++) { pick -= wts[i]; if (pick <= 0) { wk = opts[i]; break; } }
+    // master: reads the enemy fort — standing archers make light shots wasteful; a boss shield means the towers must fall first
+    const eArch = POSTS.filter(([c, rr]) => E.t[rr * E.cols + c]).length, shielded = shieldUp(E);
+    const smartW = w => !B.smart ? 1 : (eArch >= 2 && ['swarm', 'fire', 'cluster'].includes(w) ? .55 : 1) * (eArch >= 2 && ['ball', 'boulder', 'bolt'].includes(w) ? 1.7 : 1) * (shielded && w === 'bolt' ? 2.5 : 1);
+    let tot = 0; const wts = opts.map(w => { const v = ((B.w[w] || .1) + (w !== 'swarm' ? adaptBoost : 0)) * smartW(w); tot += v; return v; }); let pick = r() * tot, wk = opts[0]; for (let i = 0; i < opts.length; i++) { pick -= wts[i]; if (pick <= 0) { wk = opts[i]; break; } }
     // 4) jar opportunity: an enemy-side jar close to their fort
     if (B.jars && r() < B.jars * .35 && !mem.jarTried) { const ej = st.jars.filter(j => j.alive && Math.abs(j.x - (E.x0 + 13.5)) < 70).sort((a, b) => Math.abs(a.x - (E.x0 + 13.5)) - Math.abs(b.x - (E.x0 + 13.5)))[0];
       if (ej) { mem.jarTried = 1; const s0 = botAim(st, side, { err: B.err * .8, perr: B.err * .01 }, r, { x: ej.x, y: ej.y - 1.5 }); return { w: wk === 'boulder' ? 'swarm' : wk, a: s0.a, p: s0.p, jar: 1 }; } }
     if (I && I.hit === 'ground' && mem.lastI !== (st.impact[side] && st.impact[side].vid)) { const mine = st.impact[side]; if (mine && mine.hit === 'ground' && mine.y < GY - 6 && Math.abs(mine.x - (E.x0 + 13.5)) < 50) mem.blocked = (mem.blocked || 0) + 1; mem.lastI = mine && mine.vid; }
+    if (B.smart && shielded && (wk === 'bolt' || wk === 'ball')) { const k = r() < .5 ? 0 : 1, [pc, pr] = POSTS[k], s1 = botAim(st, side, { err: B.err, perr: B.err * .01, gates: 0 }, r, { x: E.x0 + (pc + .5) * CS, y: E.y0 + pr * CS + 1 }); return { w: wk, a: s1.a, p: s1.p }; } // break a rune tower
     const pl = botPlan(st, side, B, mem, r);
     if (wk === 'boulder') { const t2 = trace(st, side, pl.a, pl.p); const mid = W / 2; if (t2.hit === 'ground' && (side ? t2.x > mid + 8 : t2.x < mid - 8)) wk = ready(st, side, 'fire') ? 'fire' : 'swarm'; } // a short boulder rolls home
     return { w: wk, a: pl.a, p: pl.p };
@@ -298,5 +315,5 @@
   /* victim-authoritative castle sync for online play */
   function packCastle(C) { const a = []; for (let i = 0; i < C.t.length; i++) a.push(C.t[i] ? Math.round(C.hp[i] * 10) / 10 : 0); return { hp: a, core: Math.round(C.coreHp * 10) / 10 }; }
   function applyCastle(st, C, pk) { if (!pk || !Array.isArray(pk.hp) || pk.hp.length !== C.t.length) return; for (let i = 0; i < C.t.length; i++) { const v = +pk.hp[i] || 0; if (C.t[i] === 9) continue; if (v <= 0) C.t[i] = 0; else if (C.t[i]) C.hp[i] = Math.min(C.hp[i], v); else if (C.orig[i] && C.orig[i] !== 9 && st.tick - C.gone[i] > 240) { C.t[i] = C.orig[i]; C.hp[i] = v; } } if (isFinite(+pk.core)) C.coreHp = Math.min(C.coreHp, Math.max(0, +pk.core)); if (C.coreHp <= 1e-6 && !st.done) { st.done = 1; st.winner = 1 - C.side; for (let j = 0; j < C.t.length; j++) if (C.t[j] === 9) C.t[j] = 0; st.ev.push({ e: 'win', winner: st.winner }); } }
-  return { W, H, GY, CS, G, DT, WPN, ACTS, NA, POSTS, hash, lightning, MAPS, BOTS, DIFF, P, SAND_MAX, STAR_DELAY, botPlan, botTurn, remember, rng, hashStr, create, fire, ready, step, trace, botAim, launcher, velocity, cellOf, packCastle, applyCastle, carve, duneRange, buildCastle };
+  return { W, H, GY, CS, G, DT, WPN, ACTS, NA, POSTS, hash, lightning, LEVELS, LVN, skill, shieldUp, MAPS, BOTS, DIFF, P, SAND_MAX, STAR_DELAY, botPlan, botTurn, remember, rng, hashStr, create, fire, ready, step, trace, botAim, launcher, velocity, cellOf, packCastle, applyCastle, carve, duneRange, buildCastle };
 });

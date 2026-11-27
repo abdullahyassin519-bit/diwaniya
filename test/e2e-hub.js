@@ -34,7 +34,7 @@ async function waitShown(p, id, ms = 20000) { await p.waitForFunction(id => { co
     await A.evaluate(() => SHG.toMenu()); await sleep(300); ok(await visible(A, 'home') && !(await visible(A, 'hTutPop')), 'back home');
     /* ---- quick battle vs a personality ---- */
     await A.click('#hQuick'); await sleep(200); ok(await A.evaluate(() => document.querySelectorAll('#qPers button').length === 5), '5 AI personalities'); await A.click('#qPers [data-p="defensive"]'); await A.click('#qMap [data-m="2"]'); await A.screenshot({ path: OUT + '/08-quick.png' });
-    await A.click('#qGo'); await A.waitForFunction(() => SHW_DEBUG.b() && performance.now() > SHW_DEBUG.b().localAt, null, { timeout: 6000 }); ok(await A.evaluate(() => SHW_DEBUG.b().bot.dune === SHW_DEBUG.C.P.defensive.dune && SHW_DEBUG.b().st.map === 2), 'battle vs the Warden on the Mesa');
+    await A.click('#qGo'); await A.waitForFunction(() => SHW_DEBUG.b() && performance.now() > SHW_DEBUG.b().localAt, null, { timeout: 6000 }); ok(await A.evaluate(() => SHW_DEBUG.b().bot.w === SHW_DEBUG.C.P.defensive.w && SHW_DEBUG.b().bot.lvl === 'medium' && SHW_DEBUG.b().st.map === 2), 'battle vs the Warden (medium skill) on the Mesa');
     await fight(A, 9000); await A.screenshot({ path: OUT + '/09-battle.png' }); await fight(A, 150000);
     ok(await waitShown(A, 'wres', 25000), 'results screen'); await sleep(900); await A.screenshot({ path: OUT + '/10-results.png' });
     const P1 = await A.evaluate(() => SHM_DEBUG.P); ok(P1.stats.battles === 1 && P1.coins > 0 && (P1.xp > 0 || P1.lv > 1), 'XP, dinars and stats recorded ' + JSON.stringify({ b: P1.stats.battles, c: P1.coins, xp: P1.xp, lv: P1.lv }));
