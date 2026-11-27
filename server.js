@@ -45,6 +45,7 @@ function closeRoom(room) { cast(room, 'closed', {}); for (const set of room.conn
 
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x'), q = u.searchParams, p = u.pathname;
+  { const clean = p.replace(/(%2A|\*|%22|"|%29|\)|\.|,)+$/i, ''); if (clean !== p && clean.length > 1) { res.writeHead(301, { Location: clean + (clean.endsWith('/') || /\.\w+$/.test(clean) ? '' : '/') + u.search }); return res.end(); } } /* links pasted from chat often carry a trailing ** or ) — send them to the real page */
   try {
     const ip = ipOf(req);
     if (p === '/healthz') return json(res, 200, { ok: 1, up: Math.round(process.uptime()) });
